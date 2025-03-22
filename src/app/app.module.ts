@@ -1,23 +1,25 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
+import { FullCalendarModule } from '@fullcalendar/angular';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { HeaderComponent } from './header/header.component';
-import { ServicesComponent } from './services/services.component';
-import { EventsComponent } from './events/events.component';
-import { HomeComponent } from './home/home.component';
-import { FullCalendarModule } from '@fullcalendar/angular';
+import { HeaderComponent } from './pieces/header/header.component';
+import { EventsComponent } from './sections/events/events.component';
+import { HomeComponent } from './sections/home/home.component';
+import { ServicesComponent } from './sections/services/services.component';
+import { BookDialogComponent } from './pieces/book-dialog/book-dialog.component';
 @NgModule({
   declarations: [
     AppComponent,
     HeaderComponent,
     ServicesComponent,
-    HomeComponent
+    HomeComponent,
   ],
   imports: [
     BrowserModule,
     EventsComponent,
+    BookDialogComponent,
     FullCalendarModule,
 
     AppRoutingModule
