@@ -1,0 +1,25 @@
+<div class="container">
+  <div mat-dialog-title><h3>Schedule a Reading</h3></div>
+    <mat-form-field>
+      <input [(ngModel)]="reading.name" matInput placeholder="Enter name" matInput>
+      <mat-icon fontIcon="person" matSuffix></mat-icon>
+    </mat-form-field>
+    <mat-form-field>
+      <input [(ngModel)]="reading.email" matInput placeholder="Enter email" matInput>
+      <mat-icon fontIcon="email" matSuffix></mat-icon>
+    </mat-form-field>
+    <mat-form-field>
+      <input [(ngModel)]="reading.phone_number" matInput placeholder="Enter phone number" matInput>
+      <mat-icon fontIcon="phone" matSuffix></mat-icon>
+    </mat-form-field>
+    <mat-form-field>
+      <label>Date</label>
+      <input [(ngModel)]="reading.date" matInput>
+      <mat-icon fontIcon="calendar_month" matSuffix></mat-icon>
+    </mat-form-field>
+    <br><mat-checkbox [(ngModel)]="reading.isVirtual">Virtual</mat-checkbox>
+  <div mat-dialog-actions>
+    <button (click)="addToCalendar()" mat-flat-button>Schedule</button>
+    <button mat-flat-button mat-dialog-close color="warn">Cancel</button>
+  </div>
+</div>

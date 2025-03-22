@@ -27,12 +27,13 @@
     "boostrap": "^2.0.0",
     "bootstrap": "^5.3.3",
     "fullcalendar": "^6.1.15",
+    "material-design-icons-iconfont": "^6.7.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "^0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^16.1.4",
+    "@angular-devkit/build-angular": "^19.2.4",
     "@angular/cli": "^19.2.4",
     "@angular/compiler-cli": "^19.2.3",
     "@types/jasmine": "~4.3.0",

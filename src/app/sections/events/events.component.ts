@@ -6,6 +6,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 @Component({
     selector: 'app-events',
     imports: [FullCalendarModule],
+    standalone: true,
     templateUrl: './events.component.html',
     styleUrls: ['./events.component.css']
 })
