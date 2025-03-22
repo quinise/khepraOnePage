@@ -4,11 +4,11 @@ import { CalendarOptions } from '@fullcalendar/core'; // useful for typechecking
 import dayGridPlugin from '@fullcalendar/daygrid';
 
 @Component({
-  selector: 'app-events',
-  standalone: true,
-  imports: [FullCalendarModule],
-  templateUrl: './events.component.html',
-  styleUrls: ['./events.component.css']
+    selector: 'app-events',
+    imports: [FullCalendarModule],
+    standalone: true,
+    templateUrl: './events.component.html',
+    styleUrls: ['./events.component.css']
 })
 
 export class EventsComponent {
