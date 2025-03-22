@@ -12,18 +12,17 @@ export interface DialogData {
 }
 
 @Component({
-  selector: 'app-book-dialog',
-  templateUrl: './book-dialog.component.html',
-  standalone: true,
-  imports: [
-    MatFormFieldModule,
-    MatInputModule,
-    FormsModule,
-    MatButtonModule,
-    NgIf,
-    MatDialogModule,
-  ],
-  styleUrls: ['./book-dialog.component.css']
+    selector: 'app-book-dialog',
+    templateUrl: './book-dialog.component.html',
+    imports: [
+        MatFormFieldModule,
+        MatInputModule,
+        FormsModule,
+        MatButtonModule,
+        NgIf,
+        MatDialogModule,
+    ],
+    styleUrls: ['./book-dialog.component.css']
 })
 
 export class BookDialogComponent {
@@ -45,10 +44,9 @@ export class BookDialogComponent {
 }
 
 @Component({
-  selector: 'dialog-overview-example-dialog',
-  templateUrl: 'dialog-overview-example-dialog.html',
-  standalone: true,
-  imports: [MatDialogModule, MatFormFieldModule, MatInputModule, FormsModule, MatButtonModule],
+    selector: 'dialog-overview-example-dialog',
+    templateUrl: 'dialog-overview-example-dialog.html',
+    imports: [MatDialogModule, MatFormFieldModule, MatInputModule, FormsModule, MatButtonModule]
 })
 export class DialogOverviewExampleDialog {
   constructor(
