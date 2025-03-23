@@ -1,8 +1,8 @@
 export interface Reading {
-  id:Number,
-  name:String,
-  email:String,
+  id:number,
+  name:string,
+  email:string,
   phone_number:string,
   date:string,
-  isVirtual:Boolean
+  isVirtual:boolean
 }
