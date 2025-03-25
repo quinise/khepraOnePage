@@ -1,37 +1,36 @@
 import { NgIf } from '@angular/common';
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatFormField } from '@angular/material/form-field';
+import { provideNativeDateAdapter } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { Reading } from '../reading';
-import {MatDatepickerModule} from '@angular/material/datepicker';
-import {provideNativeDateAdapter} from '@angular/material/core';
-import {MatFormFieldModule} from '@angular/material/form-field';
+import { BookService } from 'src/app/services/book.service';
 
 interface ReadingForm {
   id: FormControl<string>;
   name: FormControl<string>;
   email: FormControl<string>;
   phone_number: FormControl<number | null>;
-  date: FormControl<string>;
+  date: FormControl<Date | null>;
   isVirtual: FormControl<boolean>;
 }
 @Component({
   selector: 'app-reading-form',
   standalone: true,
   imports: [
-    MatButtonModule, 
-    MatIconModule, 
+    MatButtonModule,
+    MatIconModule,
     MatDialogModule,
-    MatFormField, 
+    MatFormField,
     MatCheckboxModule,
-    MatInputModule, 
-    FormsModule, 
-    NgIf, 
+    MatInputModule,
+    FormsModule,
+    NgIf,
     ReactiveFormsModule,
     MatDatepickerModule,
     MatFormFieldModule
@@ -42,13 +41,14 @@ interface ReadingForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReadingFormComponent {
-  reading:Reading= {
-    id:0,
-    name:'',
-    email:'',
-    phone_number: 5555555555,
-    date:'',
-    isVirtual:false
+  _todaysDate = new Date();
+  minDate = new Date();
+  maxDate = new Date();
+  
+  
+  constructor (private _matDialog:MatDialog, public bookService: BookService) {
+    this.minDate.setDate(this._todaysDate.getDate() + 2);
+    this.maxDate.setMonth(this._todaysDate.getMonth() + 2);
   }
 
   protected readingForm = new FormGroup<ReadingForm>({
@@ -67,8 +67,8 @@ export class ReadingFormComponent {
       nonNullable: false,
       validators: [Validators.required, Validators.pattern("^((\\+91-?)|0)?[0-9]{10}$")]
     }),
-    date: new FormControl<string>('', {
-      nonNullable: true,
+    date: new FormControl<Date | null>(null, {
+      nonNullable: false,
       validators: Validators.required
     }),
     isVirtual: new FormControl<boolean>(false, {
@@ -76,11 +76,8 @@ export class ReadingFormComponent {
     }),
   })
 
-  onSubmit(): void {
-    this.readingForm.value.name = this.reading.name,
-    this.readingForm.value.email = this.reading.email,
-    this.readingForm.value.phone_number = this.reading.phone_number,
-    this.readingForm.value.date = this.reading.date,
-    this.readingForm.value.isVirtual = this.reading.isVirtual
+  onSubmit(form: any): void {
+    this.bookService.setServiceDetails(form.value.name, form.value.email, form.value.phone_number, form.value.date, form.value.isVirtual);
+    console.log(`TESTING: Form Value in Reading Form ${form}`);
   }
 }

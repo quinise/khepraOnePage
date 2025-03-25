@@ -1,6 +1,6 @@
 <div class="container">
   <div mat-dialog-title><h3>Schedule a Reading</h3></div>
-  <form [formGroup]="readingForm" (ngSubmit)="onSubmit()">
+  <form [formGroup]="readingForm" (ngSubmit)="onSubmit(bookServiceForm)" #bookServiceForm="ngForm">
     <mat-form-field>
       <input type="text" formControlName="name" placeholder="Enter name" matInput>
       <mat-icon fontIcon="person" matSuffix></mat-icon>
@@ -22,21 +22,13 @@
       <mat-error *ngIf="readingForm.value.phone_number">Please, Enter 10 digit Mobile Number.</mat-error>
     </mat-form-field>
     <mat-form-field>
-      <label>Choose a date</label>
-      <input type="text" formControlName="date"
-        matInput>
-      <input matInput formControlName="date" [matDatepicker]="datepicker" />
-      <mat-hint>MM/DD/YYYY</mat-hint>
+      <mat-label>Select a date</mat-label>
+      <input matInput formControlName="date" [matDatepicker]="datepicker" [min]="minDate" [max]="maxDate"/>
       <mat-datepicker-toggle matIconSuffix [for]="datepicker"></mat-datepicker-toggle>
-      <mat-datepicker #datepicker>
-        <mat-datepicker-actions>
-          <button mat-button matDatepickerCancel>Cancel</button>
-          <button mat-raised-button matDatepickerApply>Apply</button>
-        </mat-datepicker-actions>
-      </mat-datepicker>  
+      <mat-datepicker #datepicker></mat-datepicker>
       <mat-error *ngIf="!readingForm.value.date">This field is required</mat-error>
-      <mat-error *ngIf="readingForm.value.date">Please select a future date</mat-error>
-    </mat-form-field><br>
+    </mat-form-field> 
+    <br>
     <mat-checkbox formControlName="isVirtual"
       >Virtual</mat-checkbox>
     <div mat-dialog-actions>

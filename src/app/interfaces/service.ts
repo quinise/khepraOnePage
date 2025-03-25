@@ -1,8 +1,9 @@
-export interface Reading {
+export interface Service {
   id:number,
+  type:string,
   name:string,
   email:string,
   phone_number:number,
-  date:string,
+  date:Date,
   isVirtual:boolean
 }
