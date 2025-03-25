@@ -10,6 +10,7 @@ import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { BookService } from 'src/app/services/book.service';
+import { MatTimepickerModule } from '@angular/material/timepicker';
 
 interface ReadingForm {
   id: FormControl<string>;
@@ -17,6 +18,7 @@ interface ReadingForm {
   email: FormControl<string>;
   phone_number: FormControl<number | null>;
   date: FormControl<Date | null>;
+  time: FormControl<Date | null>;
   isVirtual: FormControl<boolean>;
 }
 @Component({
@@ -33,7 +35,8 @@ interface ReadingForm {
     NgIf,
     ReactiveFormsModule,
     MatDatepickerModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    MatTimepickerModule,
     ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './reading-form.component.html',
@@ -71,13 +74,25 @@ export class ReadingFormComponent {
       nonNullable: false,
       validators: Validators.required
     }),
+    time: new FormControl<Date | null>(null, {
+      nonNullable: false,
+      validators: Validators.required
+    }),
     isVirtual: new FormControl<boolean>(false, {
       nonNullable: true,
     }),
   })
 
   onSubmit(form: any): void {
-    this.bookService.setServiceDetails(form.value.name, form.value.email, form.value.phone_number, form.value.date, form.value.isVirtual);
-    console.log(`TESTING: Form Value in Reading Form ${form}`);
+    const combinedDateTime = new Date(
+      form.value.date.getFullYear(),
+      form.value.date.getMonth(),
+      form.value.date.getDate(),
+      form.value.time.getHours(),
+      form.value.time.getMinutes(),
+      form.value.time.getSeconds(),
+    )
+    this.bookService.setServiceDetails(form.value.name, form.value.email, form.value.phone_number, combinedDateTime, form.value.time, form.value.isVirtual);
+    console.log(`TESTING: Form Value in Reading Form ${form.value}`);
   }
 }
