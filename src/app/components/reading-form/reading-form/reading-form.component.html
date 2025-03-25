@@ -27,6 +27,14 @@
       <mat-datepicker-toggle matIconSuffix [for]="datepicker"></mat-datepicker-toggle>
       <mat-datepicker #datepicker></mat-datepicker>
       <mat-error *ngIf="!readingForm.value.date">This field is required</mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Select a time</mat-label>
+      <input matInput [matTimepicker]="timepicker" formControlName="time" matTimepickerMin="09:00"
+      matTimepickerMax="20:30">
+      <mat-timepicker #timepicker/>
+      <mat-timepicker-toggle [for]="timepicker" matSuffix/>
+      <mat-error *ngIf="!readingForm.value.time">This field is required</mat-error>
     </mat-form-field> 
     <br>
     <mat-checkbox formControlName="isVirtual"
