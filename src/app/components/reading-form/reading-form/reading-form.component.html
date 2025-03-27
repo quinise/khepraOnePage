@@ -1,47 +1,67 @@
 <div class="container">
-  <div mat-dialog-title><h3>Schedule a Reading</h3></div>
-  <form [formGroup]="readingForm" (ngSubmit)="onSubmit(bookServiceForm)" #bookServiceForm="ngForm">
-    <mat-form-field>
-      <input type="text" formControlName="name" placeholder="Enter name" matInput>
-      <mat-icon fontIcon="person" matSuffix></mat-icon>
-      <mat-error *ngIf="!readingForm.value.name">This field is required</mat-error>
-      <mat-error *ngIf="readingForm.value.name">Name may only include letters and spaces</mat-error>
-    </mat-form-field>
-    <mat-form-field>
-      <input type="email" formControlName="email"
-        matInput placeholder="Enter email" matInput>
-      <mat-icon fontIcon="email" matSuffix></mat-icon>
-      <mat-error *ngIf="!readingForm.value.email">This field is required</mat-error>
-      <mat-error *ngIf="readingForm.value.email">Please enter a valid email address</mat-error>
-    </mat-form-field>
-    <mat-form-field>
-      <input type="text" formControlName="phone_number"
-        matInput placeholder="Enter phone number" matInput>
-      <mat-icon fontIcon="phone" matSuffix></mat-icon>
-      <mat-error *ngIf="!readingForm.value.phone_number">This field is required</mat-error>
-      <mat-error *ngIf="readingForm.value.phone_number">Please, Enter 10 digit Mobile Number.</mat-error>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Select a date</mat-label>
-      <input matInput formControlName="date" [matDatepicker]="datepicker" [min]="minDate" [max]="maxDate"/>
-      <mat-datepicker-toggle matIconSuffix [for]="datepicker"></mat-datepicker-toggle>
-      <mat-datepicker #datepicker></mat-datepicker>
-      <mat-error *ngIf="!readingForm.value.date">This field is required</mat-error>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Select a time</mat-label>
-      <input matInput [matTimepicker]="timepicker" formControlName="time" matTimepickerMin="09:00"
-      matTimepickerMax="20:30">
-      <mat-timepicker #timepicker/>
-      <mat-timepicker-toggle [for]="timepicker" matSuffix/>
-      <mat-error *ngIf="!readingForm.value.time">This field is required</mat-error>
-    </mat-form-field> 
-    <br>
-    <mat-checkbox formControlName="isVirtual"
-      >Virtual</mat-checkbox>
-    <div mat-dialog-actions>
-      <button type="submit" [disabled]="!readingForm.valid" mat-flat-button>Schedule</button>
-      <button mat-flat-button mat-dialog-close color="warn">Cancel</button>
-    </div>
-  </form>
+  <div mat-dialog-title><h3 class="text-center">Schedule a Reading</h3></div>
+  <mat-dialog-content align="center">
+    <form class="border border-top-0 mb-5 p-4" [formGroup]="readingForm" (ngSubmit)="onSubmit(bookServiceForm)" #bookServiceForm="ngForm">
+      <div class="row">
+        <div class="row w-50">
+          <mat-form-field>
+            <input type="text" formControlName="name" placeholder="Enter name" matInput>
+            <mat-icon fontIcon="person" matSuffix></mat-icon>
+            <mat-error *ngIf="!readingForm.value.name">This field is required</mat-error>
+            <mat-error *ngIf="readingForm.value.name">Name may only include letters and spaces</mat-error>
+          </mat-form-field>
+        </div>
+        <div class="row w-50">
+          <mat-form-field>
+            <input type="email" formControlName="email"
+              matInput placeholder="Enter email" matInput>
+            <mat-icon fontIcon="email" matSuffix></mat-icon>
+            <mat-error *ngIf="!readingForm.value.email">This field is required</mat-error>
+            <mat-error *ngIf="readingForm.value.email">Please enter a valid email address</mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col w-25 mt-3">
+          <div class="row phone-number-input w-50">
+            <mat-form-field>
+              <input type="text" formControlName="phone_number"
+                matInput placeholder="Enter phone number" matInput>
+              <mat-icon fontIcon="phone" matSuffix></mat-icon>
+              <mat-error *ngIf="!readingForm.value.phone_number">This field is required</mat-error>
+              <mat-error *ngIf="readingForm.value.phone_number">Please, Enter 10 digit Mobile Number.</mat-error>
+            </mat-form-field>
+          </div>
+          <div class="date-time-inputs mt-2 col offset-md-4">
+            <div class="col">
+              <mat-form-field>
+                <mat-label>Select a date</mat-label>
+                <input matInput formControlName="date" [matDatepicker]="datepicker" [min]="minDate" [max]="maxDate"/>
+                <mat-datepicker-toggle matIconSuffix [for]="datepicker"></mat-datepicker-toggle>
+                <mat-datepicker #datepicker></mat-datepicker>
+                <mat-error *ngIf="!readingForm.value.date">This field is required</mat-error>
+              </mat-form-field>
+            </div>
+            <div class="col">
+              <mat-form-field>
+                <mat-label>Select a time</mat-label>
+                <input matInput [matTimepicker]="timepicker" formControlName="time" matTimepickerMin="09:00"
+                matTimepickerMax="20:30">
+                <mat-timepicker #timepicker/>
+                <mat-timepicker-toggle [for]="timepicker" matSuffix/>
+                <mat-error *ngIf="!readingForm.value.time">This field is required</mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+        <div class="row flex-row">
+          <mat-checkbox class="d-flex justify-content-start" formControlName="isVirtual">Virtual</mat-checkbox>
+        </div>
+      </div>
+      <div class="row">
+        <div mat-dialog-actions>
+          <button type="button" class="btn btn-primary mx-4" type="submit" [disabled]="!readingForm.valid">Schedule</button>
+          <button type="button" class="btn btn-danger" mat-dialog-close color="warn">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
 </div>
