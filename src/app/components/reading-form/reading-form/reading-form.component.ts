@@ -1,16 +1,16 @@
 import { NgIf } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { BookService } from 'src/app/services/book.service';
 import { MatTimepickerModule } from '@angular/material/timepicker';
+import { BookService } from 'src/app/services/book.service';
 
 interface ReadingForm {
   id: FormControl<string>;
@@ -47,9 +47,8 @@ export class ReadingFormComponent {
   _todaysDate = new Date();
   minDate = new Date();
   maxDate = new Date();
-  
-  
-  constructor (private _matDialog:MatDialog, public bookService: BookService) {
+
+  constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {serviceType: string}, public bookService: BookService) {
     this.minDate.setDate(this._todaysDate.getDate() + 2);
     this.maxDate.setMonth(this._todaysDate.getMonth() + 2);
   }
@@ -92,7 +91,7 @@ export class ReadingFormComponent {
       form.value.time.getMinutes(),
       form.value.time.getSeconds(),
     )
-    this.bookService.setServiceDetails(form.value.name, form.value.email, form.value.phone_number, combinedDateTime, form.value.time, form.value.isVirtual);
-    console.log(`TESTING: Form Value in Reading Form ${form.value}`);
+    this.bookService.setServiceDetails(this.data.serviceType, form.value.name, form.value.email, form.value.phone_number, combinedDateTime, form.value.time, form.value.isVirtual);
+    console.log(`TESTING: Form Values in Form ${form.value}`);
   }
 }

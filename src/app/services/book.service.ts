@@ -12,13 +12,13 @@ export class BookService {
   private _data = new BehaviorSubject<Service>({} as Service);
   public data$ = this._data.asObservable();
 
-  setServiceDetails(name: string, email: string, phone_number: number, date: Date, time: Date, isVirtual: boolean) {
+  setServiceDetails(type: string, name: string, email: string, phone_number: number, date: Date, time: Date, isVirtual: boolean) {
     if (name) {
       this._data.next({
         // TODO: hardcoded ID number
         id: 0,
+        type: type,
         name: name,
-        type: "reading",
         email: email,
         phone_number: phone_number,
         date: date,
