@@ -1,12 +1,12 @@
 <!--TODO: adjust title for grammar with Initiation form title -->
 <div class="container">
-  <div mat-dialog-title><h3 class="text-center">Schedule a {{ data.serviceType }}</h3></div>
+  <div mat-dialog-title><h3 class="text-center display-6">Schedule a {{ data.serviceType }}</h3></div>
   <mat-dialog-content align="center">
     <form class="border border-top-0 mb-5 p-4" [formGroup]="readingForm" (ngSubmit)="onSubmit(bookServiceForm)" #bookServiceForm="ngForm">
       <div class="row">
         <div class="row w-50">
           <mat-form-field>
-            <input type="text" formControlName="name" placeholder="Enter name" matInput>
+            <input type="text" formControlName="name" placeholder="Name" matInput>
             <mat-icon fontIcon="person" matSuffix></mat-icon>
             <mat-error *ngIf="!readingForm.value.name">This field is required</mat-error>
             <mat-error *ngIf="readingForm.value.name">Name may only include letters and spaces</mat-error>
@@ -15,7 +15,7 @@
         <div class="row w-50">
           <mat-form-field>
             <input type="email" formControlName="email"
-              matInput placeholder="Enter email" matInput>
+              matInput placeholder="Email" matInput>
             <mat-icon fontIcon="email" matSuffix></mat-icon>
             <mat-error *ngIf="!readingForm.value.email">This field is required</mat-error>
             <mat-error *ngIf="readingForm.value.email">Please enter a valid email address</mat-error>
@@ -25,7 +25,7 @@
           <div class="row phone-number-input w-50">
             <mat-form-field>
               <input type="text" formControlName="phone_number"
-                matInput placeholder="Enter phone number" matInput>
+                matInput placeholder="Phone number" matInput>
               <mat-icon fontIcon="phone" matSuffix></mat-icon>
               <mat-error *ngIf="!readingForm.value.phone_number">This field is required</mat-error>
               <mat-error *ngIf="readingForm.value.phone_number">Please, Enter 10 digit Mobile Number.</mat-error>
@@ -54,7 +54,7 @@
           </div>
         </div>
         <div class="row flex-row">
-          <mat-checkbox class="d-flex justify-content-start" formControlName="isVirtual">Virtual</mat-checkbox>
+          <mat-checkbox class="d-flex justify-content-start" formControlName="isVirtual">Virtual meeting</mat-checkbox>
         </div>
       </div>
       <div class="row">
