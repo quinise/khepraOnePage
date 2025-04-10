@@ -1,8 +1,8 @@
-import { Component, ElementRef, inject, ViewChild } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ReadingFormComponent } from 'src/app/components/reading-form/reading-form/reading-form.component';
-import { BookService } from 'src/app/services/book.service';
+import { AppointmentFormComponent } from 'src/app/components/book-appointment-form/book-appointment-form/book-appointment-form.component';
+import { BookAppointment } from 'src/app/services/bookAppointment.service';
 @Component({
     selector: 'app-services',
     standalone: true,
@@ -14,7 +14,7 @@ export class ServicesComponent {
     dialog = inject(MatDialog);
     selectedServiceType = '';
 
-    constructor (public bookService: BookService) {}
+    constructor (public bookAppointment: BookAppointment) {}
 
     openServiceForm(buttonId: string) {
         if (buttonId == 'readingButton') {
@@ -27,7 +27,7 @@ export class ServicesComponent {
             this.selectedServiceType = "Workshop";
         }
 
-        const dialogRef = this.dialog.open(ReadingFormComponent, {
+        const dialogRef = this.dialog.open(AppointmentFormComponent, {
             minWidth: '500px',
             data: {serviceType: this.selectedServiceType},
         });
