@@ -33,7 +33,7 @@ export class ServicesComponent {
         });
 
         dialogRef.afterClosed().subscribe(result => {
-            this.bookService.data$ = result;
+            
         });
     }
 }
