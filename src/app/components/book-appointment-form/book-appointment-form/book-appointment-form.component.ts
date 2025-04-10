@@ -11,10 +11,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import { Router } from '@angular/router';
-import { BookService } from 'src/app/services/book.service';
+import { BookAppointment } from 'src/app/services/bookAppointment.service';
 
-
-interface ReadingForm {
+interface AppointmentForm {
   name: FormControl<string>;
   email: FormControl<string>;
   phone_number: FormControl<number | null>;
@@ -23,7 +22,7 @@ interface ReadingForm {
   isVirtual: FormControl<boolean>;
 }
 @Component({
-  selector: 'app-reading-form',
+  selector: 'app-appointment-form',
   standalone: true,
   imports: [
     MatButtonModule,
@@ -40,18 +39,18 @@ interface ReadingForm {
     MatTimepickerModule,
     ],
   providers: [provideNativeDateAdapter()],
-  templateUrl: './reading-form.component.html',
-  styleUrl: './reading-form.component.css',
+  templateUrl: './book-appointment-form.component.html',
+  styleUrl: './book-appointment-form.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ReadingFormComponent {
+export class AppointmentFormComponent {
   serviceIdNumber: number;
 
   _todaysDate = new Date();
   minDate = new Date();
   maxDate = new Date();
 
-  constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {serviceType: string}, public bookService: BookService, private router: Router) {
+  constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {serviceType: string}, public bookAppointment: BookAppointment, private router: Router) {
     this.serviceIdNumber = this.generateIdNumber();
 
     this.minDate.setDate(this._todaysDate.getDate() + 2);
@@ -64,7 +63,7 @@ export class ReadingFormComponent {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
-  protected readingForm = new FormGroup<ReadingForm>({
+  protected appointmentForm = new FormGroup<AppointmentForm>({
     name: new FormControl<string>('', {
       nonNullable: true,
       validators: [Validators.pattern(/[a-zA-Z ]/), Validators.required]
@@ -113,7 +112,7 @@ export class ReadingFormComponent {
       form.value.time.getSeconds(),
     )
 
-    this.bookService.service = {
+    this.bookAppointment.appointment = {
       id: this.serviceIdNumber,
       type: this.data.serviceType,
       name: form.value.name,
@@ -121,7 +120,8 @@ export class ReadingFormComponent {
       phone_number: form.value.phone_number,
       date: combinedDateTime,
       isVirtual: form.value.isVirtual
-     };
+    };
+
     this.router.navigate(['/events']);
 
     // this.bookService.setServiceDetails(
@@ -133,6 +133,5 @@ export class ReadingFormComponent {
     // combinedDateTime, 
     // form.value.isVirtual);
 
-    // localStorage.setItem('requestedService', JSON.stringify(this.bookService.getAllServicesDetails()))
   }
 }

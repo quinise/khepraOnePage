@@ -1,41 +1,32 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, Inject, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions } from '@fullcalendar/core'; // useful for typechecking
 import dayGridPlugin from '@fullcalendar/daygrid';
-import { Service } from 'src/app/interfaces/service';
-import { BookService } from 'src/app/services/book.service';
-import { ReadingFormComponent } from 'src/app/components/reading-form/reading-form/reading-form.component';
-// import { Router } from '@angular/router';
+import { AppointmentFormComponent } from 'src/app/components/book-appointment-form/book-appointment-form/book-appointment-form.component';
+import { Appointment } from 'src/app/interfaces/appointment';
+import { BookAppointment } from 'src/app/services/bookAppointment.service';
 @Component({
     selector: 'app-events',
     imports: [FullCalendarModule, CommonModule],
     standalone: true,
     templateUrl: './events.component.html',
     styleUrls: ['./events.component.css'],
-    providers: [BookService]
+    providers: [BookAppointment]
 })
 
 export class EventsComponent {
-  protected servicesList: Service[] = [];
-  // bookService: BookService = inject(BookService);
-  readingForm: ReadingFormComponent | undefined;
+  protected appointmentsList: Appointment[] = [];
 
-  constructor(private bookService: BookService) {
+  readingForm: AppointmentFormComponent | undefined;
+
+  constructor(private bookAppointment: BookAppointment) {
     
   }
 
   ngOnInit(): void {
-    // this.servicesList = this.bookService.getAllServicesDetails();
-    // console.log(this.servicesList);
-
-    const data = this.bookService.service;
+    const data = this.bookAppointment.appointment;
     console.log(data);
-
-    // const navigation = this.router.getCurrentNavigation();
-    // const appointment = navigation?.extras?.state?.['services'];
-
-    // console.log('State:', navigation?.extras?.state);
   }
 
   calendarOptions: CalendarOptions = {

@@ -1,4 +1,4 @@
-export interface Service {
+export interface Appointment {
   id:number,
   type:string,
   name:string,
