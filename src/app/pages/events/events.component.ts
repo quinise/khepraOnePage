@@ -3,30 +3,26 @@ import { Component } from '@angular/core';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions } from '@fullcalendar/core'; // useful for typechecking
 import dayGridPlugin from '@fullcalendar/daygrid';
-import { AppointmentFormComponent } from 'src/app/components/book-appointment-form/book-appointment-form/book-appointment-form.component';
 import { Appointment } from 'src/app/interfaces/appointment';
-import { BookAppointment } from 'src/app/services/bookAppointment.service';
+import { ApiService } from 'src/app/services/api.service';
 @Component({
     selector: 'app-events',
     imports: [FullCalendarModule, CommonModule],
     standalone: true,
     templateUrl: './events.component.html',
     styleUrls: ['./events.component.css'],
-    providers: [BookAppointment]
+    providers: []
 })
 
 export class EventsComponent {
   protected appointmentsList: Appointment[] = [];
 
-  readingForm: AppointmentFormComponent | undefined;
-
-  constructor(private bookAppointment: BookAppointment) {
-    
-  }
+  constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
-    const data = this.bookAppointment.appointment;
-    console.log(data);
+    this.apiService.getAll().subscribe(data => {
+      this.appointmentsList = data;
+    });
   }
 
   calendarOptions: CalendarOptions = {

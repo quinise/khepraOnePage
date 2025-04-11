@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AppointmentFormComponent } from 'src/app/components/book-appointment-form/book-appointment-form/book-appointment-form.component';
-import { BookAppointment } from 'src/app/services/bookAppointment.service';
+import { ApiService } from 'src/app/services/api.service';
 @Component({
     selector: 'app-services',
     standalone: true,
@@ -14,7 +14,7 @@ export class ServicesComponent {
     dialog = inject(MatDialog);
     selectedServiceType = '';
 
-    constructor (public bookAppointment: BookAppointment) {}
+    constructor (public apiService: ApiService) {}
 
     openServiceForm(buttonId: string) {
         if (buttonId == 'readingButton') {
@@ -30,10 +30,6 @@ export class ServicesComponent {
         const dialogRef = this.dialog.open(AppointmentFormComponent, {
             minWidth: '500px',
             data: {serviceType: this.selectedServiceType},
-        });
-
-        dialogRef.afterClosed().subscribe(result => {
-            
         });
     }
 }

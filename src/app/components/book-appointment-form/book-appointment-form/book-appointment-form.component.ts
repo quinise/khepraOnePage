@@ -11,7 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import { Router } from '@angular/router';
-import { BookAppointment } from 'src/app/services/bookAppointment.service';
+import { ApiService } from 'src/app/services/api.service';
 
 interface AppointmentForm {
   name: FormControl<string>;
@@ -50,7 +50,7 @@ export class AppointmentFormComponent {
   minDate = new Date();
   maxDate = new Date();
 
-  constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {serviceType: string}, public bookAppointment: BookAppointment, private router: Router) {
+  constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {serviceType: string}, public apiService: ApiService, private router: Router) {
     this.serviceIdNumber = this.generateIdNumber();
 
     this.minDate.setDate(this._todaysDate.getDate() + 2);
@@ -89,19 +89,6 @@ export class AppointmentFormComponent {
     }),
   })
 
-  submitFakeData() {
-    console.log('submitting fake data');
-    // this.bookService.setServiceDetails(
-    //   123456789, 
-    //   "Reading", 
-    //   'I am a client', 
-    //   'my@email.com', 
-    //   1231231234, 
-    //   new Date(), 
-    //   true,
-    // );
-  }
-
   onSubmit(form: any): void {
     const combinedDateTime = new Date(
       form.value.date.getFullYear(),
@@ -112,7 +99,7 @@ export class AppointmentFormComponent {
       form.value.time.getSeconds(),
     )
 
-    this.bookAppointment.appointment = {
+    this.apiService.appointment = {
       id: this.serviceIdNumber,
       type: this.data.serviceType,
       name: form.value.name,
@@ -121,17 +108,5 @@ export class AppointmentFormComponent {
       date: combinedDateTime,
       isVirtual: form.value.isVirtual
     };
-
-    this.router.navigate(['/events']);
-
-    // this.bookService.setServiceDetails(
-    // this.serviceIdNumber, 
-    // this.data.serviceType, 
-    // form.value.name, 
-    // form.value.email, 
-    // form.value.phone_number, 
-    // combinedDateTime, 
-    // form.value.isVirtual);
-
   }
 }
