@@ -1,21 +1,24 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary min-vw-100 mt-4 start-50 translate-middle">
-  <div class="container-fluid">
-    <a routerLink="" class="navbar-brand" href="#"><img class="h-auto mt-5" src="/assets/khepra-brand.png"></a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav mt-5">
-        <li class="nav-item">
-          <a routerLink="" class="nav-link active" aria-current="page" href="#">Home</a>
-        </li>
-        <li class="nav-item">
-          <a routerLink="services" class="nav-link" href="#">Services</a>
-        </li>
-        <li class="nav-item">
-          <a routerLink="events" class="nav-link" href="#">Events</a>
-        </li>
-      </ul>
-    </div>
+<nav class="py-2 bg-body-tertiary border-bottom d-flex">
+  <div class="container-fluid container d-flex flex-wrap">
+    <ul class="nav me-auto">
+      <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2 active" aria-current="page">Home</a></li>
+      <li class="nav-item"><a routerLink="services" class="nav-link link-body-emphasis px-2">Services</a></li>
+      <li class="nav-item"><a routerLink="events" class="nav-link link-body-emphasis px-2">Events</a></li>
+    </ul>
+    <ul class="nav">
+      <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">Login</a></li>
+      <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">Sign up</a></li>
+    </ul>
   </div>
 </nav>
+<header class="py-3 mb-4 border-bottom">
+  <div class="container d-flex flex-wrap justify-content-center">
+    <a href="/" class="d-flex align-items-center mb-3 mb-lg-0 me-lg-auto link-body-emphasis text-decoration-none">
+      <img class="mx-4" src="/assets/khepra-brand.png">
+      <span class="fs-4">Khepra Ptah</span>
+    </a>
+    <a href="/">
+      <span style="font-size: 40px" class="material-symbols-outlined">shopping_cart</span>
+    </a>
+  </div>
+</header>
