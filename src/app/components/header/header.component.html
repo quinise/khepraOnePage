@@ -2,12 +2,13 @@
   <div class="container-fluid container d-flex flex-wrap">
     <ul class="nav me-auto">
       <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2 active" aria-current="page">Home</a></li>
-      <li class="nav-item"><a routerLink="services" class="nav-link link-body-emphasis px-2">Services</a></li>
-      <li class="nav-item"><a routerLink="events" class="nav-link link-body-emphasis px-2">Events</a></li>
+      <li class="nav-item"><a routerLink="/services" class="nav-link link-body-emphasis px-2">Services</a></li>
+      <li class="nav-item"><a routerLink="/events" class="nav-link link-body-emphasis px-2">Events</a></li>
+      <li class="nav-item"><a routerLink="/admin-panel" class="nav-link link-body-emphasis px-2">Admin Panel</a></li>
     </ul>
     <ul class="nav">
-      <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">Login</a></li>
-      <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">Sign up</a></li>
+      <li class="nav-item"><button class="nav-link link-body-emphasis px-2">Login</button></li>
+      <li class="nav-item"><button (click)="openSignUpForm()" class="nav-link link-body-emphasis px-2">Sign up</button></li>
     </ul>
   </div>
 </nav>
