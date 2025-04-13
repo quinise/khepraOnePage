@@ -1,0 +1,29 @@
+<div class="container">
+  <div mat-dialog-title><h3 class="text-center display-6">Sign Up</h3></div>
+  <mat-dialog-content align="center">
+  <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
+    <div>
+      <mat-form-field>
+        <input type="email" formControlName="email"
+          matInput placeholder="Email" matInput>
+        <mat-icon fontIcon="email" matSuffix></mat-icon>
+        <mat-error *ngIf="!signUpForm.value.email">This field is required</mat-error>
+        <mat-error *ngIf="signUpForm.value.email">Please enter a valid email address</mat-error>
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-form-field>
+        <input type="text" formControlName="password" placeholder="Password" matInput>
+        <mat-icon fontIcon="person" matSuffix></mat-icon>
+        <mat-error *ngIf="!signUpForm.value.password">This field is required</mat-error>
+        <mat-error *ngIf="signUpForm.value.password">Password Error</mat-error>
+      </mat-form-field>
+    </div>
+    <button type="submit" class="btn btn-primary mx-4">Create Account</button>
+  </form>
+  </mat-dialog-content>
+</div>
+
+
+<p *ngIf="errorMessage" style="color: red">{{ errorMessage }}</p>
+<p *ngIf="successMessage" style="color: green">{{ successMessage }}</p>

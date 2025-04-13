@@ -1,7 +1,8 @@
 <!--TODO: adjust title for grammar with Initiation form title -->
 <div class="container">
-  <div mat-dialog-title onclick="submitFakeData()"><h3 class="text-center display-6">Schedule a {{ data.serviceType }}</h3></div>
+  <div mat-dialog-title><h3 class="text-center display-6">Schedule a {{ data.serviceType }}</h3></div>
   <mat-dialog-content align="center">
+    <!-- TODO: Change name to bookAppointmentForm -->
     <form class="border border-top-0 mb-5 p-4" [formGroup]="appointmentForm" (ngSubmit)="onSubmit(bookServiceForm)" #bookServiceForm="ngForm">
       <div class="row">
         <div class="row w-50">

@@ -51,6 +51,7 @@ export class AppointmentFormComponent {
   maxDate = new Date();
 
   constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {serviceType: string}, public apiService: ApiService, private router: Router) {
+    // ToDo: Change serviceIdNumber to appointmentIdNumber
     this.serviceIdNumber = this.generateIdNumber();
 
     this.minDate.setDate(this._todaysDate.getDate() + 2);
@@ -87,7 +88,7 @@ export class AppointmentFormComponent {
     isVirtual: new FormControl<boolean>(false, {
       nonNullable: true,
     }),
-  })
+  });
 
   onSubmit(form: any): void {
     const combinedDateTime = new Date(
