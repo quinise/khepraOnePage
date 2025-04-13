@@ -16,14 +16,14 @@ export class ServicesComponent {
 
     constructor (public apiService: ApiService) {}
 
-    openServiceForm(buttonId: string) {
-        if (buttonId == 'readingButton') {
+    openServiceForm(buttonType: string) {
+        if (buttonType == 'readingButton') {
             this.selectedServiceType = "Reading";
-        } else if (buttonId == 'cleansingButton') {
+        } else if (buttonType == 'cleansingButton') {
             this.selectedServiceType = "Cleansing";
-        } else if (buttonId == 'initiationButton') {
+        } else if (buttonType == 'initiationButton') {
             this.selectedServiceType = "Initiation";
-        } else if (buttonId == 'workshopButton') {
+        } else if (buttonType == 'workshopButton') {
             this.selectedServiceType = "Workshop";
         }
 

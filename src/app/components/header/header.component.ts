@@ -14,10 +14,18 @@ import { SignupComponent } from '../signup/signup.component';
 })
 export class HeaderComponent {
     dialog = inject(MatDialog);
+    authStep = '';
 
-    openSignUpForm() {
+    openAuthForm(buttonType: string) {
+        if (buttonType == 'loginButton') {
+            this.authStep = 'Login'
+        } else if (buttonType == 'signupButton') {
+            this.authStep = 'Sign up'
+        }
+
         const dialogRef = this.dialog.open(SignupComponent, {
             minWidth: '500px',
+            data: {authStep: this.authStep},
         });
     }
 }
