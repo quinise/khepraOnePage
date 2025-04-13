@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
-import { RouterModule } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { SignupComponent } from '../signup/signup.component';
+import { RouterModule } from '@angular/router';
+import { AuthenticateComponent } from '../authenticate/authenticate.component';
 @Component({
     selector: 'app-header',
     templateUrl: './header.component.html',
@@ -14,10 +14,18 @@ import { SignupComponent } from '../signup/signup.component';
 })
 export class HeaderComponent {
     dialog = inject(MatDialog);
+    authStep = '';
 
-    openSignUpForm() {
-        const dialogRef = this.dialog.open(SignupComponent, {
+    openAuthForm(buttonType: string) {
+        if (buttonType == 'loginButton') {
+            this.authStep = 'Login'
+        } else if (buttonType == 'signupButton') {
+            this.authStep = 'Sign up'
+        }
+
+        const dialogRef = this.dialog.open(AuthenticateComponent, {
             minWidth: '500px',
+            data: {authStep: this.authStep},
         });
     }
 }
