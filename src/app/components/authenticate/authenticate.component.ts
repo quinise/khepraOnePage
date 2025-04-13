@@ -25,12 +25,12 @@ interface AuthForm {
     MatFormFieldModule,
     MatDialogModule,
   ],
-  templateUrl: './signup.component.html',
-  styleUrl: './signup.component.css',
+  templateUrl: './authenticate.component.html',
+  styleUrl: './authenticate.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 
-export class SignupComponent {
+export class AuthenticateComponent {
   errorMessage: string;
   successMessage: string;
 
