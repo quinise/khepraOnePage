@@ -7,10 +7,10 @@ import { Appointment } from 'src/app/interfaces/appointment';
 import { ApiService } from 'src/app/services/api.service';
 import { MatSelectModule, MatSelectChange } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-
+import { MatCardModule } from '@angular/material/card';
 @Component({
   selector: 'app-panel',
-  imports: [CommonModule, FullCalendarModule, MatSelectModule, MatFormFieldModule],
+  imports: [CommonModule, FullCalendarModule, MatSelectModule, MatFormFieldModule, MatCardModule],
   templateUrl: './panel.component.html',
   styleUrl: './panel.component.css'
 })
