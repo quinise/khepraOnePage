@@ -1,6 +1,59 @@
 <p>Welcome!</p>
-  <div>
+
+<!-- FUTURE APPOINTMENTS -->
+<div>
+  <mat-form-field appearance="fill">
+    <mat-label>Filter Appointments</mat-label>
+    <mat-select (selectionChange)="onRangeChange($event)">
+      <mat-option [value]="3">Next 3 Days</mat-option>
+      <mat-option [value]="7">Next 7 Days</mat-option>
+      <mat-option [value]="14">Next 14 Days</mat-option>
+      <mat-option [value]="30">Next 30 Days</mat-option>
+      <mat-option [value]="-1">All Appointments</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <div *ngFor="let date of getSortedKeys(filteredAppointments)">
+    <h3>{{ date }}</h3>
     <ul>
-      <li *ngFor="let a of appointmentsList">{{ a | json }}</li>
+      <li *ngFor="let a of filteredAppointments[date]">
+        {{ a.name }} — {{ a.date | date: 'shortTime' }}
+      </li>
     </ul>
   </div>
+</div>
+
+<!-- PAST APPOINTMENTS -->
+<div>
+  <h2>Past Appointments</h2>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Select Past Appointment Range</mat-label>
+    <mat-select [(value)]="daysRange" (selectionChange)="onRangeChange($event)">
+      <mat-option [value]="3">Last 3 Days</mat-option>
+      <mat-option [value]="7">Last 7 Days</mat-option>
+      <mat-option [value]="14">Last 14 Days</mat-option>
+      <mat-option [value]="30">Last 30 Days</mat-option>
+      <mat-option [value]="-1">All Past Appointments</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <!-- Display filtered past appointments -->
+  <div *ngIf="getSortedKeys(filteredPastAppointments).length > 0">
+    <ul>
+      <li *ngFor="let date of getSortedKeys(filteredPastAppointments)">
+        <strong>{{ date }}</strong>
+        <ul>
+          <li *ngFor="let appointment of filteredPastAppointments[date]">
+            {{ appointment.name }} — {{ appointment.date | date: 'shortTime' }}
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <!-- No past appointments message -->
+  <div *ngIf="getSortedKeys(filteredPastAppointments).length === 0">
+    <p>No past appointments available for the selected range.</p>
+  </div>
+</div>
