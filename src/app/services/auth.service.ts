@@ -1,34 +1,78 @@
 import { Injectable, inject } from '@angular/core';
 import {
   Auth,
+  authState,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
-  user
+  UserCredential,
+  sendPasswordResetEmail
 } from '@angular/fire/auth';
-import { Observable } from 'rxjs';
+import { Firestore, doc, setDoc, getDoc, docData } from '@angular/fire/firestore';
+import { Observable, of, switchMap } from 'rxjs';
+import { AppUser } from '../interfaces/appUser';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private auth: Auth = inject(Auth);
-  user$: Observable<any> = user(this.auth);
+  user$ = authState(this.auth).pipe(
+    switchMap(user => {
+      if (!user) return of(null);
+      const ref = doc(this.firestore, 'users', user.uid);
+      return docData(ref) as Observable<AppUser>;
+    })
+  );
 
-  signUpWithEmail(email: string, password: string) {
-    return createUserWithEmailAndPassword(this.auth, email, password);
+  constructor(private firestore: Firestore) {}
+
+  async signUpWithEmail(email: string, password: string): Promise<UserCredential> {
+    const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
+    const user = userCredential.user;
+    // 👇 Save user to Firestore
+    await setDoc(doc(this.firestore, 'users', user.uid), {
+      uid: user.uid,
+      email: user.email,
+      role: 'user',
+      createdAt: new Date(),
+    });
+    return await userCredential;
   }
 
-  loginWithEmail(email: string, password: string) {
-    return signInWithEmailAndPassword(this.auth, email, password);
+  async loginWithEmail(email: string, password: string): Promise<UserCredential> {
+    return await signInWithEmailAndPassword(this.auth, email, password)
   }
 
-  loginWithGoogle() {
+  async loginWithGoogle(): Promise<UserCredential> {
     const provider = new GoogleAuthProvider();
-    return signInWithPopup(this.auth, provider);
+    const result = await signInWithPopup(this.auth, provider);
+    const user = result.user;
+
+    // Check if user already exists in Firestore
+    const userRef = doc(this.firestore, 'users', user.uid);
+    const docSnap = await getDoc(userRef);
+
+    if (!docSnap.exists()) {
+      // Save new user to Firestore
+      await setDoc(userRef, {
+        uid: user.uid,
+        email: user.email,
+        role: 'user',
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        createdAt: new Date()
+      }, { merge: true });
+    }
+
+    return result;
   }
 
-  logout() {
+  logout(): Promise<void> {
     return signOut(this.auth);
+  }
+
+  sendPasswordResetEmail(email: string): Promise<void> {
+    return sendPasswordResetEmail(this.auth, email);
   }
 }
