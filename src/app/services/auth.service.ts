@@ -16,16 +16,20 @@ import { AppUser } from '../interfaces/appUser';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private auth: Auth = inject(Auth);
-  user$ = authState(this.auth).pipe(
-    switchMap(user => {
-      if (!user) return of(null);
-      const ref = doc(this.firestore, 'users', user.uid);
-      return docData(ref) as Observable<AppUser>;
-    })
-  );
+  private auth: Auth;
+  user$: Observable<AppUser | null>;
 
-  constructor(private firestore: Firestore) {}
+  constructor(private firestore: Firestore, auth: Auth) {
+    this.auth = auth;
+
+    this.user$ = authState(this.auth).pipe(
+      switchMap(user => {
+        if (!user) return of(null);
+        const ref = doc(this.firestore, 'users', user.uid);
+        return docData(ref) as Observable<AppUser>;
+      })
+    );
+  }
 
   async signUpWithEmail(email: string, password: string): Promise<UserCredential> {
     const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);

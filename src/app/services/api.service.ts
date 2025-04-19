@@ -15,27 +15,27 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   // Get all appointments
-  getAll(): Observable<Appointment[]> {
+  getAllAppointments(): Observable<Appointment[]> {
     return this.http.get<Appointment[]>(this.baseUrl);
   }
 
   // Get one appointment by its ID
-  getById(id: number): Observable<Appointment> {
+  getAppointmentById(id: number): Observable<Appointment> {
     return this.http.get<Appointment>(`${this.baseUrl}/${id}`);
   }
 
   // Create new appointment
-  create(appointment: Appointment): Observable<Appointment> {
+  createAppointment(appointment: Appointment): Observable<Appointment> {
     return this.http.post<Appointment>(this.baseUrl, appointment);
   }
 
   // Update appointment by ID
-  update(id: number, appointment: Appointment): Observable<Appointment> {
+  updateAppointment(id: number, appointment: Appointment): Observable<Appointment> {
     return this.http.put<Appointment>(`${this.baseUrl}/${id}`, appointment);
   }
 
   // Delete appointment by ID
-  delete(id: number): Observable<void> {
+  deleteAppointment(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }

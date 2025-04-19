@@ -11,6 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import { Router } from '@angular/router';
+import { Appointment } from 'src/app/interfaces/appointment';
 import { ApiService } from 'src/app/services/api.service';
 
 interface AppointmentForm {
@@ -44,7 +45,9 @@ interface AppointmentForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppointmentFormComponent {
-  serviceIdNumber: number;
+  // serviceIdNumber: number;
+  successMessage = '';
+  errorMessage = '';
 
   _todaysDate = new Date();
   minDate = new Date();
@@ -52,7 +55,7 @@ export class AppointmentFormComponent {
 
   constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {serviceType: string}, public apiService: ApiService, private router: Router) {
     // ToDo: Change serviceIdNumber to appointmentIdNumber
-    this.serviceIdNumber = this.generateIdNumber();
+    // this.serviceIdNumber = this.generateIdNumber();
 
     this.minDate.setDate(this._todaysDate.getDate() + 2);
     this.maxDate.setMonth(this._todaysDate.getMonth() + 2);
@@ -100,8 +103,7 @@ export class AppointmentFormComponent {
       form.value.time.getSeconds(),
     )
 
-    this.apiService.appointment = {
-      id: this.serviceIdNumber,
+    const appointment: Appointment = {
       type: this.data.serviceType,
       name: form.value.name,
       email: form.value.email,
@@ -109,6 +111,19 @@ export class AppointmentFormComponent {
       date: combinedDateTime,
       isVirtual: form.value.isVirtual
     };
+
+    this.apiService.createAppointment(appointment).subscribe({
+      next: (res) => {
+        this.successMessage = 'Appointment successfully booked!';
+        this.errorMessage = '';
+        this.appointmentForm.reset();
+      },
+      error: (err) => {
+        this.successMessage = '';
+        this.errorMessage = 'Failed to book appointment. Please try again.';
+        console.error(err);
+      }
+    })
 
     this._matDialog.closeAll();
   }
