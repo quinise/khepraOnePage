@@ -20,7 +20,7 @@ export class EventsComponent {
   constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
-    this.apiService.getAll().subscribe(data => {
+    this.apiService.getAllAppointments().subscribe(data => {
       this.appointmentsList = data;
     });
   }
