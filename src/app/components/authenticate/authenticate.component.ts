@@ -73,6 +73,7 @@ export class AuthenticateComponent {
 
   googleLogin() {
     this.authService.loginWithGoogle().then(res => {
+      this._matDialog.closeAll();
     }).catch(console.error);
   }
 
