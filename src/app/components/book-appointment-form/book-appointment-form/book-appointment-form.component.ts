@@ -109,5 +109,7 @@ export class AppointmentFormComponent {
       date: combinedDateTime,
       isVirtual: form.value.isVirtual
     };
+
+    this._matDialog.closeAll();
   }
 }

@@ -1,28 +1,39 @@
 <div class="container">
+  <form [formGroup]="authForm" (ngSubmit)="onSubmit()">
   <div mat-dialog-title><h3 class="text-center display-6">{{ data.authStep }}</h3></div>
   <mat-dialog-content align="center">
-  <form [formGroup]="authForm" (ngSubmit)="onSubmit()">
     <div>
       <mat-form-field>
         <input type="email" formControlName="email"
           matInput placeholder="Email" matInput>
         <mat-icon fontIcon="email" matSuffix></mat-icon>
-        <mat-error *ngIf="!authForm.value.email">This field is required</mat-error>
-        <mat-error *ngIf="authForm.value.email">Please enter a valid email address</mat-error>
+        <mat-error *ngIf="authForm.get('email')?.errors">Please enter a valid email address</mat-error>
       </mat-form-field>
     </div>
     <div>
       <mat-form-field>
-        <input type="text" formControlName="password" placeholder="Password" matInput>
+        <input type="password" formControlName="password" placeholder="Password" matInput>
         <mat-icon fontIcon="person" matSuffix></mat-icon>
-        <mat-error *ngIf="!authForm.value.password">This field is required</mat-error>
-        <mat-error *ngIf="authForm.value.password">Password Error</mat-error>
+        <mat-error *ngIf="authForm.get('password')?.errors">Password must be be 8-20 characters, include one uppercase letter, one lowercase letter, and one special character (!&#64;#$%^&*()_+&#123;&#125;[]:;<>,.?~\-=/\\|)</mat-error>
       </mat-form-field>
     </div>
-    <button *ngIf="data.authStep === 'Sign up'" type="submit" class="btn btn-primary mx-4">Create Account</button>
-    <button *ngIf="data.authStep === 'Login'" type="submit" class="btn btn-primary mx-4">Log in</button>
-  </form>
+    <div>
+      <mat-form-field *ngIf="data.authStep === 'Sign up'">
+        <input type="password" formControlName="confirmPassword" placeholder="Confirm password" matInput>
+        <mat-icon fontIcon="person" matSuffix></mat-icon>
+        <mat-error *ngIf="authForm.hasError('passwordMismatch')">Passwords do not match</mat-error>
+      </mat-form-field>
+    </div>
   </mat-dialog-content>
+  <mat-dialog-actions align="center">
+    <button *ngIf="data.authStep === 'Sign up'" type="submit" [disabled]="authForm.invalid" class="btn btn-primary mx-4">Create Account</button>
+    <button *ngIf="data.authStep === 'Login'" type="submit" class="btn btn-primary mx-4">Log in</button>
+  <button *ngIf="data.authStep === 'Login'" (click)="googleLogin()" class="btn btn-primary mx-4 my-3">Login with Google</button>
+</mat-dialog-actions>
+</form>
+<span>
+  <a (click)="resetPassword()" class="text-primary" style="cursor: pointer;">Forgot your password?</a>
+</span>
 </div>
 
 

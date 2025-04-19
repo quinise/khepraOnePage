@@ -4,12 +4,23 @@
       <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2 active" aria-current="page">Home</a></li>
       <li class="nav-item"><a routerLink="/services" class="nav-link link-body-emphasis px-2">Services</a></li>
       <li class="nav-item"><a routerLink="/events" class="nav-link link-body-emphasis px-2">Events</a></li>
-      <li class="nav-item"><a routerLink="/admin-panel" class="nav-link link-body-emphasis px-2">Admin Panel</a></li>
+      <ng-container *ngIf="user$ | async as user">
+        <div *ngIf="user.role === 'admin'">
+          <li class="nav-item"><a routerLink="/admin-panel" class="nav-link link-body-emphasis px-2">Admin Panel</a></li>
+        </div>
+      </ng-container>
     </ul>
-    <ul class="nav">
-      <li class="nav-item"><button (click)="openAuthForm('loginButton')" class="nav-link link-body-emphasis px-2">Login</button></li>
-      <li class="nav-item"><button (click)="openAuthForm('signupButton')" class="nav-link link-body-emphasis px-2">Sign up</button></li>
-    </ul>
+    <ng-container *ngIf="user$ | async as user; else showAuthOptions">
+      <ul class="nav">
+        <li class="nav-item"><button (click)="logout()" class="nav-link link-body-emphasis px-2">Logout</button></li>
+      </ul>
+    </ng-container>
+    <ng-template #showAuthOptions>
+      <ul class="nav">
+        <li class="nav-item"><button (click)="openAuthForm('loginButton')" class="nav-link link-body-emphasis px-2">Login</button></li>
+        <li class="nav-item"><button (click)="openAuthForm('signupButton')" class="nav-link link-body-emphasis px-2">Sign up</button></li>
+      </ul>
+    </ng-template>
   </div>
 </nav>
 <header class="py-3 mb-4 border-bottom">
