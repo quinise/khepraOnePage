@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { EventsComponent } from '../../events/events.component'; // adjust path as needed
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions } from '@fullcalendar/core'; // useful for typechecking
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -8,9 +9,11 @@ import { ApiService } from 'src/app/services/api.service';
 import { MatSelectModule, MatSelectChange } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
+import { FormsModule } from '@angular/forms';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 @Component({
   selector: 'app-panel',
-  imports: [CommonModule, FullCalendarModule, MatSelectModule, MatFormFieldModule, MatCardModule],
+  imports: [CommonModule, FullCalendarModule, MatSelectModule, MatFormFieldModule, MatCardModule, EventsComponent, MatSlideToggleModule, FormsModule],
   templateUrl: './panel.component.html',
   styleUrl: './panel.component.css'
 })
@@ -21,6 +24,7 @@ export class PanelComponent {
   groupedPastAppointments: { [date: string]: Appointment[] } = {};
   filteredAppointments: { [date: string]: Appointment[] } = {};
   filteredPastAppointments: { [date: string]: Appointment[] } = {};
+  includePast: boolean = false;
   daysRange: number = 3;
 
   constructor(private apiService: ApiService) {}
@@ -42,6 +46,13 @@ export class PanelComponent {
       this.filterAppointmentsByRange(false); // Future appointments
       this.filterAppointmentsByRange(true); // Past appointments
     });
+  }
+
+  handleIncludePastChange(value: boolean): void {
+    this.includePast = value;
+    // Re-filter appointments based on the new includePast value
+    this.filterAppointmentsByRange(false); // Future appointments
+    this.filterAppointmentsByRange(true);  // Past appointments
   }
 
   // Group appointments by date (future appointments)
@@ -130,6 +141,13 @@ export class PanelComponent {
   getSortedKeys(obj: { [key: string]: any }): string[] {
     return Object.keys(obj).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
   }
+
+  showCalendar: boolean = false;
+
+  toggleView(): void {
+    this.showCalendar = !this.showCalendar;
+  }
+
 
   calendarOptions: CalendarOptions = {
     initialView: 'dayGridMonth',
