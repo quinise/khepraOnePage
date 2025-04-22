@@ -11,9 +11,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
 import { FormsModule } from '@angular/forms';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import {MatButtonModule} from '@angular/material/button';
+
 @Component({
   selector: 'app-panel',
-  imports: [CommonModule, FullCalendarModule, MatSelectModule, MatFormFieldModule, MatCardModule, EventsComponent, MatSlideToggleModule, FormsModule],
+  imports: [CommonModule, FullCalendarModule, MatSelectModule, MatFormFieldModule, MatCardModule, EventsComponent, MatSlideToggleModule, FormsModule, MatButtonModule],
   templateUrl: './panel.component.html',
   styleUrl: './panel.component.css'
 })

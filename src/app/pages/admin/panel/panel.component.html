@@ -1,28 +1,32 @@
 <h1 class="display-1 text-center my-5">Welcome!</h1>
-
-<mat-slide-toggle [checked]="includePast" (change)="handleIncludePastChange($event.checked)">Include Past Appointments</mat-slide-toggle>
-
-<div class="text-end me-5">
-  <button mat-raised-button color="primary" (click)="toggleView()">
-    {{ showCalendar ? 'Switch to List View' : 'Switch to Calendar View' }}
-  </button>
+<div class="row justify-content-center">
+  <div class="col">
+    <div class="text-end me-5">
+      <button mat-raised-button class="float-end mt-0 mb-2 p-2" color="primary" (click)="toggleView()">
+        {{ showCalendar ? 'Switch to List View' : 'Switch to Calendar View' }}
+      </button>
+    </div>
+  </div>
+  <div class="col"></div>
+  <div class="col">
+    <div class="row">
+      <div class="text-end w-50">
+        <mat-form-field appearance="fill" class="mt-4 mb-3">
+          <mat-label>{{ showCalendar ? 'Filter Calendar' : 'Filter Appointments' }}</mat-label>
+          <mat-select (selectionChange)="onRangeChange($event)" [value]="daysRange">
+            <mat-option [value]="3">Within 3 Days</mat-option>
+            <mat-option [value]="7">Within 7 Days</mat-option>
+            <mat-option [value]="14">Within 14 Days</mat-option>
+            <mat-option [value]="30">Within 30 Days</mat-option>
+            <mat-option [value]="-1">All Appointments</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <mat-slide-toggle class="mx-auto" [checked]="includePast" (change)="handleIncludePastChange($event.checked)">Include Past Appointments</mat-slide-toggle>
+    </div>
+  </div>
 </div>
-
-<div class="text-end me-5">
-  <mat-form-field appearance="fill" class="mt-4 mb-3">
-    <mat-label>{{ showCalendar ? 'Filter Calendar' : 'Filter Appointments' }}</mat-label>
-    <mat-select (selectionChange)="onRangeChange($event)" [value]="daysRange">
-      <mat-option [value]="3">Within 3 Days</mat-option>
-      <mat-option [value]="7">Within 7 Days</mat-option>
-      <mat-option [value]="14">Within 14 Days</mat-option>
-      <mat-option [value]="30">Within 30 Days</mat-option>
-      <mat-option [value]="-1">All Appointments</mat-option>
-    </mat-select>
-  </mat-form-field>
-
-</div>
-
-<div *ngIf="showCalendar">
+<div class="my-5" *ngIf="showCalendar">
   <app-events [daysRange]="daysRange" [includePast]="includePast"></app-events>
 </div>
 <!-- Appointment List View -->
@@ -32,7 +36,7 @@
     <h2>Past Appointments</h2>
     <div *ngFor="let date of getSortedKeys(filteredPastAppointments)">
       <h3>{{ date }}</h3>
-      <mat-card *ngFor="let appointment of filteredPastAppointments[date]">
+      <mat-card *ngFor="let appointment of filteredPastAppointments[date]" class="appointment-card my-4 mx-5 w-50">
         <mat-card-title class="text-center">Client: {{ appointment.name }}</mat-card-title>
         <mat-card-subtitle class="text-center">{{ appointment.date | date: 'shortTime' }}</mat-card-subtitle>
         <mat-card-content>
@@ -47,9 +51,8 @@
       </mat-card>
     </div>
   </div>
-    <!-- Future Appointments -->
-    <h2>Future Appointments</h2>
-
+  <!-- Future Appointments -->
+  <h2>Future Appointments</h2>
   <div *ngFor="let date of getSortedKeys(filteredAppointments)">
     <h3>{{ date }}</h3>
     <mat-card *ngFor="let appointment of filteredAppointments[date]" class="appointment-card my-4 mx-5 w-50">
