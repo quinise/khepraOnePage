@@ -79,4 +79,10 @@ export class AuthService {
   sendPasswordResetEmail(email: string): Promise<void> {
     return sendPasswordResetEmail(this.auth, email);
   }
+
+  getAppUser(): Promise<AppUser | null> {
+    return new Promise((resolve) => {
+      this.user$.subscribe(user => resolve(user));
+    });
+  }
 }

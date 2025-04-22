@@ -1,78 +1,69 @@
 <h1 class="display-1 text-center my-5">Welcome!</h1>
 
-<div class="">
-<h2 class="display-4">Appointments at a Glance</h2>
-<!-- FUTURE APPOINTMENTS -->
-  <div>
-    <mat-form-field appearance="fill" class="mt-4 mb-3">
-      <mat-label>Filter Appointments</mat-label>
-      <mat-select (selectionChange)="onRangeChange($event)">
-        <mat-option [value]="3">Next 3 Days</mat-option>
-        <mat-option [value]="7">Next 7 Days</mat-option>
-        <mat-option [value]="14">Next 14 Days</mat-option>
-        <mat-option [value]="30">Next 30 Days</mat-option>
-        <mat-option [value]="-1">All Future Appointments</mat-option>
-      </mat-select>
-    </mat-form-field>
+<mat-slide-toggle [checked]="includePast" (change)="handleIncludePastChange($event.checked)">Include Past Appointments</mat-slide-toggle>
 
-    <div *ngFor="let date of getSortedKeys(filteredAppointments)">
-      <h3 class="mx-4">{{ date }}</h3>
-      <div *ngFor="let a of filteredAppointments[date]">
-        <mat-card class="appointment-card my-4 mx-5 w-50">
-          <mat-card-title class="text-center">Client: {{ a.name }}</mat-card-title>
-          <mat-card-subtitle  class="text-center">{{ a.date | date: 'shortTime' }}</mat-card-subtitle>
-          <mat-card-content>
-            <p>Appointment Service: {{ a.type }}</p>
-            <p>Virtual: {{ a.isVirtual ? 'Yes' : 'No' }}</p>
-            <div>
-              <h6>Contact Information</h6>
-              <p>Email: {{ a.email }}</p>
-              <p>Phone Number: {{ a.phone_number }}</p>
-            </div>
-          </mat-card-content>
-        </mat-card>
-      </div>
-    </div>
-  </div>
+<div class="text-end me-5">
+  <button mat-raised-button color="primary" (click)="toggleView()">
+    {{ showCalendar ? 'Switch to List View' : 'Switch to Calendar View' }}
+  </button>
 </div>
-<!-- PAST APPOINTMENTS -->
-<div class="my-5">
-  <hr class="w-75 mx-auto">
-  <h2 class="display-4 my-4">Past Appointments</h2>
 
+<div class="text-end me-5">
   <mat-form-field appearance="fill" class="mt-4 mb-3">
-    <mat-label>Select Past Appointment Range</mat-label>
-    <mat-select [(value)]="daysRange" (selectionChange)="onRangeChange($event)">
-      <mat-option [value]="3">Last 3 Days</mat-option>
-      <mat-option [value]="7">Last 7 Days</mat-option>
-      <mat-option [value]="14">Last 14 Days</mat-option>
-      <mat-option [value]="30">Last 30 Days</mat-option>
-      <mat-option [value]="-1">All Past Appointments</mat-option>
+    <mat-label>{{ showCalendar ? 'Filter Calendar' : 'Filter Appointments' }}</mat-label>
+    <mat-select (selectionChange)="onRangeChange($event)" [value]="daysRange">
+      <mat-option [value]="3">Within 3 Days</mat-option>
+      <mat-option [value]="7">Within 7 Days</mat-option>
+      <mat-option [value]="14">Within 14 Days</mat-option>
+      <mat-option [value]="30">Within 30 Days</mat-option>
+      <mat-option [value]="-1">All Appointments</mat-option>
     </mat-select>
   </mat-form-field>
 
-  <div *ngIf="getSortedKeys(filteredPastAppointments).length > 0">
+</div>
+
+<div *ngIf="showCalendar">
+  <app-events [daysRange]="daysRange" [includePast]="includePast"></app-events>
+</div>
+<!-- Appointment List View -->
+<div *ngIf="!showCalendar">
+  <!-- Past Appointments (conditionally displayed) -->
+  <div *ngIf="includePast">
+    <h2>Past Appointments</h2>
     <div *ngFor="let date of getSortedKeys(filteredPastAppointments)">
-      <h3 class="mx-4">{{ date }}</h3>
-      <div *ngFor="let appointment of filteredPastAppointments[date]">
-        <mat-card class="appointment-card my-4 mx-5 w-50">
-          <mat-card-title class="text-center">Client: {{ appointment.name }}</mat-card-title>
-          <mat-card-subtitle class="text-center">{{ appointment.date | date: 'shortTime' }}</mat-card-subtitle>
-          <mat-card-content>
-            <p>Appointment Service: {{ appointment.type }}</p>
-            <p>Virtual: {{ appointment.isVirtual ? 'Yes' : 'No' }}</p>
-            <div>
-              <h6>Contact Information</h6>
-              <p>Email: {{ appointment.email }}</p>
-              <p>Phone Number: {{ appointment.phone_number }}</p>
-            </div>
-          </mat-card-content>
-        </mat-card>
-      </div>
+      <h3>{{ date }}</h3>
+      <mat-card *ngFor="let appointment of filteredPastAppointments[date]">
+        <mat-card-title class="text-center">Client: {{ appointment.name }}</mat-card-title>
+        <mat-card-subtitle class="text-center">{{ appointment.date | date: 'shortTime' }}</mat-card-subtitle>
+        <mat-card-content>
+          <p>Appointment Service: {{ appointment.type }}</p>
+          <p>Virtual: {{ appointment.isVirtual ? 'Yes' : 'No' }}</p>
+          <div>
+            <h6>Contact Information</h6>
+            <p>Email: {{ appointment.email }}</p>
+            <p>Phone Number: {{ appointment.phone_number }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </div>
   </div>
+    <!-- Future Appointments -->
+    <h2>Future Appointments</h2>
 
-  <div *ngIf="getSortedKeys(filteredPastAppointments).length === 0">
-    <p>No past appointments available for the selected range.</p>
+  <div *ngFor="let date of getSortedKeys(filteredAppointments)">
+    <h3>{{ date }}</h3>
+    <mat-card *ngFor="let appointment of filteredAppointments[date]" class="appointment-card my-4 mx-5 w-50">
+        <mat-card-title class="text-center">Client: {{ appointment.name }}</mat-card-title>
+        <mat-card-subtitle class="text-center">{{ appointment.date | date: 'shortTime' }}</mat-card-subtitle>
+        <mat-card-content>
+          <p>Appointment Service: {{ appointment.type }}</p>
+          <p>Virtual: {{ appointment.isVirtual ? 'Yes' : 'No' }}</p>
+          <div>
+            <h6>Contact Information</h6>
+            <p>Email: {{ appointment.email }}</p>
+            <p>Phone Number: {{ appointment.phone_number }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
   </div>
 </div>
