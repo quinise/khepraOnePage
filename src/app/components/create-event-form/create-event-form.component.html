@@ -41,23 +41,52 @@
             <input matInput formControlName="endTime" type="time" placeholder="Select end time" />
           </mat-form-field>
         </div>
-        <div class="row mb-3">
-          <!-- Event Location -->
-          <mat-form-field appearance="fill">
-            <mat-label>Location</mat-label>
-            <input matInput formControlName="location" placeholder="Enter location" />
-          </mat-form-field>
-        </div>
-        <div class="row mb-3">
-          <!-- Event Description -->
-          <mat-form-field appearance="fill">
-            <mat-label>Description</mat-label>
-            <textarea matInput formControlName="description" placeholder="Enter event description"></textarea>
-          </mat-form-field>
-        </div>
         <div class="row">
           <!-- Is Virtual -->
           <mat-checkbox formControlName="isVirtual">Is this event virtual?</mat-checkbox>
+        </div>
+        <div class="row mb-3">
+          <!-- Event Location -->
+          <div class="row mb-3" *ngIf="!eventForm.get('isVirtual')?.value">
+            <mat-label>Location</mat-label>
+            <div class="address-group">
+              <div class="row">
+                <!-- Street Address -->
+                <mat-form-field appearance="fill" class="w-50">
+                  <mat-label>Street Address</mat-label>
+                  <input matInput formControlName="streetAddress" placeholder="123 Main St" />
+                </mat-form-field>
+                <!-- City -->
+                <mat-form-field appearance="fill" class="w-50">
+                  <mat-label>City</mat-label>
+                  <input matInput formControlName="city" placeholder="Seattle" />
+                </mat-form-field>
+              </div>
+              <div class="row">
+                <!-- State -->
+                <mat-form-field appearance="fill" class="w-50">
+                  <mat-label>State</mat-label>
+                  <mat-select formControlName="state">
+                    <mat-option *ngFor="let state of usStates" [value]="state.abbreviation">
+                      {{ state.name }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <!-- ZIP Code -->
+                <mat-form-field appearance="fill" class="w-50">
+                  <mat-label>ZIP Code</mat-label>
+                  <input matInput formControlName="zipCode" placeholder="98101" maxlength="10" />
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <!-- Event Description -->
+            <mat-form-field appearance="fill">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description" placeholder="Enter event description"></textarea>
+            </mat-form-field>
+          </div>
         </div>
       </mat-card-content>
       <div class="row mt-5 mb-2">
