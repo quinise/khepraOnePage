@@ -12,5 +12,10 @@ export const routes: Routes = [
     path: 'admin-panel',
     loadComponent: () => import('./pages/admin/panel/panel.component').then(m => m.PanelComponent),
     canActivate: [adminGuard]
-  }
+  },
+  {
+    path: 'event-management',
+    loadComponent: () => import('./pages/admin/events-management/events-management.component').then(m => m.EventsManagementComponent),
+    canActivate: [adminGuard]
+  },
 ];

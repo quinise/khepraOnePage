@@ -61,11 +61,11 @@ export class AppointmentFormComponent {
     this.maxDate.setMonth(this._todaysDate.getMonth() + 2);
   }
 
-  generateIdNumber(): number {
-    const min = 10000000;
-    const max = 99999999;
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
+  // generateIdNumber(): number {
+  //   const min = 10000000;
+  //   const max = 99999999;
+  //   return Math.floor(Math.random() * (max - min + 1)) + min;
+  // }
 
   protected appointmentForm = new FormGroup<AppointmentForm>({
     name: new FormControl<string>('', {
