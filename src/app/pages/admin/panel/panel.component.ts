@@ -1,17 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { EventsComponent } from '../../events/events.component'; // adjust path as needed
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectChange, MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions } from '@fullcalendar/core'; // useful for typechecking
 import dayGridPlugin from '@fullcalendar/daygrid';
 import { Appointment } from 'src/app/interfaces/appointment';
-import { ApiService } from 'src/app/services/api.service';
-import { MatSelectModule, MatSelectChange } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatCardModule } from '@angular/material/card';
-import { FormsModule } from '@angular/forms';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import {MatButtonModule} from '@angular/material/button';
+import { AppointmentApiService } from 'src/app/services/appointmentApi.service';
+import { EventsComponent } from '../../events/events.component';
 
 @Component({
   selector: 'app-panel',
@@ -29,10 +29,10 @@ export class PanelComponent {
   includePast: boolean = false;
   daysRange: number = 3;
 
-  constructor(private apiService: ApiService) {}
+  constructor(private appointmentApiService: AppointmentApiService) {}
 
   ngOnInit(): void {
-    this.apiService.getAllAppointments().subscribe(data => {
+    this.appointmentApiService.getAllAppointments().subscribe(data => {
       const now = new Date();
       this.appointmentsList = data.sort((a, b) =>
         new Date(a.date).getTime() - new Date(b.date).getTime()

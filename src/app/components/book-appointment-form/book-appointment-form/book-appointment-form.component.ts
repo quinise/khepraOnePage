@@ -12,7 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import { Router } from '@angular/router';
 import { Appointment } from 'src/app/interfaces/appointment';
-import { ApiService } from 'src/app/services/api.service';
+import { AppointmentApiService } from 'src/app/services/appointmentApi.service';
 
 interface AppointmentForm {
   name: FormControl<string>;
@@ -53,7 +53,7 @@ export class AppointmentFormComponent {
   minDate = new Date();
   maxDate = new Date();
 
-  constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {serviceType: string}, public apiService: ApiService, private router: Router) {
+  constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {serviceType: string}, public appointmentApiService: AppointmentApiService, private router: Router) {
     // ToDo: Change serviceIdNumber to appointmentIdNumber
     // this.serviceIdNumber = this.generateIdNumber();
 
@@ -112,7 +112,7 @@ export class AppointmentFormComponent {
       isVirtual: form.value.isVirtual
     };
 
-    this.apiService.createAppointment(appointment).subscribe({
+    this.appointmentApiService.createAppointment(appointment).subscribe({
       next: (res) => {
         this.successMessage = 'Appointment successfully booked!';
         this.errorMessage = '';
