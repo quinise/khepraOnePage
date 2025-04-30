@@ -1,17 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { FullCalendarModule } from '@fullcalendar/angular';
-import { CalendarOptions } from '@fullcalendar/core';
-import { Appointment } from 'src/app/interfaces/appointment';
-import { ApiService } from 'src/app/services/api.service';
-import { AuthService } from 'src/app/services/auth.service';
-import { take } from 'rxjs';
+import { ChangeDetectorRef, Component, inject, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
+import { CalendarOptions, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { ViewChild } from '@angular/core';
-import { FullCalendarComponent } from '@fullcalendar/angular';
-import { EventInput } from '@fullcalendar/core';
-import { ChangeDetectorRef } from '@angular/core';
+import { take } from 'rxjs';
+import { Appointment } from 'src/app/interfaces/appointment';
+import { AppointmentApiService } from 'src/app/services/appointmentApi.service';
+import { AuthService } from 'src/app/services/auth.service';
 
 type GroupedAppointments = { [date: string]: Appointment[] };
 
@@ -56,13 +52,13 @@ export class EventsComponent implements OnChanges {
   private authService = inject(AuthService);
   protected isAdmin: boolean = false;
 
-  constructor(private apiService: ApiService, private cdr: ChangeDetectorRef) {}
+  constructor(private appointmentApiService: AppointmentApiService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.authService.user$.pipe(take(1)).subscribe(user => {
       this.isAdmin = user?.role === 'admin';
       if (this.isAdmin) {
-        this.apiService.getAllAppointments().subscribe((appointments: Appointment[]) => {
+        this.appointmentApiService.getAllAppointments().subscribe((appointments: Appointment[]) => {
           const now = new Date();
           const futureAppointments = appointments.filter(app => new Date(app.date) >= now);
           const events = this.transformAppointmentsToEvents(futureAppointments);
@@ -85,7 +81,7 @@ export class EventsComponent implements OnChanges {
   updateListView(): void {
     this.groupedAppointments = this.groupAppointmentsByDate(this.filteredAppointments);
     this.cdr.detectChanges();
-  }  
+  }
 
   updateCalendar(): void {
     const events = this.transformAppointmentsToEvents(this.filteredAppointments);
@@ -122,10 +118,10 @@ export class EventsComponent implements OnChanges {
   
     this.updateCalendar();
     this.updateListView();
-  }  
+  }
   
   fetchAndFilterAppointments(): void {
-    this.apiService.getAllAppointments().pipe(take(1)).subscribe((appointments: Appointment[]) => {
+    this.appointmentApiService.getAllAppointments().pipe(take(1)).subscribe((appointments: Appointment[]) => {
       this.appointments = appointments;
       this.applyFilters();
     });
@@ -146,7 +142,7 @@ export class EventsComponent implements OnChanges {
   }
 
   loadEvents(): void {
-    this.apiService.getAllAppointments().pipe(take(1)).subscribe((appointments: Appointment[]) => {
+    this.appointmentApiService.getAllAppointments().pipe(take(1)).subscribe((appointments: Appointment[]) => {
       const now = new Date();
       let startDate: Date;
       let endDate: Date;

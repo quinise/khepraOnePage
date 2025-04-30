@@ -12,7 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import { Router } from '@angular/router';
 import { Appointment } from 'src/app/interfaces/appointment';
-import { ApiService } from 'src/app/services/api.service';
+import { AppointmentApiService } from 'src/app/services/appointmentApi.service';
 
 interface AppointmentForm {
   name: FormControl<string>;
@@ -45,7 +45,7 @@ interface AppointmentForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppointmentFormComponent {
-  // serviceIdNumber: number;
+  // TODO: REMOVE serviceIdNumber: number;
   successMessage = '';
   errorMessage = '';
 
@@ -53,14 +53,15 @@ export class AppointmentFormComponent {
   minDate = new Date();
   maxDate = new Date();
 
-  constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {serviceType: string}, public apiService: ApiService, private router: Router) {
-    // ToDo: Change serviceIdNumber to appointmentIdNumber
-    // this.serviceIdNumber = this.generateIdNumber();
+  constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {serviceType: string}, public appointmentApiService: AppointmentApiService, private router: Router) {
+    // TODO: REMOVE Change serviceIdNumber to appointmentIdNumber
+    // TODO: REMOVE this.serviceIdNumber = this.generateIdNumber();
 
     this.minDate.setDate(this._todaysDate.getDate() + 2);
     this.maxDate.setMonth(this._todaysDate.getMonth() + 2);
   }
 
+  // TODO: REMOVE
   // generateIdNumber(): number {
   //   const min = 10000000;
   //   const max = 99999999;
@@ -112,7 +113,7 @@ export class AppointmentFormComponent {
       isVirtual: form.value.isVirtual
     };
 
-    this.apiService.createAppointment(appointment).subscribe({
+    this.appointmentApiService.createAppointment(appointment).subscribe({
       next: (res) => {
         this.successMessage = 'Appointment successfully booked!';
         this.errorMessage = '';

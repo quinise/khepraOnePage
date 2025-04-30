@@ -6,7 +6,7 @@ import { Appointment } from '../interfaces/appointment';
 @Injectable({
   providedIn: 'root'
 })
-export class ApiService {
+export class AppointmentApiService {
   appointments: Appointment[] = [];
   appointment: Appointment | {} = {};
 

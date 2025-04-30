@@ -7,7 +7,7 @@
           <!-- Event Name -->
           <mat-form-field class="w-50" appearance="fill">
             <mat-label>Event Name</mat-label>
-            <input matInput formControlName="name" placeholder="Enter event name" />
+            <input matInput formControlName="eventName" placeholder="Enter event name" />
           </mat-form-field>
           <!-- Client Name -->
           <mat-form-field class="w-50" appearance="fill">
@@ -17,18 +17,35 @@
         </div>
         <div class="row mb-3">
           <div class="row">
-            <!-- Event Start Date -->
-            <mat-form-field class="w-25" appearance="fill">
-              <mat-label>Start Date</mat-label>
-              <input matInput formControlName="startDate" [matDatepicker]="startPicker" placeholder="Choose a start date" />
-              <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-              <mat-datepicker #startPicker></mat-datepicker>
-            </mat-form-field>
-            <!-- Event Start Time -->
-            <mat-form-field class="w-25" appearance="fill">
-              <mat-label>Start Time</mat-label>
-              <input matInput formControlName="startTime" type="time" placeholder="Select start time" />
-            </mat-form-field>
+            <div class="col">
+              <!-- Event Start Date -->
+              <mat-form-field class="w-25" appearance="fill">
+                <mat-label>Start Date</mat-label>
+                <input matInput formControlName="startDate" [matDatepicker]="startPicker" placeholder="Choose a start date" />
+                <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+                <mat-datepicker #startPicker></mat-datepicker>
+              </mat-form-field>
+              <!-- Event Start Time -->
+              <mat-form-field class="w-25 mx-5">
+                <mat-label>Select a time</mat-label>
+                <input matInput [matTimepicker]="startTimePicker" formControlName="startTime" matTimepickerMin="08:00"
+                matTimepickerMax="20:30">
+                <mat-timepicker #startTimePicker/>
+                <mat-timepicker-toggle [for]="startTimePicker" matSuffix/>
+                <mat-error *ngIf="!eventForm.value.startTime">This field is required</mat-error>
+              </mat-form-field>
+            </div>
+            <div class="col">
+              <!-- Event Type -->
+              <mat-form-field appearance="fill" class="w-50">
+                <mat-label>Event Type</mat-label>
+                <mat-select formControlName="eventType">
+                  <mat-option *ngFor="let event of eventTypes" [value]="event.value">
+                    {{ event.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
           </div>
           <div class="row">
             <!-- Event End Date -->
@@ -39,9 +56,13 @@
               <mat-datepicker #endPicker></mat-datepicker>
             </mat-form-field>
             <!-- Event End Time -->
-            <mat-form-field class="w-25" appearance="fill">
-              <mat-label>End Time</mat-label>
-              <input matInput formControlName="endTime" type="time" placeholder="Select end time" />
+            <mat-form-field class="w-25 mx-5">
+              <mat-label>Select a time</mat-label>
+              <input matInput [matTimepicker]="endTimePicker" formControlName="endTime" matTimepickerMin="08:00"
+              matTimepickerMax="20:30">
+              <mat-timepicker #endTimePicker/>
+              <mat-timepicker-toggle [for]="endTimePicker" matSuffix/>
+              <mat-error *ngIf="!eventForm.value.endTime">This field is required</mat-error>
             </mat-form-field>
           </div>
         </div>
