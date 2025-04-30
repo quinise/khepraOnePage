@@ -28,7 +28,7 @@ export class HeaderComponent {
     }
     
     logout() {
-        this.authService.logout(); // Make sure logout() is defined in your AuthService
+        this.authService.logout(); //TODO: Make sure logout() is defined in your AuthService
     }
 
     openAuthForm(buttonType: string) {
