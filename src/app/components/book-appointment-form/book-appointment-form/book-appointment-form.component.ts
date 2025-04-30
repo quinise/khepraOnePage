@@ -10,9 +10,12 @@ import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTimepickerModule } from '@angular/material/timepicker';
-import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 import { Appointment } from 'src/app/interfaces/appointment';
+import { AppUser } from 'src/app/interfaces/appUser';
 import { AppointmentApiService } from 'src/app/services/appointmentApi.service';
+import { AuthService } from 'src/app/services/auth.service';
+import { firstValueFrom } from 'rxjs';
 
 interface AppointmentForm {
   name: FormControl<string>;
@@ -45,7 +48,8 @@ interface AppointmentForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppointmentFormComponent {
-  // TODO: REMOVE serviceIdNumber: number;
+  user$: Observable<AppUser | null>;
+
   successMessage = '';
   errorMessage = '';
 
@@ -53,20 +57,12 @@ export class AppointmentFormComponent {
   minDate = new Date();
   maxDate = new Date();
 
-  constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {serviceType: string}, public appointmentApiService: AppointmentApiService, private router: Router) {
-    // TODO: REMOVE Change serviceIdNumber to appointmentIdNumber
-    // TODO: REMOVE this.serviceIdNumber = this.generateIdNumber();
+  constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {serviceType: string}, public appointmentApiService: AppointmentApiService, public authService: AuthService) {
+    this.user$ = authService.user$;
 
     this.minDate.setDate(this._todaysDate.getDate() + 2);
     this.maxDate.setMonth(this._todaysDate.getMonth() + 2);
   }
-
-  // TODO: REMOVE
-  // generateIdNumber(): number {
-  //   const min = 10000000;
-  //   const max = 99999999;
-  //   return Math.floor(Math.random() * (max - min + 1)) + min;
-  // }
 
   protected appointmentForm = new FormGroup<AppointmentForm>({
     name: new FormControl<string>('', {
@@ -94,7 +90,7 @@ export class AppointmentFormComponent {
     }),
   });
 
-  onSubmit(form: any): void {
+  async onSubmit(form: any): Promise<void> {
     const combinedDateTime = new Date(
       form.value.date.getFullYear(),
       form.value.date.getMonth(),
@@ -104,8 +100,11 @@ export class AppointmentFormComponent {
       form.value.time.getSeconds(),
     )
 
+    const user = await firstValueFrom(this.user$); // ⬅️ safely get user value
+
     const appointment: Appointment = {
       type: this.data.serviceType,
+      userId: user?.uid ?? '',
       name: form.value.name,
       email: form.value.email,
       phone_number: form.value.phone_number,
