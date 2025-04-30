@@ -1,21 +1,23 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardActions, MatCardContent } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatTimepickerModule } from '@angular/material/timepicker';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatCardContent, MatCardActions } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTimepickerModule } from '@angular/material/timepicker';
 import { Router } from '@angular/router';
-
+import { Event } from 'src/app/interfaces/event';
+import { EventsApiService } from 'src/app/services/events-api.service';
 interface EventForm {
-  name: FormControl<string>;
+  eventName: FormControl<string>;
+  eventType: FormControl<string>;
   clientName: FormControl<string | null>;
   startDate: FormControl<Date | null>;
   endDate: FormControl<Date | null>;
@@ -25,7 +27,7 @@ interface EventForm {
   city: FormControl<string | null>;
   state: FormControl<string | null>;
   zipCode: FormControl<number | null>;
-  description: FormControl<string | null>;
+  description: FormControl<string>;
   isVirtual: FormControl<boolean>;
 }
 
@@ -107,14 +109,29 @@ export class CreateEventFormComponent {
     { name: 'Wisconsin', abbreviation: 'WI' },
     { name: 'Wyoming', abbreviation: 'WY' }
   ];
+
+  eventTypes = [
+    { name: 'Workshop', value: 'workshop' },
+    { name: 'Bembe', value: 'bembe' },
+    { name: 'Lecture', value: 'lecture' },
+    { name: 'Community Egungun', value: 'egungun' },
+    { name: 'Priest Training', value: 'priestTraining' },
+  ];
   
+  successMessage = '';
+  errorMessage = '';
+
   protected eventForm = new FormGroup<EventForm>({
-      name: new FormControl<string>('', {
+      eventName: new FormControl<string>('', {
         nonNullable: true,
         validators: [Validators.pattern(/[a-zA-Z ]/), Validators.required]
       }),
-      clientName: new FormControl<string>('', {
+      eventType: new FormControl<string>('', {
         nonNullable: true,
+        validators: [Validators.pattern(/[a-zA-Z ]/), Validators.required]
+      }),
+      clientName: new FormControl<string | null>('', {
+        nonNullable: false,
         validators: [Validators.pattern(/[a-zA-Z ]/)]
       }),
       startDate: new FormControl<Date | null>(null, {
@@ -158,7 +175,7 @@ export class CreateEventFormComponent {
       }),
     });
 
-  constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {serviceType: string}, private router: Router) {}
+  constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {eventType: string}, public eventsService: EventsApiService, private router: Router) {}
 
 ngOnInit(): void {
     this.eventForm.get('isVirtual')?.valueChanges.subscribe((isVirtual) => {
@@ -195,7 +212,67 @@ ngOnInit(): void {
 
   onSubmit(): void {
     if (this.eventForm.valid) {
-      // Handle form submission
+      const formValues = this.eventForm.value;
+      let combinedStartDateTime: Date | null = null;
+      let combinedEndDateTime: Date | null = null;
+
+      const startDate = formValues.startDate;
+      const startTime = formValues.startTime;
+  
+      if (startDate && startTime) {
+        combinedStartDateTime = new Date(
+          startDate.getFullYear(),
+          startDate.getMonth(),
+          startDate.getDate(),
+          startTime.getHours(),
+          startTime.getMinutes(),
+          startTime.getSeconds()
+        );
+      }
+
+        const endDate = formValues.endDate;
+        const endTime = formValues.endTime;
+    
+        if (endDate && endTime) {
+          combinedEndDateTime = new Date(
+            endDate.getFullYear(),
+            endDate.getMonth(),
+            endDate.getDate(),
+            endTime.getHours(),
+            endTime.getMinutes(),
+            endTime.getSeconds()
+          );
+        }
+
+        const event: Event = {
+          eventName: formValues.eventName!,
+          eventType: formValues.eventType!,
+          clientName: formValues.clientName,
+          startDate: combinedStartDateTime!,
+          endDate: combinedEndDateTime!,
+          streetAddress: formValues.streetAddress,
+          city: formValues.city,
+          state: formValues.state,
+          zipCode: formValues.zipCode,
+          description: formValues.description!,
+          isVirtual: formValues.isVirtual!
+        }
+
+        console.log("TESTING: formValues.eventName, formValues.evenType, formValues.clientName, formValues.clientName, formValues.startDate, formValues.endDate, formValues.streetAddress, formValues.city, formValues.state, formValues.zipCode, formValues.isVirtual, formValues.description", formValues.eventName, formValues.eventType, formValues.endTime, formValues.clientName, formValues.clientName, formValues.startDate, formValues.endDate, formValues.streetAddress, formValues.city, formValues.state, formValues.zipCode, formValues.isVirtual, formValues.description)
+
+        this.eventsService.createEvent(event).subscribe({
+          next: (res) => {
+            this.successMessage = 'Event successfully scheduled!';
+            this.errorMessage = '';
+            this.eventForm.reset();
+          },
+          error: (err) => {
+            this.successMessage = '';
+            this.errorMessage = 'Failed to schedule event. Please try again.';
+            console.error(err);
+          }
+        })
+
       this._matDialog.closeAll();
     } else {
       // Handle form errors

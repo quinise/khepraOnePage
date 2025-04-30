@@ -45,7 +45,7 @@ interface AppointmentForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppointmentFormComponent {
-  // serviceIdNumber: number;
+  // TODO: REMOVE serviceIdNumber: number;
   successMessage = '';
   errorMessage = '';
 
@@ -54,13 +54,14 @@ export class AppointmentFormComponent {
   maxDate = new Date();
 
   constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {serviceType: string}, public appointmentApiService: AppointmentApiService, private router: Router) {
-    // ToDo: Change serviceIdNumber to appointmentIdNumber
-    // this.serviceIdNumber = this.generateIdNumber();
+    // TODO: REMOVE Change serviceIdNumber to appointmentIdNumber
+    // TODO: REMOVE this.serviceIdNumber = this.generateIdNumber();
 
     this.minDate.setDate(this._todaysDate.getDate() + 2);
     this.maxDate.setMonth(this._todaysDate.getMonth() + 2);
   }
 
+  // TODO: REMOVE
   // generateIdNumber(): number {
   //   const min = 10000000;
   //   const max = 99999999;

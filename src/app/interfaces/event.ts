@@ -1,10 +1,14 @@
 export interface Event {
   id?: number;
-  name: string;
-  clientName?: string;
+  eventName: string;
+  eventType: string;
+  clientName?: string | null;
   startDate: Date;
   endDate: Date;
-  location: string;
+  streetAddress?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zipCode?: number | null;
   description: string;
   isVirtual: boolean;
 }
