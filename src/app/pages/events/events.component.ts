@@ -24,6 +24,7 @@ type GroupedEvents = { [date: string]: Event[] };
 export class EventsComponent implements OnChanges, AfterViewInit {
   @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
   private calendarReady = false;
+  private listReady = false;
 
   @Input() daysRange: number = -1; // default to "All"
   private _includePast: boolean = false;
@@ -31,7 +32,7 @@ export class EventsComponent implements OnChanges, AfterViewInit {
   @Input()
   set includePast(value: boolean) {
     this._includePast = value;
-    if (this.calendarReady) {
+    if (this.calendarReady || this.listReady) {
       this.applyFilters();
     }
   }
@@ -47,6 +48,13 @@ export class EventsComponent implements OnChanges, AfterViewInit {
   events: Event[] = [];
   filteredEvents: Event[] = [];
   groupedEvents: GroupedEvents  = {};
+  
+  displayedListEvents: {
+    id: number | string | undefined;
+    title: string;
+    date: string;
+    type: 'appointment' | 'event';
+  }[] = [];
   
   protected calendarOptions: CalendarOptions = {
     plugins: [dayGridPlugin, interactionPlugin],
@@ -69,7 +77,7 @@ export class EventsComponent implements OnChanges, AfterViewInit {
     this.authService.user$.pipe(take(1)).subscribe(user => {
       this.isAdmin = user?.role === 'admin';
       this.calendarReady = true;
-      this.loadCalendarEvents(); // triggers applyFilters safely
+      this.loadCalendarEvents();
     });
   }
   
@@ -79,9 +87,25 @@ export class EventsComponent implements OnChanges, AfterViewInit {
     }
   }
   
-  updateListView(): void {
-    this.groupedAppointments = this.groupAppointmentsByDate(this.filteredAppointments);
-    this.cdr.detectChanges();
+  private updateListView(): void {
+    if (!this.listReady) return;
+  
+    const combined = [
+      ...this.filteredAppointments.map(appointment => ({
+        id: appointment.id,
+        title: appointment.name,
+        date: new Date(appointment.date).toISOString(),
+        type: 'appointment' as const,
+      })),
+      ...this.filteredEvents.map(event => ({
+        id: event.id,
+        title: event.eventName,
+        date: new Date(event.startDate).toISOString(),
+        type: 'event' as const,
+      })),
+    ];
+  
+    this.displayedListEvents = combined.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }
 
   updateCalendar(): void {
@@ -137,7 +161,7 @@ export class EventsComponent implements OnChanges, AfterViewInit {
       id: appointment.id?.toString(),
       title: `${appointment.name} - ${appointment.type}`,
       start: appointment.date,
-      allDay: false, // Set to true if the event spans the entire day
+      allDay: false,
       extendedProps: {
         appointmentId: appointment.id,
         appointmentType: appointment.type,
@@ -156,7 +180,7 @@ export class EventsComponent implements OnChanges, AfterViewInit {
       title: event.eventName,
       start: event.startDate,
       end: event.endDate,
-      allDay: true, // Set to true if the event spans the entire day
+      allDay: true,
       extendedProps: {
         eventId: event.id,
         eventName: event.eventName,
@@ -184,10 +208,11 @@ export class EventsComponent implements OnChanges, AfterViewInit {
       this.appointments = appointments as Appointment[];
       this.events = events;
   
-      this.filteredAppointments = this.appointments; // temp until filters run
+      this.filteredAppointments = this.appointments;
       this.filteredEvents = this.events;
   
-      this.applyFilters(); // Safe to call now
+      this.listReady = true;
+      this.applyFilters(); // Safe for both calendar and list view
     });
   }
 

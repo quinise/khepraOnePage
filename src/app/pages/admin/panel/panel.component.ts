@@ -12,7 +12,8 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import { Appointment } from 'src/app/interfaces/appointment';
 import { AppointmentApiService } from 'src/app/services/appointmentApi.service';
 import { EventsComponent } from '../../events/events.component';
-
+import { EventsApiService } from 'src/app/services/events-api.service';
+import { Event as CustomEvent } from 'src/app/interfaces/event';
 @Component({
   selector: 'app-panel',
   imports: [CommonModule, FullCalendarModule, MatSelectModule, MatFormFieldModule, MatCardModule, EventsComponent, MatSlideToggleModule, FormsModule, MatButtonModule],
@@ -26,35 +27,57 @@ export class PanelComponent {
   groupedPastAppointments: { [date: string]: Appointment[] } = {};
   filteredAppointments: { [date: string]: Appointment[] } = {};
   filteredPastAppointments: { [date: string]: Appointment[] } = {};
+  
+  protected eventsList: CustomEvent[] = [];
+  protected pastEvents: CustomEvent[] = [];
+  groupedEvents: { [date: string]: CustomEvent[] } = {};
+  groupedPastEvents: { [date: string]: CustomEvent[] } = {};
+  filteredEvents: { [date: string]: CustomEvent[] } = {};
+  filteredPastEvents: { [date: string]: CustomEvent[] } = {};
+
   includePast: boolean = false;
   daysRange: number = 3;
 
-  constructor(private appointmentApiService: AppointmentApiService) {}
+  constructor(private appointmentApiService: AppointmentApiService, private eventApiService: EventsApiService) {}
 
   ngOnInit(): void {
     this.appointmentApiService.getAllAppointments().subscribe(data => {
+      this.appointmentsList = data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  
       const now = new Date();
-      this.appointmentsList = data.sort((a, b) =>
-        new Date(a.date).getTime() - new Date(b.date).getTime()
-      );
-
-      this.pastAppointments = this.appointmentsList.filter(a => new Date(a.date) < now);
+      const pastAppointments = this.appointmentsList.filter(a => new Date(a.date) < now);
       const futureAppointments = this.appointmentsList.filter(a => new Date(a.date) >= now);
+  
+      this.groupedAppointments = this.groupItemsByDate(futureAppointments, 'date');
+      this.groupedPastAppointments = this.groupItemsByDate(pastAppointments, 'date');
+  
+      this.filteredAppointments = this.filterItemsByRange(this.groupedAppointments, this.daysRange, false);
+      this.filteredPastAppointments = this.filterItemsByRange(this.groupedPastAppointments, this.daysRange, true);
+    });
+  
+    this.eventApiService.getAllEvents().subscribe(data => {
+      this.eventsList = data.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+  
+      const now = new Date();
+      const pastEvents = this.eventsList.filter(e => new Date(e.startDate) < now);
+      const futureEvents = this.eventsList.filter(e => new Date(e.startDate) >= now);
+  
+      this.groupedEvents = this.groupItemsByDate(futureEvents, 'startDate');
+      this.groupedPastEvents = this.groupItemsByDate(pastEvents, 'startDate');
 
-      this.groupAppointmentsByDate(futureAppointments);
-      this.groupPastAppointmentsByDate(this.pastAppointments);
-      
-      // Filter both future and past appointments based on the selected range
-      this.filterAppointmentsByRange(false); // Future appointments
-      this.filterAppointmentsByRange(true); // Past appointments
+      this.filteredEvents = this.filterItemsByRange(this.groupedEvents, this.daysRange, false);
+      this.filteredPastEvents = this.filterItemsByRange(this.groupedPastEvents, this.daysRange, true);
     });
   }
 
   handleIncludePastChange(value: boolean): void {
     this.includePast = value;
     // Re-filter appointments based on the new includePast value
-    this.filterAppointmentsByRange(false); // Future appointments
-    this.filterAppointmentsByRange(true);  // Past appointments
+    this.filteredAppointments = this.filterItemsByRange(this.groupedAppointments, this.daysRange, false);
+    this.filteredPastAppointments = this.filterItemsByRange(this.groupedPastAppointments, this.daysRange, true);
+
+    this.filteredEvents = this.filterItemsByRange(this.groupedEvents, this.daysRange, false);
+    this.filteredPastEvents = this.filterItemsByRange(this.groupedPastEvents, this.daysRange, true);
   }
 
   // Group appointments by date (future appointments)
@@ -69,70 +92,61 @@ export class PanelComponent {
     }
   }
 
-  // Group past appointments by date
-  groupPastAppointmentsByDate(appointments: Appointment[]): void {
-    this.groupedPastAppointments = {};
-    for (const appointment of appointments) {
-      const dateKey = new Date(appointment.date).toLocaleDateString();
-      if (!this.groupedPastAppointments[dateKey]) {
-        this.groupedPastAppointments[dateKey] = [];
+  // Generic function to group Events and Appointments by date
+  private groupItemsByDate<T>(items: T[], dateKey: keyof T): { [date: string]: T[] } {
+    return items.reduce((grouped, item) => {
+      const rawDate = item[dateKey];
+      if (!rawDate) return grouped;
+  
+      const date = new Date(rawDate as any).toLocaleDateString();
+      if (!grouped[date]) {
+        grouped[date] = [];
       }
-      this.groupedPastAppointments[dateKey].push(appointment);
-    }
+      grouped[date].push(item);
+      return grouped;
+    }, {} as { [date: string]: T[] });
   }
 
-  // Filter appointments (future or past) based on the selected date range
-  filterAppointmentsByRange(isPast: boolean): void {
+  // Generic filtering function
+  private filterItemsByRange<T>(
+    groupedItems: { [date: string]: T[] },
+    daysRange: number,
+    isPast: boolean
+  ): { [date: string]: T[] } {
     const today = new Date();
-    
-    // If no range is selected, show all appointments
-    if (this.daysRange === -1) {
-      if (isPast) {
-        this.filteredPastAppointments = { ...this.groupedPastAppointments };
-      } else {
-        this.filteredAppointments = { ...this.groupedAppointments };
-      }
-      return;
+
+    if (daysRange === -1) {
+      return { ...groupedItems };
     }
 
     const startDate = new Date(today);
     const endDate = new Date(today);
+    isPast
+      ? startDate.setDate(today.getDate() - daysRange)
+      : endDate.setDate(today.getDate() + daysRange);
 
-    if (isPast) {
-      // For past appointments, set the start date to be 'daysRange' days before today
-      startDate.setDate(today.getDate() - this.daysRange);
-    } else {
-      // For future appointments, set the end date to be 'daysRange' days after today
-      endDate.setDate(today.getDate() + this.daysRange);
-    }
+    return Object.entries(groupedItems).reduce((filtered, [dateStr, items]) => {
+      const itemDate = new Date(dateStr);
+      const isInRange = isPast
+        ? itemDate <= today && itemDate >= startDate
+        : itemDate >= today && itemDate <= endDate;
 
-    // Filter appointments based on the range
-    const group = isPast ? this.groupedPastAppointments : this.groupedAppointments;
-    const filteredAppointments = Object.keys(group)
-      .filter(dateStr => {
-        const appointmentDate = new Date(dateStr);
-        return isPast
-          ? appointmentDate <= today && appointmentDate >= startDate
-          : appointmentDate >= today && appointmentDate <= endDate;
-      })
-      .reduce((filtered, dateStr) => {
-        filtered[dateStr] = group[dateStr];
-        return filtered;
-      }, {} as { [date: string]: Appointment[] });
-
-    // Assign filtered results to the correct property
-    if (isPast) {
-      this.filteredPastAppointments = filteredAppointments;
-    } else {
-      this.filteredAppointments = filteredAppointments;
-    }
+      if (isInRange) {
+        filtered[dateStr] = items;
+      }
+      return filtered;
+    }, {} as { [date: string]: T[] });
   }
 
   // Set the range and filter the appointments
   setRange(value: number): void {
     this.daysRange = value;
-    this.filterAppointmentsByRange(false); // Future appointments
-    this.filterAppointmentsByRange(true); // Past appointments
+
+    this.filteredAppointments = this.filterItemsByRange(this.groupedAppointments, this.daysRange, false);
+    this.filteredPastAppointments = this.filterItemsByRange(this.groupedPastAppointments, this.daysRange, true);
+
+    this.filteredEvents = this.filterItemsByRange(this.groupedEvents, this.daysRange, false);
+    this.filteredPastEvents = this.filterItemsByRange(this.groupedPastEvents, this.daysRange, true);
   }
 
   onRangeChange(event: MatSelectChange): void {
@@ -149,7 +163,6 @@ export class PanelComponent {
   toggleView(): void {
     this.showCalendar = !this.showCalendar;
   }
-
 
   calendarOptions: CalendarOptions = {
     initialView: 'dayGridMonth',
