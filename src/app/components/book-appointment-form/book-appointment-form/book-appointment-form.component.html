@@ -26,11 +26,11 @@
         <div class="col w-25 mt-3">
           <div class="row phone-number-input w-50">
             <mat-form-field>
-              <input type="text" formControlName="phone_number"
+              <input type="text" formControlName="phoneNumber"
                 matInput placeholder="Phone number" matInput>
               <mat-icon fontIcon="phone" matSuffix></mat-icon>
-              <mat-error *ngIf="!appointmentForm.value.phone_number">This field is required</mat-error>
-              <mat-error *ngIf="appointmentForm.value.phone_number">Please, Enter 10 digit Mobile Number.</mat-error>
+              <mat-error *ngIf="!appointmentForm.value.phoneNumber">This field is required</mat-error>
+              <mat-error *ngIf="appointmentForm.value.phoneNumber">Please, Enter 10 digit Mobile Number.</mat-error>
             </mat-form-field>
           </div>
           <div class="date-time-inputs mt-2 col offset-md-4">
