@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, inject, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, Input, OnChanges, SimpleChanges, ViewChild, AfterViewInit } from '@angular/core';
 import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -10,6 +10,7 @@ import { Event } from 'src/app/interfaces/event';
 import { AppointmentApiService } from 'src/app/services/appointmentApi.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { EventsApiService } from 'src/app/services/events-api.service';
+import { forkJoin, of } from 'rxjs';
 
 type GroupedAppointments = { [date: string]: Appointment[] };
 type GroupedEvents = { [date: string]: Event[] };
@@ -20,8 +21,9 @@ type GroupedEvents = { [date: string]: Event[] };
   templateUrl: './events.component.html',
   styleUrls: ['./events.component.css']
 })
-export class EventsComponent implements OnChanges {
+export class EventsComponent implements OnChanges, AfterViewInit {
   @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
+  private calendarReady = false;
 
   @Input() daysRange: number = -1; // default to "All"
   private _includePast: boolean = false;
@@ -29,7 +31,9 @@ export class EventsComponent implements OnChanges {
   @Input()
   set includePast(value: boolean) {
     this._includePast = value;
-    this.applyFilters(); // Call your filtering logic here
+    if (this.calendarReady) {
+      this.applyFilters();
+    }
   }
   
   get includePast(): boolean {
@@ -61,44 +65,28 @@ export class EventsComponent implements OnChanges {
 
   constructor(private appointmentApiService: AppointmentApiService, private eventApiService: EventsApiService, private cdr: ChangeDetectorRef) {}
 
-  ngOnInit(): void {
+  ngAfterViewInit(): void {
     this.authService.user$.pipe(take(1)).subscribe(user => {
       this.isAdmin = user?.role === 'admin';
-      if (this.isAdmin) {
-        this.appointmentApiService.getAllAppointments().subscribe((appointments: Appointment[]) => {
-          const now = new Date();
-          const futureAppointments = appointments.filter(app => new Date(app.date) >= now);
-          const appointmentsForFullCalendar = this.transformAppointmentsForFullCalendar(futureAppointments);
-          const calendarApi = this.calendarComponent.getApi();
-          calendarApi.removeAllEventSources();
-          calendarApi.addEventSource(appointmentsForFullCalendar);
-        });
-      } else if (!this.isAdmin) {
-        
-
-        this.eventApiService.getAllEvents().subscribe((events: Event[]) => {
-          const eventsForFullCalendar = this.transformEventsForFullCalendar(events);
-          const calendarApi = this.calendarComponent.getApi();
-          calendarApi.removeAllEventSources();
-          calendarApi.addEventSource(eventsForFullCalendar);
-        });
-      }
+      this.calendarReady = true;
+      this.loadCalendarEvents(); // triggers applyFilters safely
     });
   }
-
+  
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['daysRange'] || changes['includePast']) {
-      this.loadAppointments();
-      this.loadEvents();
+      this.applyFilters();
     }
   }
-
+  
   updateListView(): void {
     this.groupedAppointments = this.groupAppointmentsByDate(this.filteredAppointments);
     this.cdr.detectChanges();
   }
 
   updateCalendar(): void {
+    if (!this.calendarReady || !this.calendarComponent) return;
+  
     const appointments = this.transformAppointmentsForFullCalendar(this.filteredAppointments);
     const events = this.transformEventsForFullCalendar(this.filteredEvents);
     const calendarApi = this.calendarComponent.getApi();
@@ -108,22 +96,22 @@ export class EventsComponent implements OnChanges {
   }
   
   applyFilters(): void {
+    if (!this.calendarReady) return;
+  
     const now = new Date();
     let startDate: Date;
     let endDate: Date;
   
     if (this.daysRange === -1) {
       startDate = this.includePast ? new Date(0) : now;
-      endDate = new Date(8640000000000000); // Maximum possible date
+      endDate = new Date(8640000000000000); // Max JS date
     } else {
+      startDate = new Date(now);
+      endDate = new Date(now);
       if (this.includePast) {
-        startDate = new Date(now);
         startDate.setDate(now.getDate() - this.daysRange);
-        endDate = new Date(now);
         endDate.setDate(now.getDate() + this.daysRange);
       } else {
-        startDate = new Date(now);
-        endDate = new Date(now);
         endDate.setDate(now.getDate() + this.daysRange);
       }
     }
@@ -185,69 +173,21 @@ export class EventsComponent implements OnChanges {
     }));
   }
 
-  loadAppointments(): void {
-    this.appointmentApiService.getAllAppointments().pipe(take(1)).subscribe((appointments: Appointment[]) => {
-      const now = new Date();
-      let startDate: Date;
-      let endDate: Date;
+  private loadCalendarEvents(): void {
+    const appointment$ = this.isAdmin
+      ? this.appointmentApiService.getAllAppointments().pipe(take(1))
+      : of([]);
   
-      if (this.daysRange === -1) {
-        startDate = this.includePast ? new Date(0) : now;
-        endDate = new Date(8640000000000000); // Maximum possible date
-      } else {
-        startDate = new Date(now);
-        endDate = new Date(now);
+    const event$ = this.eventApiService.getAllEvents().pipe(take(1));
   
-        if (this.includePast) {
-          startDate.setDate(now.getDate() - this.daysRange);
-          endDate.setDate(now.getDate() + this.daysRange);
-        } else {
-          endDate.setDate(now.getDate() + this.daysRange);
-        }
-      }
+    forkJoin([appointment$, event$]).subscribe(([appointments, events]) => {
+      this.appointments = appointments as Appointment[];
+      this.events = events;
   
-      const filteredAppointments = appointments.filter(app => {
-        const appDate = new Date(app.date);
-        return appDate >= startDate && appDate <= endDate;
-      });
-
-      const appointmentsForFullCalendar = this.transformAppointmentsForFullCalendar(filteredAppointments);
-      const calendarApi = this.calendarComponent.getApi();
-      calendarApi.removeAllEventSources();
-      calendarApi.addEventSource(appointmentsForFullCalendar);
-    });
-  }
+      this.filteredAppointments = this.appointments; // temp until filters run
+      this.filteredEvents = this.events;
   
-  loadEvents(): void {
-    this.eventApiService.getAllEvents().pipe(take(1)).subscribe((events: Event[]) => {
-      const now = new Date();
-      let startDate: Date;
-      let endDate: Date;
-  
-      if (this.daysRange === -1) {
-        startDate = this.includePast ? new Date(0) : now;
-        endDate = new Date(8640000000000000); // Maximum possible date
-      } else {
-        startDate = new Date(now);
-        endDate = new Date(now);
-  
-        if (this.includePast) {
-          startDate.setDate(now.getDate() - this.daysRange);
-          endDate.setDate(now.getDate() + this.daysRange);
-        } else {
-          endDate.setDate(now.getDate() + this.daysRange);
-        }
-      }
-  
-      const filteredEvents = events.filter(event => {
-        const eventStart = new Date(event.startDate);
-        return eventStart >= startDate && eventStart <= endDate;
-      });
-
-      const eventsForFullCalendar = this.transformEventsForFullCalendar(filteredEvents);
-      const calendarApi = this.calendarComponent.getApi();
-      calendarApi.removeAllEventSources();
-      calendarApi.addEventSource(eventsForFullCalendar);
+      this.applyFilters(); // Safe to call now
     });
   }
 
