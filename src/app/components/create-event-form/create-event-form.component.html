@@ -3,93 +3,103 @@
   <div mat-dialog-content align="center">
     <form class="border border-top-0 mb-5 p-4" [formGroup]="eventForm" (ngSubmit)="onSubmit()">
       <mat-card-content>
+
+        <!-- Row 1: Event Name and Client Name -->
         <div class="row mb-3">
-          <!-- Event Name -->
-          <mat-form-field class="w-50" appearance="fill">
-            <mat-label>Event Name</mat-label>
-            <input matInput formControlName="eventName" placeholder="Enter event name" />
-          </mat-form-field>
-          <!-- Client Name -->
-          <mat-form-field class="w-50" appearance="fill">
-            <mat-label>Client Name</mat-label>
-            <input matInput formControlName="clientName" placeholder="Enter client name (optional)" />
-          </mat-form-field>
+          <div class="col-md-6">
+            <mat-form-field appearance="fill" class="w-100">
+              <mat-label>Event Name</mat-label>
+              <input matInput formControlName="eventName" placeholder="Enter event name" />
+            </mat-form-field>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field appearance="fill" class="w-100">
+              <mat-label>Client Name</mat-label>
+              <input matInput formControlName="clientName" placeholder="Enter client name (optional)" />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Row 2: Event Type -->
+        <div class="row mb-3">
+          <div class="col-12">
+            <mat-form-field appearance="fill" class="w-50">
+              <mat-label>Event Type</mat-label>
+              <mat-select formControlName="eventType">
+                <mat-option *ngFor="let event of eventTypes" [value]="event.value">
+                  {{ event.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Row 3: Start/End Date & Time -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <mat-form-field appearance="fill" class="w-100">
+              <mat-label>Start Date</mat-label>
+              <input matInput formControlName="startDate" [matDatepicker]="startPicker" placeholder="Start date" />
+              <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+              <mat-datepicker #startPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field appearance="fill" class="w-100">
+              <mat-label>Start Time</mat-label>
+              <input matInput [matTimepicker]="startTimePicker" formControlName="startTime" matTimepickerMin="08:00"
+                     matTimepickerMax="20:30">
+              <mat-timepicker-toggle [for]="startTimePicker" matSuffix />
+              <mat-timepicker #startTimePicker />
+            </mat-form-field>
+          </div>
         </div>
         <div class="row mb-3">
-          <div class="row">
-            <div class="col">
-              <!-- Event Start Date -->
-              <mat-form-field class="w-25" appearance="fill">
-                <mat-label>Start Date</mat-label>
-                <input matInput formControlName="startDate" [matDatepicker]="startPicker" placeholder="Choose a start date" />
-                <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-                <mat-datepicker #startPicker></mat-datepicker>
-              </mat-form-field>
-              <!-- Event Start Time -->
-              <mat-form-field class="w-25 mx-5">
-                <mat-label>Select a time</mat-label>
-                <input matInput [matTimepicker]="startTimePicker" formControlName="startTime" matTimepickerMin="08:00"
-                matTimepickerMax="20:30">
-                <mat-timepicker #startTimePicker/>
-                <mat-timepicker-toggle [for]="startTimePicker" matSuffix/>
-                <mat-error *ngIf="!eventForm.value.startTime">This field is required</mat-error>
-              </mat-form-field>
-            </div>
-            <div class="col">
-              <!-- Event Type -->
-              <mat-form-field appearance="fill" class="w-50">
-                <mat-label>Event Type</mat-label>
-                <mat-select formControlName="eventType">
-                  <mat-option *ngFor="let event of eventTypes" [value]="event.value">
-                    {{ event.name }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-          </div>
-          <div class="row">
-            <!-- Event End Date -->
-            <mat-form-field class="w-25" appearance="fill">
+          <div class="col-md-6">
+            <mat-form-field appearance="fill" class="w-100">
               <mat-label>End Date</mat-label>
-              <input matInput formControlName="endDate" [matDatepicker]="endPicker" placeholder="Choose an end date" />
+              <input matInput formControlName="endDate" [matDatepicker]="endPicker" placeholder="End date" />
               <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
               <mat-datepicker #endPicker></mat-datepicker>
             </mat-form-field>
-            <!-- Event End Time -->
-            <mat-form-field class="w-25 mx-5">
-              <mat-label>Select a time</mat-label>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field appearance="fill" class="w-100">
+              <mat-label>End Time</mat-label>
               <input matInput [matTimepicker]="endTimePicker" formControlName="endTime" matTimepickerMin="08:00"
-              matTimepickerMax="20:30">
-              <mat-timepicker #endTimePicker/>
-              <mat-timepicker-toggle [for]="endTimePicker" matSuffix/>
-              <mat-error *ngIf="!eventForm.value.endTime">This field is required</mat-error>
+                     matTimepickerMax="20:30">
+              <mat-timepicker-toggle [for]="endTimePicker" matSuffix />
+              <mat-timepicker #endTimePicker />
             </mat-form-field>
           </div>
         </div>
+
+        <!-- Virtual Checkbox -->
         <div class="row mb-3">
-          <!-- Is Virtual -->
           <mat-checkbox formControlName="isVirtual">Is this event virtual?</mat-checkbox>
         </div>
-        <div class="row mb-3">
-          <!-- Event Location -->
-          <div class="row mb-3" *ngIf="!eventForm.get('isVirtual')?.value">
-            <mat-label class="mb-3">Location</mat-label>
-            <div class="address-group">
-              <div class="row">
-                <!-- Street Address -->
-                <mat-form-field appearance="fill" class="w-50">
+
+        <!-- Event Location (Conditional) -->
+        <div class="row mb-3" *ngIf="!eventForm.get('isVirtual')?.value">
+          <mat-label class="mb-3">Location</mat-label>
+          <div class="address-group">
+            <div class="row">
+              <div class="col-md-6">
+                <mat-form-field appearance="fill" class="w-100">
                   <mat-label>Street Address</mat-label>
                   <input matInput formControlName="streetAddress" placeholder="123 Main St" />
                 </mat-form-field>
-                <!-- City -->
-                <mat-form-field appearance="fill" class="w-50">
+              </div>
+              <div class="col-md-6">
+                <mat-form-field appearance="fill" class="w-100">
                   <mat-label>City</mat-label>
                   <input matInput formControlName="city" placeholder="Seattle" />
                 </mat-form-field>
               </div>
-              <div class="row">
-                <!-- State -->
-                <mat-form-field appearance="fill" class="w-50">
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <mat-form-field appearance="fill" class="w-100">
                   <mat-label>State</mat-label>
                   <mat-select formControlName="state">
                     <mat-option *ngFor="let state of usStates" [value]="state.abbreviation">
@@ -97,23 +107,28 @@
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
-                <!-- ZIP Code -->
-                <mat-form-field appearance="fill" class="w-50">
+              </div>
+              <div class="col-md-6">
+                <mat-form-field appearance="fill" class="w-100">
                   <mat-label>ZIP Code</mat-label>
                   <input matInput formControlName="zipCode" placeholder="98101" maxlength="10" />
                 </mat-form-field>
               </div>
             </div>
           </div>
-          <div class="row mb-3">
-            <!-- Event Description -->
-            <mat-form-field appearance="fill">
-              <mat-label>Description</mat-label>
-              <textarea matInput formControlName="description" placeholder="Enter event description"></textarea>
-            </mat-form-field>
-          </div>
         </div>
+
+        <!-- Description -->
+        <div class="row mb-3">
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" placeholder="Enter event description"></textarea>
+          </mat-form-field>
+        </div>
+
       </mat-card-content>
+
+      <!-- Actions -->
       <div class="row mt-3 mb-2">
         <mat-card-actions>
           <button class="mx-5" mat-raised-button color="primary" type="submit">Save</button>
