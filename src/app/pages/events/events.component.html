@@ -1,5 +1,35 @@
-<div class="row">
-  <div class="col">
-    <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+<div class="container-fluid">
+  <div class="row">
+    <!-- Calendar Column -->
+    <div class="col-lg-8 col-md-12 mb-3">
+      <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+    </div>
+
+    <!-- Event Details Panel Column -->
+    <div class="col-lg-4 col-md-12" *ngIf="selectedEvent">
+      <div class="card mb-3 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+          <h5 class="mb-0">Event Details</h5>
+          <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="selectedEvent = null"></button>
+        </div>
+        <div class="card-body" *ngIf="selectedEvent">
+          <p><strong>Name:</strong> {{ selectedEvent.extendedProps?.['eventName'] }}</p>
+          <p><strong>Time:</strong> {{ selectedEvent.extendedProps?.['eventStart'] }} - {{ selectedEvent.extendedProps?.['eventEnd'] }}</p>
+          <p><strong>Description:</strong> {{ selectedEvent.extendedProps?.['eventDescription'] }}</p>
+          <p *ngIf="selectedEvent.extendedProps?.['eventVirtual']"><strong>Virtual:</strong> Yes</p>
+          <ng-container *ngIf="!selectedEvent.extendedProps?.['eventVirtual']">
+            <p><strong>Address:</strong></p>
+            <div class="mb-2">
+              <div>{{ selectedEvent.extendedProps?.['eventStreet'] }}</div>
+              <div>
+                {{ selectedEvent.extendedProps?.['eventCity'] }},
+                {{ selectedEvent.extendedProps?.['eventState'] }}
+                {{ selectedEvent.extendedProps?.['eventZip'] }}
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

@@ -8,9 +8,11 @@ import { take } from 'rxjs';
 import { Appointment } from 'src/app/interfaces/appointment';
 import { AppointmentApiService } from 'src/app/services/appointmentApi.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { EventsApiService } from 'src/app/services/events-api.service';
+import { Event } from 'src/app/interfaces/event';
 
 type GroupedAppointments = { [date: string]: Appointment[] };
-
+type GroupedEvents = { [date: string]: Event[] };
 @Component({
   selector: 'app-events',
   standalone: true,
@@ -34,9 +36,13 @@ export class EventsComponent implements OnChanges {
     return this._includePast;
   }
 
-  appointments: Appointment[] = []; // All fetched appointments
+  appointments: Appointment[] = [];
   filteredAppointments: Appointment[] = [];
   groupedAppointments: GroupedAppointments = {};
+
+  events: Event[] = [];
+  filteredEvents: Event[] = [];
+  groupedEvents: GroupedEvents  = {};
   
   protected calendarOptions: CalendarOptions = {
     plugins: [dayGridPlugin, interactionPlugin],
@@ -47,12 +53,13 @@ export class EventsComponent implements OnChanges {
       center: 'title',
       right: 'dayGridMonth,timeGridWeek,timeGridDay',
     },
+    eventClick: this.handleEventClick.bind(this),
   };
 
   private authService = inject(AuthService);
   protected isAdmin: boolean = false;
 
-  constructor(private appointmentApiService: AppointmentApiService, private cdr: ChangeDetectorRef) {}
+  constructor(private appointmentApiService: AppointmentApiService, private eventApiService: EventsApiService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.authService.user$.pipe(take(1)).subscribe(user => {
@@ -61,19 +68,27 @@ export class EventsComponent implements OnChanges {
         this.appointmentApiService.getAllAppointments().subscribe((appointments: Appointment[]) => {
           const now = new Date();
           const futureAppointments = appointments.filter(app => new Date(app.date) >= now);
-          const events = this.transformAppointmentsToEvents(futureAppointments);
+          const appointmentsForFullCalendar = this.transformAppointmentsForFullCalendar(futureAppointments);
           const calendarApi = this.calendarComponent.getApi();
           calendarApi.removeAllEventSources();
-          calendarApi.addEventSource(events);
+          calendarApi.addEventSource(appointmentsForFullCalendar);
         });
-      } else {
-        this.loadAdminEvents(); // Placeholder for non-admin users
+      } else if (!this.isAdmin) {
+        
+
+        this.eventApiService.getAllEvents().subscribe((events: Event[]) => {
+          const eventsForFullCalendar = this.transformEventsForFullCalendar(events);
+          const calendarApi = this.calendarComponent.getApi();
+          calendarApi.removeAllEventSources();
+          calendarApi.addEventSource(eventsForFullCalendar);
+        });
       }
     });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['daysRange'] || changes['includePast']) {
+      this.loadAppointments();
       this.loadEvents();
     }
   }
@@ -84,9 +99,11 @@ export class EventsComponent implements OnChanges {
   }
 
   updateCalendar(): void {
-    const events = this.transformAppointmentsToEvents(this.filteredAppointments);
+    const appointments = this.transformAppointmentsForFullCalendar(this.filteredAppointments);
+    const events = this.transformEventsForFullCalendar(this.filteredEvents);
     const calendarApi = this.calendarComponent.getApi();
     calendarApi.removeAllEventSources();
+    calendarApi.addEventSource(appointments);
     calendarApi.addEventSource(events);
   }
   
@@ -127,7 +144,7 @@ export class EventsComponent implements OnChanges {
     });
   }
 
-  private transformAppointmentsToEvents(appointments: Appointment[]): EventInput[] {
+  private transformAppointmentsForFullCalendar(appointments: Appointment[]): EventInput[] {
     return appointments.map(app => ({
       id: app.id?.toString(),
       title: `${app.name} - ${app.type}`,
@@ -141,7 +158,30 @@ export class EventsComponent implements OnChanges {
     }));
   }
 
-  loadEvents(): void {
+  private transformEventsForFullCalendar(events: Event[]): EventInput[] {
+    return events.map(event => ({
+      id: event.id?.toString(),
+      title: event.eventName,
+      start: event.startDate,
+      end: event.endDate,
+      allDay: true, // Set to true if the event spans the entire day
+      extendedProps: {
+        eventId: event.id,
+        eventName: event.eventName,
+        eventType: event.eventType,
+        eventStart: event.startDate,
+        eventEnd: event.endDate,
+        eventDescription: event.description,
+        eventVirtual: event.isVirtual,
+        eventStreet: event.streetAddress,
+        eventCity: event.city,
+        eventState: event.state,
+        eventZip: event.zipCode,
+      }
+    }));
+  }
+
+  loadAppointments(): void {
     this.appointmentApiService.getAllAppointments().pipe(take(1)).subscribe((appointments: Appointment[]) => {
       const now = new Date();
       let startDate: Date;
@@ -167,21 +207,44 @@ export class EventsComponent implements OnChanges {
         return appDate >= startDate && appDate <= endDate;
       });
 
-      const events = this.transformAppointmentsToEvents(filteredAppointments);
+      const appointmentsForFullCalendar = this.transformAppointmentsForFullCalendar(filteredAppointments);
       const calendarApi = this.calendarComponent.getApi();
       calendarApi.removeAllEventSources();
-      calendarApi.addEventSource(events);
+      calendarApi.addEventSource(appointmentsForFullCalendar);
     });
   }
   
-  private loadAdminEvents(): void {
-    // Placeholder for non-admin users
-    this.calendarOptions = {
-      ...this.calendarOptions,
-      events: [
-        { title: 'Sample Admin Event', date: new Date().toISOString() }
-      ]
-    };
+  loadEvents(): void {
+    this.eventApiService.getAllEvents().pipe(take(1)).subscribe((events: Event[]) => {
+      const now = new Date();
+      let startDate: Date;
+      let endDate: Date;
+  
+      if (this.daysRange === -1) {
+        startDate = this.includePast ? new Date(0) : now;
+        endDate = new Date(8640000000000000); // Maximum possible date
+      } else {
+        startDate = new Date(now);
+        endDate = new Date(now);
+  
+        if (this.includePast) {
+          startDate.setDate(now.getDate() - this.daysRange);
+          endDate.setDate(now.getDate() + this.daysRange);
+        } else {
+          endDate.setDate(now.getDate() + this.daysRange);
+        }
+      }
+  
+      const filteredEvents = events.filter(event => {
+        const eventStart = new Date(event.startDate);
+        return eventStart >= startDate && eventStart <= endDate;
+      });
+
+      const eventsForFullCalendar = this.transformEventsForFullCalendar(filteredEvents);
+      const calendarApi = this.calendarComponent.getApi();
+      calendarApi.removeAllEventSources();
+      calendarApi.addEventSource(eventsForFullCalendar);
+    });
   }
 
   private groupAppointmentsByDate(appointments: Appointment[]): { [date: string]: Appointment[] } {
@@ -194,4 +257,18 @@ export class EventsComponent implements OnChanges {
       return groups;
     }, {});
   }
+
+  selectedEvent: EventInput | null = null;
+
+  handleEventClick(arg: any): void {
+    this.selectedEvent = arg.event;
+  }
+    
+  closeEventDetails(): void {
+    this.selectedEvent = null;
+  }
+
+  getCustomKeys(obj: any): string[] {
+    return obj ? Object.keys(obj) : [];
+  } 
 }
