@@ -9,7 +9,8 @@
     <div class="col-lg-4 col-md-12" *ngIf="selectedEvent">
       <div class="card mb-3 shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
-          <h5 class="mb-0">Event Details</h5>
+          <h5 class="mb-0" *ngIf="selectedEvent.extendedProps?.['appointmentId']">Appointment Details</h5>
+          <h5 class="mb-0" *ngIf="selectedEvent.extendedProps?.['eventId']">Event Details</h5>
           <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="selectedEvent = null"></button>
         </div>
         <div class="card-body" *ngIf="selectedEvent">
