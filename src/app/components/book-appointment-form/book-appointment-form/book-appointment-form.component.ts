@@ -20,7 +20,7 @@ import { firstValueFrom } from 'rxjs';
 interface AppointmentForm {
   name: FormControl<string>;
   email: FormControl<string>;
-  phone_number: FormControl<number | null>;
+  phoneNumber: FormControl<number | null>;
   date: FormControl<Date | null>;
   time: FormControl<Date | null>;
   isVirtual: FormControl<boolean>;
@@ -73,7 +73,7 @@ export class AppointmentFormComponent {
       nonNullable: true,
       validators: [Validators.required, Validators.email],
     }),
-    phone_number: new FormControl<number | null>(null, {
+    phoneNumber: new FormControl<number | null>(null, {
       nonNullable: false,
       validators: [Validators.required, Validators.pattern("^((\\+91-?)|0)?[0-9]{10}$")]
     }),
@@ -107,7 +107,7 @@ export class AppointmentFormComponent {
       userId: user?.uid ?? '',
       name: form.value.name,
       email: form.value.email,
-      phone_number: form.value.phone_number,
+      phoneNumber: form.value.phoneNumber,
       date: combinedDateTime,
       isVirtual: form.value.isVirtual
     };

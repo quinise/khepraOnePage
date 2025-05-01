@@ -6,10 +6,10 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { take } from 'rxjs';
 import { Appointment } from 'src/app/interfaces/appointment';
+import { Event } from 'src/app/interfaces/event';
 import { AppointmentApiService } from 'src/app/services/appointmentApi.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { EventsApiService } from 'src/app/services/events-api.service';
-import { Event } from 'src/app/interfaces/event';
 
 type GroupedAppointments = { [date: string]: Appointment[] };
 type GroupedEvents = { [date: string]: Event[] };
@@ -145,15 +145,19 @@ export class EventsComponent implements OnChanges {
   }
 
   private transformAppointmentsForFullCalendar(appointments: Appointment[]): EventInput[] {
-    return appointments.map(app => ({
-      id: app.id?.toString(),
-      title: `${app.name} - ${app.type}`,
-      start: app.date,
+    return appointments.map(appointment => ({
+      id: appointment.id?.toString(),
+      title: `${appointment.name} - ${appointment.type}`,
+      start: appointment.date,
       allDay: false, // Set to true if the event spans the entire day
       extendedProps: {
-        appointmentId: app.id,
-        appointmentType: app.type,
-        // Add other custom properties as needed
+        appointmentId: appointment.id,
+        appointmentType: appointment.type,
+        appointmentName: appointment.name,
+        appointmentEmail: appointment.email,
+        appointmentPhone: appointment.phoneNumber,
+        appointmentDate: appointment.date,
+        appointmentVirtual: appointment.isVirtual,
       }
     }));
   }
