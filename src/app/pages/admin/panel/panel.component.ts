@@ -118,7 +118,7 @@ export class PanelComponent {
     }, {} as { [date: string]: T[] });
   }
 
-  // Generic filtering function
+  // Generic filtering function for Events and Appointments
   private filterItemsByRange<T>(
     groupedItems: { [date: string]: T[] },
     daysRange: number,
