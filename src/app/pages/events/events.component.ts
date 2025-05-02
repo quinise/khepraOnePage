@@ -1,19 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, inject, Input, OnChanges, SimpleChanges, ViewChild, AfterViewInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { take } from 'rxjs';
+import { forkJoin, of, take } from 'rxjs';
 import { Appointment } from 'src/app/interfaces/appointment';
 import { Event } from 'src/app/interfaces/event';
 import { AppointmentApiService } from 'src/app/services/appointmentApi.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { EventsApiService } from 'src/app/services/events-api.service';
-import { forkJoin, of } from 'rxjs';
 
-type GroupedAppointments = { [date: string]: Appointment[] };
-type GroupedEvents = { [date: string]: Event[] };
 @Component({
   selector: 'app-events',
   standalone: true,
@@ -26,9 +23,9 @@ export class EventsComponent implements OnChanges, AfterViewInit {
   private calendarReady = false;
   private listReady = false;
 
-  @Input() daysRange: number = -1; // default to "All"
+  @Input() daysRange: number = -1;
   private _includePast: boolean = false;
-  
+
   @Input()
   set includePast(value: boolean) {
     this._includePast = value;
@@ -36,26 +33,29 @@ export class EventsComponent implements OnChanges, AfterViewInit {
       this.applyFilters();
     }
   }
-  
+
   get includePast(): boolean {
     return this._includePast;
   }
 
+  @Output() appointmentDeleted = new EventEmitter<number>();
+  @Output() eventDeleted = new EventEmitter<number>();  
+
   appointments: Appointment[] = [];
   filteredAppointments: Appointment[] = [];
-  groupedAppointments: GroupedAppointments = {};
+  groupedAppointments: { [date: string]: Appointment[] } = {};
 
   events: Event[] = [];
   filteredEvents: Event[] = [];
-  groupedEvents: GroupedEvents  = {};
-  
+  groupedEvents: { [date: string]: Event[] } = {};
+
   displayedListEvents: {
     id: number | string | undefined;
     title: string;
     date: string;
     type: 'appointment' | 'event';
   }[] = [];
-  
+
   protected calendarOptions: CalendarOptions = {
     plugins: [dayGridPlugin, interactionPlugin],
     initialView: 'dayGridMonth',
@@ -71,7 +71,10 @@ export class EventsComponent implements OnChanges, AfterViewInit {
   private authService = inject(AuthService);
   protected isAdmin: boolean = false;
 
-  constructor(private appointmentApiService: AppointmentApiService, private eventApiService: EventsApiService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private appointmentApiService: AppointmentApiService,
+    private eventApiService: EventsApiService,
+  ) {}
 
   ngAfterViewInit(): void {
     this.authService.user$.pipe(take(1)).subscribe(user => {
@@ -80,16 +83,16 @@ export class EventsComponent implements OnChanges, AfterViewInit {
       this.loadCalendarEvents();
     });
   }
-  
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['daysRange'] || changes['includePast']) {
       this.applyFilters();
     }
   }
-  
-  private updateListView(): void {
+
+  updateListView(): void {
     if (!this.listReady) return;
-  
+
     const combined = [
       ...this.filteredAppointments.map(appointment => ({
         id: appointment.id,
@@ -104,13 +107,13 @@ export class EventsComponent implements OnChanges, AfterViewInit {
         type: 'event' as const,
       })),
     ];
-  
+
     this.displayedListEvents = combined.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }
 
   updateCalendar(): void {
     if (!this.calendarReady || !this.calendarComponent) return;
-  
+
     const appointments = this.transformAppointmentsForFullCalendar(this.filteredAppointments);
     const events = this.transformEventsForFullCalendar(this.filteredEvents);
     const calendarApi = this.calendarComponent.getApi();
@@ -118,8 +121,8 @@ export class EventsComponent implements OnChanges, AfterViewInit {
     calendarApi.addEventSource(appointments);
     calendarApi.addEventSource(events);
   }
-  
-  applyFilters(): void {
+
+  applyFilters(): void {    
     if (!this.calendarReady) return;
   
     const now = new Date();
@@ -128,7 +131,7 @@ export class EventsComponent implements OnChanges, AfterViewInit {
   
     if (this.daysRange === -1) {
       startDate = this.includePast ? new Date(0) : now;
-      endDate = new Date(8640000000000000); // Max JS date
+      endDate = new Date(8640000000000000);
     } else {
       startDate = new Date(now);
       endDate = new Date(now);
@@ -145,10 +148,16 @@ export class EventsComponent implements OnChanges, AfterViewInit {
       return appDate >= startDate && appDate <= endDate;
     });
   
+    this.filteredEvents = this.events.filter(event => {
+      const eventDate = new Date(event.startDate);
+      return eventDate >= startDate && eventDate <= endDate;
+    });
+  
     this.updateCalendar();
     this.updateListView();
   }
   
+
   fetchAndFilterAppointments(): void {
     this.appointmentApiService.getAllAppointments().pipe(take(1)).subscribe((appointments: Appointment[]) => {
       this.appointments = appointments;
@@ -201,43 +210,79 @@ export class EventsComponent implements OnChanges, AfterViewInit {
     const appointment$ = this.isAdmin
       ? this.appointmentApiService.getAllAppointments().pipe(take(1))
       : of([]);
-  
+
     const event$ = this.eventApiService.getAllEvents().pipe(take(1));
-  
+
     forkJoin([appointment$, event$]).subscribe(([appointments, events]) => {
       this.appointments = appointments as Appointment[];
       this.events = events;
-  
+
       this.filteredAppointments = this.appointments;
       this.filteredEvents = this.events;
-  
+
       this.listReady = true;
-      this.applyFilters(); // Safe for both calendar and list view
+      this.applyFilters();
     });
   }
 
-  private groupAppointmentsByDate(appointments: Appointment[]): { [date: string]: Appointment[] } {
-    return appointments.reduce((groups: { [date: string]: Appointment[] }, appointment) => {
-      const date = new Date(appointment.date).toISOString().split('T')[0];
-      if (!groups[date]) {
-        groups[date] = [];
-      }
-      groups[date].push(appointment);
-      return groups;
-    }, {});
+  deleteSelectedEvent(): void {
+    if (!this.selectedEvent || !this.isAdmin) return;
+  
+    const appointmentId = this.selectedEvent.extendedProps?.['appointmentId'];
+    const eventId = this.selectedEvent.extendedProps?.['eventId'];
+  
+    if (appointmentId) {
+      if (!confirm('Are you sure you want to delete this appointment?')) return;
+  
+      this.appointmentApiService.deleteAppointment(appointmentId).pipe(take(1)).subscribe({
+        next: () => {
+          this.appointmentDeleted.emit(appointmentId);
+          this.appointments = this.appointments.filter(a => a.id !== appointmentId);
+          this.filteredAppointments = this.filteredAppointments.filter(a => a.id !== appointmentId);
+          this.selectedEvent = null;
+          this.updateCalendar();
+          this.updateListView();
+        },
+        error: err => {
+          console.error('Failed to delete appointment:', err);
+          alert('Could not delete appointment.');
+        }
+      });
+    }
+  
+    if (eventId) {
+      if (!confirm('Are you sure you want to delete this event?')) return;
+  
+      this.eventApiService.deleteEvent(eventId).pipe(take(1)).subscribe({
+        next: () => {
+          this.eventDeleted.emit(eventId);
+          this.events = this.events.filter(e => e.id !== eventId);
+          this.filteredEvents = this.filteredEvents.filter(e => e.id !== eventId);
+          this.selectedEvent = null;
+          this.updateCalendar();
+          this.updateListView();
+        },
+        error: err => {
+          console.error('Failed to delete event:', err);
+          alert('Could not delete event.');
+        }
+      });
+    }
   }
 
+  selectedAppointment: EventInput | null = null;
   selectedEvent: EventInput | null = null;
+
 
   handleEventClick(arg: any): void {
     this.selectedEvent = arg.event;
   }
-    
+
   closeEventDetails(): void {
     this.selectedEvent = null;
   }
 
   getCustomKeys(obj: any): string[] {
     return obj ? Object.keys(obj) : [];
-  } 
+  }
 }

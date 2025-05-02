@@ -40,6 +40,9 @@
               </div>
             </div>
           </ng-container>
+          <!-- Delete button visible only to admins and for 'event' type -->
+          <button *ngIf="isAdmin && selectedEvent.extendedProps?.['eventId']" class="btn btn-danger btn-sm" (click)="deleteSelectedEvent()">Delete Event</button>
+          <button *ngIf="selectedEvent.extendedProps?.['appointmentId']" class="btn btn-danger btn-sm" (click)="deleteSelectedEvent()">Delete Appointment</button>
         </div>
       </div>
     </div>
