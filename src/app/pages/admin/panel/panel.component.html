@@ -1,5 +1,3 @@
-<h1 class="display-1 text-center my-5">Welcome!</h1>
-
 <!-- Top Controls: Toggle Button + Filters -->
 <div class="row justify-content-center">
   <div class="col">
@@ -38,16 +36,18 @@
 
 <!-- Appointment and Event List View -->
 <div *ngIf="!showCalendar">
-  <!-- Past Appointments and Events -->
+  <!-- Past Appointments and Events (conditionally displayed) -->
   <div *ngIf="includePast">
     <h2 class="text-center">Past Appointments and Events</h2>
     <div class="row">
-      <!-- Appointments -->
+      <!-- Past Appointments -->
       <div class="col-md-6">
         <h4 class="text-primary">Appointments</h4>
         <div *ngFor="let date of getSortedKeys(filteredPastAppointments)">
           <div class="card mb-3 mx-2">
-            <div class="card-header bg-primary text-white">{{ date }}</div>
+            <div class="card-header bg-primary text-white">
+              {{ date }}
+            </div>
             <ul class="list-group list-group-flush">
               <li class="list-group-item" *ngFor="let appointment of filteredPastAppointments[date]">
                 <strong>Client: {{ appointment.name }}</strong><br>
@@ -56,23 +56,32 @@
                 Virtual: {{ appointment.isVirtual ? 'Yes' : 'No' }}<br>
                 Email: {{ appointment.email }}<br>
                 Phone: {{ appointment.phoneNumber }}
+                <button *ngIf="isAdmin" class="btn btn-sm btn-danger mt-2" (click)="deleteAppointment(appointment.id!)">
+                  Delete
+                </button>
               </li>
             </ul>
           </div>
         </div>
       </div>
-      <!-- Events -->
+
+      <!-- Past Events -->
       <div class="col-md-6">
         <h4 class="text-success">Events</h4>
         <div *ngFor="let date of getSortedKeys(filteredPastEvents)">
           <div class="card mb-3 mx-2">
-            <div class="card-header bg-success text-white">{{ date }}</div>
+            <div class="card-header bg-success text-white">
+              {{ date }}
+            </div>
             <ul class="list-group list-group-flush">
               <li class="list-group-item" *ngFor="let event of filteredPastEvents[date]">
                 <strong>{{ event.eventName }}</strong><br>
                 {{ event.startDate | date: 'shortTime' }}<br>
                 Type: {{ event.eventType }}<br>
                 Virtual: {{ event.isVirtual ? 'Yes' : 'No' }}
+                <button *ngIf="isAdmin" class="btn btn-sm btn-danger mt-2" (click)="deleteEvent(event.id!)">
+                  Delete
+                </button>
               </li>
             </ul>
           </div>
@@ -84,35 +93,46 @@
   <!-- Future Appointments and Events -->
   <h2 class="text-center mt-5">Future Appointments and Events</h2>
   <div class="row">
-    <!-- Appointments -->
+    <!-- Future Appointments -->
     <div class="col-md-6">
       <h4 class="text-primary">Appointments</h4>
       <div *ngFor="let date of getSortedKeys(filteredAppointments)">
         <div class="card mb-3 mx-2">
-          <div class="card-header bg-primary text-white">{{ date }}</div>
+          <div class="card-header bg-primary text-white">
+            {{ date }}
+          </div>
           <ul class="list-group list-group-flush">
             <li class="list-group-item" *ngFor="let appointment of filteredAppointments[date]">
               <strong>Client: {{ appointment.name }}</strong><br>
               {{ appointment.date | date: 'shortTime' }}<br>
               Service: {{ appointment.type }}<br>
               Virtual: {{ appointment.isVirtual ? 'Yes' : 'No' }}
+              <button *ngIf="isAdmin" class="btn btn-sm btn-danger mt-2" (click)="deleteAppointment(appointment.id!)">
+                Delete
+              </button>
             </li>
           </ul>
         </div>
       </div>
     </div>
-    <!-- Events -->
+
+    <!-- Future Events -->
     <div class="col-md-6">
       <h4 class="text-success">Events</h4>
       <div *ngFor="let date of getSortedKeys(filteredEvents)">
         <div class="card mb-3 mx-2">
-          <div class="card-header bg-success text-white">{{ date }}</div>
+          <div class="card-header bg-success text-white">
+            {{ date }}
+          </div>
           <ul class="list-group list-group-flush">
             <li class="list-group-item" *ngFor="let event of filteredEvents[date]">
               <strong>{{ event.eventName }}</strong><br>
               {{ event.startDate | date: 'shortTime' }}<br>
               Type: {{ event.eventType }}<br>
               Virtual: {{ event.isVirtual ? 'Yes' : 'No' }}
+              <button *ngIf="isAdmin" class="btn btn-sm btn-danger mt-2" (click)="deleteEvent(event.id!)">
+                Delete
+              </button>
             </li>
           </ul>
         </div>
