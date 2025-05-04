@@ -48,7 +48,7 @@
             <mat-form-field appearance="fill" class="w-100">
               <mat-label>Start Time</mat-label>
               <input matInput [matTimepicker]="startTimePicker" formControlName="startTime" matTimepickerMin="08:00"
-                     matTimepickerMax="20:30">
+                matTimepickerMax="20:30">
               <mat-timepicker-toggle [for]="startTimePicker" matSuffix />
               <mat-timepicker #startTimePicker />
             </mat-form-field>
@@ -67,7 +67,7 @@
             <mat-form-field appearance="fill" class="w-100">
               <mat-label>End Time</mat-label>
               <input matInput [matTimepicker]="endTimePicker" formControlName="endTime" matTimepickerMin="08:00"
-                     matTimepickerMax="20:30">
+                matTimepickerMax="20:30">
               <mat-timepicker-toggle [for]="endTimePicker" matSuffix />
               <mat-timepicker #endTimePicker />
             </mat-form-field>

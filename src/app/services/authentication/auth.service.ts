@@ -12,7 +12,7 @@ import {
 } from '@angular/fire/auth';
 import { Firestore, doc, setDoc, getDoc, docData } from '@angular/fire/firestore';
 import { Observable, of, switchMap } from 'rxjs';
-import { AppUser } from '../interfaces/appUser';
+import { AppUser } from '../../interfaces/appUser';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {

@@ -1,8 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { AppointmentFormComponent } from 'src/app/components/book-appointment-form/book-appointment-form/book-appointment-form.component';
-import { AppointmentApiService } from 'src/app/services/appointmentApi.service';
+import { AppointmentFormComponent } from 'src/app/components/forms/book-appointment-form/book-appointment-form.component';
+import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
 @Component({
     selector: 'app-services',
     standalone: true,

@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { CreateEventFormComponent } from 'src/app/components/create-event-form/create-event-form.component';
+import { CreateEventFormComponent } from 'src/app/components/forms/create-event-form/create-event-form.component';
 @Component({
   selector: 'app-events-management',
   imports: [MatButtonModule, MatDialogModule],
