@@ -5,6 +5,7 @@
       <li class="nav-item"><a routerLink="/services" class="nav-link link-body-emphasis px-2">Services</a></li>
       <li class="nav-item"><a routerLink="/events" class="nav-link link-body-emphasis px-2">Events</a></li>
       <ng-container *ngIf="user$ | async as user">
+        <!-- Admin header items -->
         <ng-container *ngIf="user.role === 'admin'">
           <li class="nav-item d-flex align-items-center">
             <div class="vr my-auto mx-5" style="height: 30px;"></div>
@@ -14,6 +15,15 @@
           </li>
           <li class="nav-item">
             <a routerLink="/event-management" class="nav-link link-body-emphasis px-2">Event Management</a>
+          </li>
+        </ng-container>
+        <!-- User header items -->
+        <ng-container *ngIf="user.role === 'user'">
+          <li class="nav-item d-flex align-items-center">
+            <div class="vr my-auto mx-5" style="height: 30px;"></div>
+          </li>
+          <li class="nav-item">
+            <a routerLink="/user-dashboard" class="nav-link link-body-emphasis px-2">Dashboard</a>
           </li>
         </ng-container>
       </ng-container>

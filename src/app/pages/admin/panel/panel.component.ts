@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSelectChange } from '@angular/material/select';
-import { CalendarOptions, EventInput } from '@fullcalendar/core';
+import { CalendarOptions } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { take } from 'rxjs';
-import { CalendarViewComponent } from 'src/app/components/shared/calendar-view/calendar-view.component';
 import { EventListComponent } from 'src/app/components/event-list-component/event-list-component.component';
+import { CalendarViewComponent } from 'src/app/components/shared/calendar-view/calendar-view.component';
 import { Appointment } from 'src/app/interfaces/appointment';
 import { Event } from 'src/app/interfaces/event';
 import { AuthService } from 'src/app/services/authentication/auth.service';
