@@ -1,0 +1,69 @@
+<app-event-filter (filtersChanged)="onFilterChange()"></app-event-filter>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Calendar Column -->
+    <div class="col-lg-8 col-md-12 mb-3">
+      <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+    </div>
+
+    <!-- Details Panel Column -->
+    <div class="col-lg-4 col-md-12" *ngIf="selectedEvent">
+      <div class="card mb-3 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+          <h5 *ngIf="selectedEvent.extendedProps?.['appointmentId']" class="mb-0">Appointment Details</h5>
+          <h5 *ngIf="selectedEvent.extendedProps?.['eventId']" class="mb-0">Event Details</h5>
+          <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="closeEventDetails()"></button>
+        </div>
+        <div class="card-body" *ngIf="selectedEvent">
+          <!-- Name -->
+          <p *ngIf="selectedEvent.extendedProps?.['appointmentName']"><strong>Name:</strong> {{ selectedEvent.extendedProps?.['appointmentName'] }}</p>
+          <p *ngIf="selectedEvent.extendedProps?.['eventName']"><strong>Name:</strong> {{ selectedEvent.extendedProps?.['eventName'] }}</p>
+
+          <!-- Time -->
+          <p *ngIf="selectedEvent.extendedProps?.['eventEnd']">
+            <strong>Time:</strong> {{ selectedEvent.extendedProps?.['eventStart'] }} - {{ selectedEvent.extendedProps?.['eventEnd'] }}
+          </p>
+          <p *ngIf="!selectedEvent.extendedProps?.['eventEnd']">
+            <strong>Time:</strong> {{ selectedEvent.extendedProps?.['eventStart'] }}
+          </p>
+
+          <!-- Contact Info -->
+          <p *ngIf="selectedEvent.extendedProps?.['appointmentEmail']"><strong>Email:</strong> {{ selectedEvent.extendedProps?.['appointmentEmail'] }}</p>
+          <p *ngIf="selectedEvent.extendedProps?.['appointmentPhone']"><strong>Phone:</strong> {{ selectedEvent.extendedProps?.['appointmentPhone'] }}</p>
+
+          <!-- Description -->
+          <p *ngIf="selectedEvent.extendedProps?.['eventDescription']"><strong>Description:</strong> {{ selectedEvent.extendedProps?.['eventDescription'] }}</p>
+
+          <!-- Virtual Field -->
+          <p *ngIf="selectedEvent.extendedProps?.['appointmentVirtual'] || selectedEvent.extendedProps?.['eventVirtual']">
+            <strong>Virtual:</strong> Yes
+          </p>
+
+          <!-- Show address only for non-virtual, non-appointment events -->
+          <ng-container *ngIf="!(selectedEvent.extendedProps?.['appointmentId']) && !(selectedEvent.extendedProps?.['eventVirtual'])">
+            <p><strong>Address:</strong></p>
+            <div class="mb-2">
+              <div>{{ selectedEvent.extendedProps?.['eventStreet'] }}</div>
+              <div>
+                {{ selectedEvent.extendedProps?.['eventCity'] }},
+                {{ selectedEvent.extendedProps?.['eventState'] }}
+                {{ selectedEvent.extendedProps?.['eventZip'] }}
+              </div>
+            </div>
+          </ng-container>
+        </div>
+        <div>
+          <button *ngIf="isAdmin && selectedEvent.extendedProps?.['appointmentId']" class="btn btn-sm btn-danger mt-2" (click)="deleteAppointment()">
+            Cancel Appointment
+          </button>
+        </div>
+        <div>
+          <button *ngIf="isAdmin && selectedEvent.extendedProps?.['eventId']" class="btn btn-sm btn-danger mt-2" (click)="deleteEvent()">
+            Cancel Event
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,11 +1,11 @@
-import { Component, inject } from '@angular/core';
 import { AsyncPipe, NgIf } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
-import { AuthenticateComponent } from '../authenticate/authenticate.component';
-import { AuthService } from 'src/app/services/auth.service';
 import { Observable } from 'rxjs';
 import { AppUser } from 'src/app/interfaces/appUser';
+import { AuthService } from 'src/app/services/authentication/auth.service';
+import { AuthenticateComponent } from '../../authenticate/authenticate.component';
 @Component({
     selector: 'app-header',
     templateUrl: './header.component.html',

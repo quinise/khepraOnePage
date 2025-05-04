@@ -10,12 +10,11 @@ import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTimepickerModule } from '@angular/material/timepicker';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { Appointment } from 'src/app/interfaces/appointment';
 import { AppUser } from 'src/app/interfaces/appUser';
-import { AppointmentApiService } from 'src/app/services/appointmentApi.service';
-import { AuthService } from 'src/app/services/auth.service';
-import { firstValueFrom } from 'rxjs';
+import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
+import { AuthService } from 'src/app/services/authentication/auth.service';
 
 interface AppointmentForm {
   name: FormControl<string>;
@@ -48,14 +47,14 @@ interface AppointmentForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppointmentFormComponent {
-  user$: Observable<AppUser | null>;
-
   successMessage = '';
   errorMessage = '';
 
   _todaysDate = new Date();
   minDate = new Date();
   maxDate = new Date();
+
+  user$: Observable<AppUser | null>;
 
   constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {serviceType: string}, public appointmentApiService: AppointmentApiService, public authService: AuthService) {
     this.user$ = authService.user$;

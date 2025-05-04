@@ -14,7 +14,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import { Router } from '@angular/router';
 import { Event } from 'src/app/interfaces/event';
-import { EventsApiService } from 'src/app/services/events-api.service';
+import { EventsApiService } from 'src/app/services/apis/events-api.service';
 interface EventForm {
   eventName: FormControl<string>;
   eventType: FormControl<string>;
@@ -257,8 +257,6 @@ ngOnInit(): void {
           description: formValues.description!,
           isVirtual: formValues.isVirtual!
         }
-
-        console.log("TESTING: formValues.eventName, formValues.evenType, formValues.clientName, formValues.clientName, formValues.startDate, formValues.endDate, formValues.streetAddress, formValues.city, formValues.state, formValues.zipCode, formValues.isVirtual, formValues.description", formValues.eventName, formValues.eventType, formValues.endTime, formValues.clientName, formValues.clientName, formValues.startDate, formValues.endDate, formValues.streetAddress, formValues.city, formValues.state, formValues.zipCode, formValues.isVirtual, formValues.description)
 
         this.eventsService.createEvent(event).subscribe({
           next: (res) => {

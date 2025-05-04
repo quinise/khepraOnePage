@@ -1,14 +1,14 @@
 import { NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators, NonNullableFormBuilder } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormField, MatInputModule } from '@angular/material/input';
 import { Router } from '@angular/router';
-import { AuthService } from 'src/app/services/auth.service';
-import { UserService } from 'src/app/services/user.service';
-import { PasswordResetComponent } from '../password-reset/password-reset.component'; // adjust path as needed
+import { AuthService } from 'src/app/services/authentication/auth.service';
+import { UserService } from 'src/app/services/authentication/user.service';
+import { PasswordResetComponent } from './password-reset/password-reset.component'; // adjust path as needed
 
 @Component({
   selector: 'app-signup',
