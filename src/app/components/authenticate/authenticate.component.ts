@@ -39,16 +39,14 @@ export class AuthenticateComponent {
     this.successMessage = "";
 
     this.authForm.addControl(
-      'email',
-      new FormControl<string>('', {
+      'email', new FormControl<string>('', {
         nonNullable: true,
         validators: [Validators.required, Validators.email],
       })
     );
   
     this.authForm.addControl(
-      'password',
-      new FormControl<string>('', {
+      'password', new FormControl<string>('', {
         nonNullable: true,
         validators: [
           Validators.required,
@@ -61,8 +59,7 @@ export class AuthenticateComponent {
 
     if (this.data.authStep === "Sign up") {
       this.authForm.addControl(
-        'confirmPassword',
-        new FormControl<string>('', {
+        'confirmPassword', new FormControl<string>('', {
           nonNullable: true,
           validators: [Validators.required],
         })
