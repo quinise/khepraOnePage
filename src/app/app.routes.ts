@@ -24,4 +24,9 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/user/dashboard/dashboard.component').then(m => m.DashboardComponent),
     canActivate: [userGuard],
   },
+  {
+    path: 'account-settings',
+    loadComponent: () => import('./pages/user/account-settings/account-settings.component').then(m => m.AccountSettingsComponent),
+    canActivate: [userGuard],
+  },
 ];
