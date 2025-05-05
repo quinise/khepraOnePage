@@ -41,7 +41,7 @@ export class DeleteAccountComponent {
       } else if (providerIds.includes('password')) {
         console.log('User signed in with Email/Password');
         try {
-          // Prompt the user for their email and password
+          // TODO: Create a form to get the email and password from the user
           const email = prompt('Please enter your email:');
           const password = prompt('Please enter your password:');
     
