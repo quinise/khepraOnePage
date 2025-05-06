@@ -32,11 +32,12 @@ export class AuthService {
   }
 
   async signUpWithEmail(email: string, password: string): Promise<UserCredential> {
-    const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(this.auth, email, password)
     const user = userCredential.user;
     // 👇 Save user to Firestore
     await setDoc(doc(this.firestore, 'users', user.uid), {
       uid: user.uid,
+      displayName: user.displayName,
       email: user.email,
       role: 'user',
       createdAt: new Date(),
