@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { forkJoin, Observable, of } from 'rxjs';
-import { take, tap } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { Appointment } from 'src/app/interfaces/appointment';
 import { Event } from 'src/app/interfaces/event';
 import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';

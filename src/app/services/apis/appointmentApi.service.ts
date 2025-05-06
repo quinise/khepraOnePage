@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Appointment } from '../../interfaces/appointment';
@@ -19,10 +19,29 @@ export class AppointmentApiService {
     return this.http.get<Appointment[]>(this.baseUrl);
   }
 
+  // TODO: Switch to this method for getting appointments (instead of getAllAppointments)
+  getAppointments(userId: string, filter: 'past' | 'upcoming' | null) {
+    const params = new HttpParams()
+    .set('userId', userId)
+    .set('filter', filter ?? '');
+
+  return this.http.get<Appointment[]>('/api/appointments', { params });
+}
+
+
   // Get one appointment by its ID
   getAppointmentById(id: number): Observable<Appointment> {
     return this.http.get<Appointment>(`${this.baseUrl}/${id}`);
   }
+
+  getAppointmentsByUserId(userId: string, filter?: 'past' | 'upcoming'): Observable<Appointment[]> {
+    let params = new HttpParams().set('userId', userId);
+    if (filter) {
+      params = params.set('filter', filter);
+    }
+    return this.http.get<Appointment[]>(`/api/appointments`, { params });
+  }
+  
 
   // Create new appointment
   createAppointment(appointment: Appointment): Observable<Appointment> {
