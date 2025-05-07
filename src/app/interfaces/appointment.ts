@@ -4,7 +4,7 @@ export interface Appointment {
   type:string,
   name:string,
   email:string,
-  phoneNumber:number,
+  phoneNumber:string,
   date:Date,
   isVirtual:boolean
 }

@@ -1,16 +1,20 @@
 <!--TODO: adjust title for grammar with Initiation form title -->
 <div class="container">
-  <div mat-dialog-title><h3 class="text-center display-6">Schedule a {{ data.serviceType }}</h3></div>
+  <div mat-dialog-title>
+    <h3 class="text-center display-6">
+      {{ data.appointmentToEdit ? 'Edit Appointment' : 'Schedule a ' + data.serviceType }}
+    </h3>
+  </div>
   <mat-dialog-content align="center">
-     <!-- TODO: Consolidate error messages -->
+  <!-- TODO: Consolidate error messages -->
     <form class="border border-top-0 mb-5 p-4" [formGroup]="appointmentForm" (ngSubmit)="onSubmit(bookServiceForm)" #bookServiceForm="ngForm">
       <div class="row">
         <div class="row w-50">
           <mat-form-field>
             <input type="text" formControlName="name" placeholder="Name" matInput>
             <mat-icon fontIcon="person" matSuffix></mat-icon>
-            <mat-error *ngIf="!appointmentForm.value.name">This field is required</mat-error>
-            <mat-error *ngIf="appointmentForm.value.name">Name may only include letters and spaces</mat-error>
+            <mat-error *ngIf="appointmentForm.controls.name?.hasError('required')">This field is required</mat-error>
+            <mat-error *ngIf="appointmentForm.controls.name?.hasError('pattern')">Name may only include letters and spaces</mat-error>
           </mat-form-field>
         </div>
         <div class="row w-50">
@@ -18,8 +22,8 @@
             <input type="email" formControlName="email"
               matInput placeholder="Email" matInput>
             <mat-icon fontIcon="email" matSuffix></mat-icon>
-            <mat-error *ngIf="!appointmentForm.value.email">This field is required</mat-error>
-            <mat-error *ngIf="appointmentForm.value.email">Please enter a valid email address</mat-error>
+            <mat-error *ngIf="appointmentForm.controls.email?.hasError('required')">This field is required</mat-error>
+            <mat-error *ngIf="appointmentForm.controls.email?.hasError('pattern')">Please enter a valid email address</mat-error>
           </mat-form-field>
         </div>
         <div class="col w-25 mt-3">
@@ -28,8 +32,12 @@
               <input type="text" formControlName="phoneNumber"
                 matInput placeholder="Phone number" matInput>
               <mat-icon fontIcon="phone" matSuffix></mat-icon>
-              <mat-error *ngIf="!appointmentForm.value.phoneNumber">This field is required</mat-error>
-              <mat-error *ngIf="appointmentForm.value.phoneNumber">Please, Enter 10 digit Mobile Number.</mat-error>
+              <mat-error *ngIf="appointmentForm.controls.phoneNumber?.hasError('required')">
+                This field is required
+              </mat-error>
+              <mat-error *ngIf="appointmentForm.controls.phoneNumber?.hasError('pattern')">
+                Please enter a 10-digit phone number
+              </mat-error>
             </mat-form-field>
           </div>
           <div class="date-time-inputs mt-2 col offset-md-4">
@@ -39,7 +47,7 @@
                 <input matInput formControlName="date" [matDatepicker]="datepicker" [min]="minDate" [max]="maxDate"/>
                 <mat-datepicker-toggle matIconSuffix [for]="datepicker"></mat-datepicker-toggle>
                 <mat-datepicker #datepicker></mat-datepicker>
-                <mat-error *ngIf="!appointmentForm.value.date">This field is required</mat-error>
+                <mat-error *ngIf="appointmentForm.controls.date?.hasError('required')">This field is required</mat-error>
               </mat-form-field>
             </div>
             <div class="col">
@@ -49,7 +57,7 @@
                 matTimepickerMax="20:30">
                 <mat-timepicker #timepicker/>
                 <mat-timepicker-toggle [for]="timepicker" matSuffix/>
-                <mat-error *ngIf="!appointmentForm.value.time">This field is required</mat-error>
+                <mat-error *ngIf="appointmentForm.controls.time?.hasError('required')">This field is required</mat-error>
               </mat-form-field>
             </div>
           </div>
@@ -60,7 +68,9 @@
       </div>
       <div class="row">
         <div mat-dialog-actions>
-          <button type="button" class="btn btn-primary mx-4" type="submit" [disabled]="!appointmentForm.valid">Schedule</button>
+          <button type="submit" class="btn btn-primary mx-4" [disabled]="!appointmentForm.valid">
+            {{ data.appointmentToEdit ? 'Update' : 'Schedule' }}
+          </button>
           <button type="button" class="btn btn-danger" mat-dialog-close color="warn">Cancel</button>
         </div>
       </div>
