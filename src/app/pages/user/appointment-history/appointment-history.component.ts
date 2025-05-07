@@ -1,9 +1,11 @@
+import { AsyncPipe, DatePipe, NgFor, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { AsyncPipe, NgFor, NgIf, DatePipe } from '@angular/common';
-import { Observable, of, BehaviorSubject } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { AppointmentFormComponent } from 'src/app/components/forms/book-appointment-form/book-appointment-form.component';
 import { Appointment } from 'src/app/interfaces/appointment';
-import { AuthService } from 'src/app/services/authentication/auth.service';
 import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
+import { AuthService } from 'src/app/services/authentication/auth.service';
 import { DeleteEventService } from 'src/app/services/delete-event.service';
 @Component({
   selector: 'app-appointment-history',
@@ -21,6 +23,7 @@ export class AppointmentHistoryComponent implements OnInit {
     private authService: AuthService,
     private appointmentApiService: AppointmentApiService,
     private deleteService: DeleteEventService,
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -36,6 +39,29 @@ export class AppointmentHistoryComponent implements OnInit {
     });
   }
   
+  openEditDialog(appointment: Appointment): void {
+    const dialogRef = this.dialog.open(AppointmentFormComponent, {
+      data: { serviceType: appointment.type, appointmentToEdit: appointment },
+    });
+  
+    dialogRef.componentInstance.appointmentSaved.subscribe((updated: Appointment) => {
+      // Update the appointment in the list
+      const index = this.upcomingAppointments.findIndex(a => a.id === updated.id);
+      if (index !== -1) {
+        this.upcomingAppointments[index] = updated;
+      }
+    });
+  }
+
+  editAppointment(appointment: Appointment): void {
+    this.dialog.open(AppointmentFormComponent, {
+      data: {
+        serviceType: appointment.type,
+        appointmentToEdit: appointment
+      }
+    });
+  }
+
   deleteAppointment(id: number): void {
     this.deleteService.deleteAppointment(
       id,

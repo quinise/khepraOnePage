@@ -6,6 +6,9 @@
         <strong>{{ appointment.name }}</strong> - {{ appointment.type }}<br>
         Date: {{ appointment.date | date:'medium' }}<br>
         Mode: {{ appointment.isVirtual ? 'Virtual' : 'In-Person' }}<br>
+        <button class="btn btn-sm btn-primary mt-2 mx-3" (click)="openEditDialog(appointment)">
+          Edit Appointment Details
+        </button>
         <button class="btn btn-sm btn-danger mt-2" (click)="deleteAppointment(appointment.id!)">
           Cancel
         </button>
