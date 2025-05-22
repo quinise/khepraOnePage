@@ -1,16 +1,16 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   Auth,
+  GoogleAuthProvider,
+  UserCredential,
   authState,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
-  signOut,
-  GoogleAuthProvider,
   signInWithPopup,
-  UserCredential,
-  sendPasswordResetEmail
+  signOut
 } from '@angular/fire/auth';
-import { Firestore, doc, setDoc, getDoc, docData } from '@angular/fire/firestore';
+import { Firestore, doc, docData, getDoc, setDoc } from '@angular/fire/firestore';
 import { Observable, of, switchMap } from 'rxjs';
 import { AppUser } from '../../interfaces/appUser';
 

@@ -1,28 +1,27 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Inject, Output } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardActions, MatCardContent } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTimepickerModule } from '@angular/material/timepicker';
-import { Router } from '@angular/router';
 import { Event } from 'src/app/interfaces/event';
 import { EventsApiService } from 'src/app/services/apis/events-api.service';
 interface EventForm {
   eventName: FormControl<string>;
   eventType: FormControl<string>;
   clientName: FormControl<string | null>;
-  startDate: FormControl<Date | null>;
-  endDate: FormControl<Date | null>;
-  startTime: FormControl<Date | null>;
-  endTime: FormControl<Date | null>;
+  startDate: FormControl<Date>;
+  endDate: FormControl<Date>;
+  startTime: FormControl<Date>;
+  endTime: FormControl<Date>;
   streetAddress: FormControl<string | null>;
   city: FormControl<string | null>;
   state: FormControl<string | null>;
@@ -53,7 +52,8 @@ interface EventForm {
     MatSelectModule,
   ],
   templateUrl: './create-event-form.component.html',
-  styleUrl: './create-event-form.component.css'
+  styleUrl: './create-event-form.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 
 export class CreateEventFormComponent {
@@ -121,6 +121,8 @@ export class CreateEventFormComponent {
   successMessage = '';
   errorMessage = '';
 
+  @Output() eventSaved = new EventEmitter<Event>();
+
   protected eventForm = new FormGroup<EventForm>({
       eventName: new FormControl<string>('', {
         nonNullable: true,
@@ -134,20 +136,20 @@ export class CreateEventFormComponent {
         nonNullable: false,
         validators: [Validators.pattern(/[a-zA-Z ]/)]
       }),
-      startDate: new FormControl<Date | null>(null, {
-        nonNullable: false,
+      startDate: new FormControl<Date>(new Date(), {
+        nonNullable: true,
         validators: Validators.required
       }),
-      endDate: new FormControl<Date | null>(null, {
-        nonNullable: false,
+      endDate: new FormControl<Date>(new Date(), {
+        nonNullable: true,
         validators: Validators.required
       }),
-      startTime: new FormControl<Date | null>(null, {
-        nonNullable: false,
+      startTime: new FormControl<Date>(new Date(), {
+        nonNullable: true,
         validators: Validators.required
       }),
-      endTime: new FormControl<Date | null>(null, {
-        nonNullable: false,
+      endTime: new FormControl<Date>(new Date(), {
+        nonNullable: true,
         validators: Validators.required
       }),
       streetAddress: new FormControl<string>('', {
@@ -158,10 +160,11 @@ export class CreateEventFormComponent {
         nonNullable: false,
         validators: [Validators.pattern(/[a-zA-Z ]/)]
       }),
-      state: new FormControl<string | null>('', {
+      state: new FormControl<string>('', {
         nonNullable: false,
-        // validators: []
+        // TODO: validators: []
       }),
+      // TODO: Change to string
       zipCode: new FormControl<number | null>(null, {
         nonNullable: false,
         validators: [Validators.pattern(/[0-9]/)]
@@ -175,9 +178,15 @@ export class CreateEventFormComponent {
       }),
     });
 
-  constructor (private _matDialog:MatDialog, @Inject(MAT_DIALOG_DATA) public data: {eventType: string}, public eventsService: EventsApiService, private router: Router) {}
+    constructor(
+      private _matDialog: MatDialog,
+      @Inject(MAT_DIALOG_DATA) public data: { eventType?: string; eventToEdit?: Event },
+      public eventsService: EventsApiService,
+      private dialogRef: MatDialogRef<CreateEventFormComponent>
+    ) {}    
+    
 
-ngOnInit(): void {
+  ngOnInit(): void {
     this.eventForm.get('isVirtual')?.valueChanges.subscribe((isVirtual) => {
       const streetAddress = this.eventForm.get('streetAddress');
       const city = this.eventForm.get('city');
@@ -204,6 +213,26 @@ ngOnInit(): void {
       state?.updateValueAndValidity();
       zipCode?.updateValueAndValidity();
     });
+
+    const event = this.data.eventToEdit;
+
+    if (event) {
+      this.eventForm.patchValue({
+        eventName: event.eventName,
+        eventType: event.eventType,
+        clientName: event.clientName,
+        startDate: new Date(event.startDate),
+        endDate: new Date(event.endDate),
+        startTime: new Date(event.startDate),
+        endTime: new Date(event.endDate),
+        streetAddress: event.streetAddress,
+        city: event.city,
+        state: event.state,
+        zipCode: event.zipCode,
+        description: event.description,
+        isVirtual: event.isVirtual,
+      });
+    }
   }
 
   onCancel() {
@@ -213,67 +242,61 @@ ngOnInit(): void {
   onSubmit(): void {
     if (this.eventForm.valid) {
       const formValues = this.eventForm.value;
-      let combinedStartDateTime: Date | null = null;
-      let combinedEndDateTime: Date | null = null;
-
-      const startDate = formValues.startDate;
-      const startTime = formValues.startTime;
   
-      if (startDate && startTime) {
-        combinedStartDateTime = new Date(
-          startDate.getFullYear(),
-          startDate.getMonth(),
-          startDate.getDate(),
-          startTime.getHours(),
-          startTime.getMinutes(),
-          startTime.getSeconds()
-        );
-      }
-
-        const endDate = formValues.endDate;
-        const endTime = formValues.endTime;
-    
-        if (endDate && endTime) {
-          combinedEndDateTime = new Date(
-            endDate.getFullYear(),
-            endDate.getMonth(),
-            endDate.getDate(),
-            endTime.getHours(),
-            endTime.getMinutes(),
-            endTime.getSeconds()
-          );
-        }
-
-        const event: Event = {
-          eventName: formValues.eventName!,
-          eventType: formValues.eventType!,
-          clientName: formValues.clientName,
-          startDate: combinedStartDateTime!,
-          endDate: combinedEndDateTime!,
-          streetAddress: formValues.streetAddress,
-          city: formValues.city,
-          state: formValues.state,
-          zipCode: formValues.zipCode,
-          description: formValues.description!,
-          isVirtual: formValues.isVirtual!
-        }
-
-        this.eventsService.createEvent(event).subscribe({
-          next: (res) => {
-            this.successMessage = 'Event successfully scheduled!';
-            this.errorMessage = '';
-            this.eventForm.reset();
+      const combinedStart = new Date(
+        formValues.startDate!.getFullYear(),
+        formValues.startDate!.getMonth(),
+        formValues.startDate!.getDate(),
+        formValues.startTime!.getHours(),
+        formValues.startTime!.getMinutes()
+      );
+  
+      const combinedEnd = new Date(
+        formValues.endDate!.getFullYear(),
+        formValues.endDate!.getMonth(),
+        formValues.endDate!.getDate(),
+        formValues.endTime!.getHours(),
+        formValues.endTime!.getMinutes()
+      );
+  
+      const eventPayload: Event = {
+        ...this.data.eventToEdit, // In case it's edit mode
+        eventName: formValues.eventName!,
+        eventType: formValues.eventType!,
+        clientName: formValues.clientName,
+        startDate: combinedStart,
+        endDate: combinedEnd,
+        streetAddress: formValues.streetAddress,
+        city: formValues.city,
+        state: formValues.state,
+        zipCode: formValues.zipCode,
+        description: formValues.description!,
+        isVirtual: formValues.isVirtual!
+      };
+  
+      if (this.data.eventToEdit) {
+        // EDIT MODE
+        this.eventsService.updateEvent(this.data.eventToEdit.id!, eventPayload).subscribe({
+          next: (updatedEvent) => {
+            this.eventSaved.emit(updatedEvent);
+            this.dialogRef.close();
           },
-          error: (err) => {
-            this.successMessage = '';
-            this.errorMessage = 'Failed to schedule event. Please try again.';
-            console.error(err);
+          error: () => {
+            this.errorMessage = 'Failed to update event.';
           }
-        })
-
-      this._matDialog.closeAll();
-    } else {
-      // Handle form errors
+        });
+      } else {
+        // CREATE MODE
+        this.eventsService.createEvent(eventPayload).subscribe({
+          next: (newEvent) => {
+            this.eventSaved.emit(newEvent);
+            this.dialogRef.close();
+          },
+          error: () => {
+            this.errorMessage = 'Failed to create event.';
+          }
+        });
+      }
     }
-  }
+  }  
 }

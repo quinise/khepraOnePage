@@ -1,25 +1,90 @@
-<app-event-filter (filtersChanged)="updateFilteredData()"></app-event-filter>
+<!-- Filter Component -->
+<app-event-filter></app-event-filter>
 
 <!-- Past Appointments and Events -->
-<div *ngIf="includePast && sortedPastDates.length > 0">
-  <h2 class="text-center">Past Appointments and Events</h2>
-  <div *ngFor="let date of sortedPastDates" class="row">
-    <!-- Past Appointments -->
-    <div class="col-md-6" *ngIf="filteredPastAppointmentsGrouped[date]">
+<div *ngIf="includePast">
+  <ng-container *ngIf="computedSortedPastDates.length > 0; else noPastItems">
+    <h2 class="text-center">Past Appointments and Events</h2>
+    <div *ngFor="let date of computedSortedPastDates" class="row">
+
+      <!-- Past Appointments -->
+      <div class="col-md-6" *ngIf="pastAppointmentsGrouped[date]?.length">
+        <h4 class="text-primary">Appointments</h4>
+        <div class="card mb-3 mx-2">
+          <div class="card-header bg-primary text-white">
+            {{ date }}
+          </div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item" *ngFor="let appointment of pastAppointmentsGrouped[date]">
+              <strong>Client: {{ appointment.name }}</strong><br>
+              {{ appointment.date | date: 'shortTime' }}<br>
+              Service: {{ appointment.type }}<br>
+              Virtual: {{ appointment.isVirtual ? 'Yes' : 'No' }}<br>
+              Email: {{ appointment.email }}<br>
+              Phone: {{ appointment.phoneNumber }}<br>
+              <button class="btn btn-sm btn-danger mt-2" (click)="deleteAppointment(+appointment.id!)">
+                Delete
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Past Events -->
+      <div class="col-md-6" *ngIf="pastEventsGrouped[date]?.length">
+        <h4 class="text-success">Events</h4>
+        <div class="card mb-3 mx-2">
+          <div class="card-header bg-success text-white">
+            {{ date }}
+          </div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item" *ngFor="let event of pastEventsGrouped[date]">
+              <strong>{{ event.eventName }}</strong><br>
+              {{ event.startDate | date: 'shortTime' }}<br>
+              Type: {{ event.eventType }}<br>
+              Virtual: {{ event.isVirtual ? 'Yes' : 'No' }}<br>
+              <div>
+                <button *ngIf="isAdmin" class="btn btn-sm btn-primary mt-2 mx-3" (click)="openEditEventDialog(event)">
+                  Edit Event Details
+                </button>
+                <button class="btn btn-sm btn-danger mt-2" (click)="deleteEvent(+event.id!)">
+                  Delete
+                </button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+
+  <ng-template #noPastItems>
+    <p class="text-muted text-center">No past appointments or events found within the selected range.</p>
+  </ng-template>
+</div>
+
+<!-- Future Appointments and Events -->
+<h2 class="text-center mt-5">Future Appointments and Events</h2>
+<div *ngIf="unifiedSortedFutureDates.length > 0; else noFutureItems">
+  <div *ngFor="let date of unifiedSortedFutureDates" class="row">
+
+    <!-- Future Appointments -->
+    <div class="col-md-6" *ngIf="filteredAppointmentsGrouped[date]?.length">
       <h4 class="text-primary">Appointments</h4>
       <div class="card mb-3 mx-2">
         <div class="card-header bg-primary text-white">
           {{ date }}
         </div>
         <ul class="list-group list-group-flush">
-          <li class="list-group-item" *ngFor="let appointment of filteredPastAppointmentsGrouped[date]">
+          <li class="list-group-item" *ngFor="let appointment of filteredAppointmentsGrouped[date]">
             <strong>Client: {{ appointment.name }}</strong><br>
             {{ appointment.date | date: 'shortTime' }}<br>
             Service: {{ appointment.type }}<br>
             Virtual: {{ appointment.isVirtual ? 'Yes' : 'No' }}<br>
             Email: {{ appointment.email }}<br>
             Phone: {{ appointment.phoneNumber }}<br>
-            <button class="btn btn-sm btn-danger mt-2" (click)="deleteAppointment(appointment.id!)">
+            <button class="btn btn-sm btn-danger mt-2" (click)="deleteAppointment(+appointment.id!)">
               Delete
             </button>
           </li>
@@ -27,73 +92,35 @@
       </div>
     </div>
 
-    <!-- Past Events -->
-    <div class="col-md-6" *ngIf="filteredPastEventsGrouped[date]">
+    <!-- Future Events -->
+    <div class="col-md-6" *ngIf="filteredEventsGrouped[date]?.length">
       <h4 class="text-success">Events</h4>
       <div class="card mb-3 mx-2">
         <div class="card-header bg-success text-white">
           {{ date }}
         </div>
         <ul class="list-group list-group-flush">
-          <li class="list-group-item" *ngFor="let event of filteredPastEventsGrouped[date]">
+          <li class="list-group-item" *ngFor="let event of filteredEventsGrouped[date]">
             <strong>{{ event.eventName }}</strong><br>
             {{ event.startDate | date: 'shortTime' }}<br>
             Type: {{ event.eventType }}<br>
             Virtual: {{ event.isVirtual ? 'Yes' : 'No' }}<br>
-            <button class="btn btn-sm btn-danger mt-2" (click)="deleteEvent(event.id!)">
-              Delete
-            </button>
+            <div>
+              <button *ngIf="isAdmin" class="btn btn-sm btn-primary mt-2 mx-3" (click)="openEditEventDialog(event)">
+                Edit Event Details
+              </button>
+              <button class="btn btn-sm btn-danger mt-2" (click)="deleteEvent(+event.id!)">
+                Delete
+              </button>
+            </div>
           </li>
         </ul>
       </div>
     </div>
+
   </div>
 </div>
 
-<!-- Future Appointments and Events -->
-<h2 class="text-center mt-5">Future Appointments and Events</h2>
-<div *ngFor="let date of sortedDates" class="row">
-  <!-- Future Appointments -->
-  <div class="col-md-6" *ngIf="filteredAppointmentsGrouped[date]">
-    <h4 class="text-primary">Appointments</h4>
-    <div class="card mb-3 mx-2">
-      <div class="card-header bg-primary text-white">
-        {{ date }}
-      </div>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item" *ngFor="let appointment of filteredAppointmentsGrouped[date]">
-          <strong>Client: {{ appointment.name }}</strong><br>
-          {{ appointment.date | date: 'shortTime' }}<br>
-          Service: {{ appointment.type }}<br>
-          Virtual: {{ appointment.isVirtual ? 'Yes' : 'No' }}<br>
-          Email: {{ appointment.email }}<br>
-          Phone: {{ appointment.phoneNumber }}<br>
-          <button class="btn btn-sm btn-danger mt-2" (click)="deleteAppointment(appointment.id!)">
-            Delete
-          </button>
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- Future Events -->
-  <div class="col-md-6" *ngIf="filteredEventsGrouped[date]">
-    <h4 class="text-success">Events</h4>
-    <div class="card mb-3 mx-2">
-      <div class="card-header bg-success text-white">
-        {{ date }}
-      </div>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item" *ngFor="let event of filteredEventsGrouped[date]">
-          <strong>{{ event.eventName }}</strong><br>
-          {{ event.startDate | date: 'shortTime' }}<br>
-          Type: {{ event.eventType }}<br>
-          Virtual: {{ event.isVirtual ? 'Yes' : 'No' }}<br>
-          <button class="btn btn-sm btn-danger mt-2" (click)="deleteEvent(event.id!)">
-            Delete
-          </button>
-        </li>
-      </ul>
-    </div>
-  </div>
-</div>
+<ng-template #noFutureItems>
+  <p class="text-muted text-center">No upcoming appointments or events found within the selected range.</p>
+</ng-template>

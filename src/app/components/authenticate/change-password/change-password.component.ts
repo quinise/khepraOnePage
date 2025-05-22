@@ -59,7 +59,7 @@ export class ChangePasswordComponent {
         this.changeEmail(currentPassword!, newEmail);
       }
     } else {
-      console.log('Form is invalid');
+      console.log('TESTING: Form is invalid');
     }
   }
   
@@ -86,7 +86,8 @@ export class ChangePasswordComponent {
     await this.reauthenticateUser(currentPassword);
     if (this.user) {
       await verifyBeforeUpdateEmail(this.user, newEmail);
-      console.log('Verification email sent to the new address. Please verify to complete the update.');
+      // TODO: Produce an alert or notification to inform the user that a verification email has been sent
+      console.log('TODO: Verification email sent to the new address. Please verify to complete the update.');
     }
   }
 
@@ -94,6 +95,7 @@ export class ChangePasswordComponent {
     await this.reauthenticateUser(currentPassword);
     if (this.user) {
       await updatePassword(this.user, newPassword);
+      // TODO: Produce an alert or notification to inform the user that their password has been updated
       console.log('Password updated successfully.');
     }
   }

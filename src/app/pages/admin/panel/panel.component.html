@@ -10,13 +10,16 @@
   <div class="col"></div>
 </div>
 
-<div *ngIf="showCalendar">
+<div *appIfView="showCalendar">
   <app-calendar-view [calendarOptions]="calendarOptions"></app-calendar-view>
 </div>
 
-<div *ngIf="!showCalendar">
+<div *appIfView="!showCalendar">
   <app-event-list
-    [appointments]="appointments"
+    *ngIf="events?.length"
     [events]="events"
-  ></app-event-list>
+    [appointments]="appointments"
+    [attr.key]="showCalendar ? 'calendar' : 'list'">
+  </app-event-list>
 </div>
+

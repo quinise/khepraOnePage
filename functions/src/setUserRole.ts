@@ -12,8 +12,8 @@ export const setUserRole = functions.auth.user().onCreate(async (user) => {
       role: role,
     });
 
-    console.log(`User role set to '${role}' for user: ${user.uid}`);
+    console.log(`TESTING: User role set to '${role}' for user: ${user.uid}`);
   } catch (error) {
-    console.error("Error setting user role:", error);
+    console.error("TESTING: Error setting user role:", error);
   }
 });

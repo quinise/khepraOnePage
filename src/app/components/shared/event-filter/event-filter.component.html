@@ -1,20 +1,26 @@
 <div class="container">
-  <div class="text-end w-50">
-    <mat-form-field appearance="fill" class="mt-4 mb-3">
-      <mat-select (selectionChange)="onRangeChangeWrapper($event)" [value]="daysRange">
-        <mat-option [value]="3">Within 3 Days</mat-option>
-        <mat-option [value]="7">Within 7 Days</mat-option>
-        <mat-option [value]="14">Within 14 Days</mat-option>
-        <mat-option [value]="30">Within 30 Days</mat-option>
-        <!-- TODO: UX text improvement -->
-        <mat-option [value]="365">A year ahead</mat-option>
-      </mat-select>
-    </mat-form-field>
+  <div class="row justify-content-end">
+    <div class="col-md-6 text-end">
+      <mat-form-field appearance="fill" class="mt-4 mb-3 w-100">
+        <mat-label>Show items within</mat-label>
+        <mat-select (selectionChange)="onRangeChangeWrapper($event)" [value]="daysRange">
+          <mat-option [value]="3">Next 3 Days</mat-option>
+          <mat-option [value]="7">Next 7 Days</mat-option>
+          <mat-option [value]="14">Next 14 Days</mat-option>
+          <mat-option [value]="30">Next 30 Days</mat-option>
+          <mat-option [value]="365">Next 365 Days</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
   </div>
-  <mat-slide-toggle
-    class="mx-auto"
-    [checked]="includePast"
-    (change)="handleIncludePastChangeWrapper($event.checked)">
-    Include Past Appointments and Events
-  </mat-slide-toggle>
+
+  <div class="row justify-content-center">
+    <div class="col-auto">
+      <mat-slide-toggle
+        [checked]="includePast | async"
+        (change)="handleIncludePastChangeWrapper($event.checked)">
+        Include Past Appointments and Events
+      </mat-slide-toggle>
+    </div>
+  </div>
 </div>

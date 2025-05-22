@@ -1,99 +1,97 @@
-import { Injectable, EventEmitter } from '@angular/core';
-import { take } from 'rxjs';
-import { AppointmentApiService } from './apis/appointmentApi.service';
-import { EventsApiService } from './apis/events-api.service';
+import { Injectable } from '@angular/core';
 import { Appointment } from '../interfaces/appointment';
 import { Event } from '../interfaces/event';
+import { AppointmentApiService } from './apis/appointmentApi.service';
+import { EventsApiService } from './apis/events-api.service';
+import { EventStoreService } from './event-store.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DeleteEventService {
-  appointmentDeleted = new EventEmitter<number>();
-  eventDeleted = new EventEmitter<number>();
-
   constructor(
-    private appointmentApiService: AppointmentApiService,
-    private eventApiService: EventsApiService
+    // private eventsService: EventsService,
+    private eventStore: EventStoreService,
+    private eventsApiService: EventsApiService,
+    private appointmentApiService: AppointmentApiService
   ) {}
 
-  deleteAppointment(
-    id: number,
-    flatAppointments: Appointment[],
-    groupedAppointments: { [date: string]: Appointment[] },
-    onSuccess: () => void,
-    onCleanup?: () => void
-  ): void {
-    if (!confirm('Are you sure you want to delete this appointment?')) return;
-  
-    this.appointmentApiService.deleteAppointment(id).pipe(take(1)).subscribe({
-      next: () => {
-        this.appointmentDeleted.emit(id);
-  
-        // Remove from flat list
-        const index = flatAppointments.findIndex(a => a.id === id);
-        if (index > -1) flatAppointments.splice(index, 1);
-  
-        // Remove from grouped object
-        for (const date in groupedAppointments) {
-          groupedAppointments[date] = groupedAppointments[date].filter(a => a.id !== id);
-          if (groupedAppointments[date].length === 0) delete groupedAppointments[date];
-        }
-  
-        onSuccess();
-        onCleanup?.();
-      },
-      error: err => {
-        console.error('Failed to delete appointment:', err);
-        alert('Could not delete appointment.');
-      }
-    });
-  }
-  
   deleteEvent(
-    id: number,
-    flatEvents: Event[],
-    groupedEvents: { [date: string]: Event[] },
+    id: string,
+    events: Event[],
     onSuccess: () => void,
-    onCleanup?: () => void
+    onComplete: () => void
   ): void {
-    if (!confirm('Are you sure you want to delete this event?')) return;
-  
-    this.eventApiService.deleteEvent(id).pipe(take(1)).subscribe({
+    const numericId = Number(id); // Convert string to number
+    const event = events.find(e => e.id === numericId || e.id === numericId);
+
+    if (!event) {
+      alert('Event not found');
+      onComplete();
+      return;
+    }
+
+    if (event.id === undefined) {
+      console.error('Cannot delete event: missing event ID');
+    return;
+}
+
+    if (!confirm(`Are you sure you want to delete this event: "${event.eventName}"?`)) {
+      onComplete();
+      return;
+    }
+
+    this.eventsApiService.deleteEvent(event.id).subscribe({
       next: () => {
-        this.eventDeleted.emit(id);
-  
-        // Remove from flat list
-        const index = flatEvents.findIndex(e => e.id === id);
-        if (index > -1) flatEvents.splice(index, 1);
-  
-        // Remove from grouped object
-        for (const date in groupedEvents) {
-          groupedEvents[date] = groupedEvents[date].filter(e => e.id !== id);
-          if (groupedEvents[date].length === 0) delete groupedEvents[date];
+        if (typeof event.id === 'number') {
+          this.eventStore.removeEventById(String(event.id));
         }
-  
         onSuccess();
-        onCleanup?.();
       },
-      error: err => {
-        console.error('Failed to delete event:', err);
-        alert('Could not delete event.');
-      }
+      error: (err) => {
+        console.error('Failed to delete event', err);
+        alert('Failed to delete event');
+      },
+      complete: onComplete,
     });
   }
 
-  private filterOutItem<T extends { id?: number }>(
-    list: T[] | { [key: string]: T[] },
-    id: number
+  deleteAppointment(
+    id: string,
+    appointments: Appointment[],
+    onSuccess: () => void,
+    onComplete: () => void
   ): void {
-    if (Array.isArray(list)) {
-      const index = list.findIndex(item => item.id === id);
-      if (index !== -1) list.splice(index, 1);
-    } else {
-      for (const key in list) {
-        list[key] = list[key].filter(item => item.id !== id);
-      }
+    const numericId = Number(id); // Convert string to number
+    const appointment = appointments.find(a => a.id === numericId || a.id === numericId);
+
+    if (!appointment) {
+      alert('Appointment not found');
+      onComplete();
+      return;
     }
+
+    if (appointment.id === undefined) {
+      console.error('Cannot delete apointment: missing appointment ID');
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to delete this appointment: "${appointment.name}"?`)) {
+      onComplete();
+      return;
+    }
+
+    this.appointmentApiService.deleteAppointment(appointment.id).subscribe({
+      next: () => {
+        // Remove the appointment from the store
+        this.eventStore.removeAppointmentById(String(appointment.id));
+        onSuccess();
+      },
+      error: (err) => {
+        console.error('Failed to delete appointment', err);
+        alert('Failed to delete appointment');
+      },
+      complete: onComplete,
+    });
   }
 }

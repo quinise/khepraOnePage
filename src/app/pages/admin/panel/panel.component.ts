@@ -9,9 +9,12 @@ import { EventListComponent } from 'src/app/components/event-list-component/even
 import { CalendarViewComponent } from 'src/app/components/shared/calendar-view/calendar-view.component';
 import { Appointment } from 'src/app/interfaces/appointment';
 import { Event } from 'src/app/interfaces/event';
+import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
+import { EventsApiService } from 'src/app/services/apis/events-api.service';
 import { AuthService } from 'src/app/services/authentication/auth.service';
+import { EventStoreService } from 'src/app/services/event-store.service';
 import { EventsService } from 'src/app/services/events.service';
-
+import { IfViewDirective } from 'src/app/shared/ifViewDirective';
 @Component({
   selector: 'app-panel',
   standalone: true,
@@ -19,6 +22,7 @@ import { EventsService } from 'src/app/services/events.service';
     CommonModule,
     CalendarViewComponent,
     EventListComponent,
+    IfViewDirective,
     MatButtonModule,
   ],
   templateUrl: './panel.component.html',
@@ -32,12 +36,26 @@ export class PanelComponent implements OnInit {
   
   isAdmin: boolean = false;
 
-  constructor(private eventsService: EventsService, private authService: AuthService) {}
+  constructor(
+    private appointmentsApiService: AppointmentApiService,
+    private eventsApiService: EventsApiService,
+    private eventsService: EventsService,
+    private authService: AuthService,
+    private eventStore: EventStoreService
+  ) {}
 
   ngOnInit(): void {
     this.authService.user$.pipe(take(1)).subscribe(user => {
       this.isAdmin = user?.role === 'admin';
       this.fetchData();
+    });
+  
+    this.eventsApiService.getAllEvents().subscribe(events => {
+      this.eventStore.setEvents(events);
+    });
+
+    this.appointmentsApiService.getAllAppointments().subscribe(appointments => {
+      this.appointments = appointments;
     });
   }
 
