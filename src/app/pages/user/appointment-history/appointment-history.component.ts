@@ -64,14 +64,13 @@ export class AppointmentHistoryComponent implements OnInit {
 
   deleteAppointment(id: number): void {
     this.deleteService.deleteAppointment(
-      id,
+      id.toString(),
       this.upcomingAppointments,
-      {},
+      () => {},
       () => {
         // After deletion, update BehaviorSubject so the view refreshes
         this.upcomingAppointments$.next([...this.upcomingAppointments]);
         // TODO: Success action - show a toast
-        console.log('Appointment deleted from history component');
       }
     );
   }

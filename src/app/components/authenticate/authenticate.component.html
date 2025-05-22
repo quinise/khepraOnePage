@@ -26,7 +26,10 @@
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="center">
-    <button *ngIf="data.authStep === 'Sign up'" type="submit" [disabled]="authForm.invalid" class="btn btn-primary mx-4">Create Account</button>
+    <div>
+      <button *ngIf="data.authStep === 'Sign up'" type="submit" [disabled]="authForm.invalid" class="btn btn-primary mx-4">Create Account</button>
+      <button *ngIf="data.authStep === 'Sign up'" (click)="googleLogin()" class="btn btn-primary mx-4">Sign up with Google</button>
+    </div>
     <button *ngIf="data.authStep === 'Login'" type="submit" class="btn btn-primary mx-4">Log in</button>
   <button *ngIf="data.authStep === 'Login'" (click)="googleLogin()" class="btn btn-primary mx-4 my-3">Login with Google</button>
 </mat-dialog-actions>

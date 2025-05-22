@@ -1,12 +1,15 @@
 import { CommonModule, NgFor } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { Subscription, take } from 'rxjs';
 import { Appointment } from 'src/app/interfaces/appointment';
 import { Event } from 'src/app/interfaces/event';
-import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
 import { EventsApiService } from 'src/app/services/apis/events-api.service';
+import { AuthService } from 'src/app/services/authentication/auth.service';
 import { DeleteEventService } from 'src/app/services/delete-event.service';
 import { EventFilterService } from 'src/app/services/event-filter.service';
-import { EventsService } from 'src/app/services/events.service';
+import { EventStoreService } from 'src/app/services/event-store.service';
+import { CreateEventFormComponent } from '../forms/create-event-form/create-event-form.component';
 import { EventFilterComponent } from '../shared/event-filter/event-filter.component';
 
 @Component({
@@ -17,12 +20,24 @@ import { EventFilterComponent } from '../shared/event-filter/event-filter.compon
   styleUrls: ['./event-list-component.component.css'],
 })
 export class EventListComponent implements OnInit {
-  @Input() events: Event[] = [];
-  @Input() appointments: Appointment[] = [];
+  isAdmin: boolean = false;
+
+  private _appointments: Appointment[] = [];
+  private _events: Event[] = [];
+
+  filteredAppointments$ = this.filterService.filteredAppointments$;
+  filteredPastAppointments$ = this.filterService.filteredPastAppointments$;
+  filteredEvents$ = this.filterService.filteredEvents$;
+  filteredPastEvents$ = this.filterService.filteredPastEvents$;
 
   filteredAppointmentsGrouped: { [date: string]: Appointment[] } = {};
   filteredEventsGrouped: { [date: string]: Event[] } = {};
-  
+
+  pastAppointmentsGrouped: { [date: string]: Appointment[] } = {};
+  pastEventsGrouped: { [date: string]: Event[] } = {};
+
+  private subscriptions: Subscription[] = [];
+
   displayedListEvents: {
     id: number | string | undefined;
     title: string;
@@ -30,104 +45,231 @@ export class EventListComponent implements OnInit {
     type: 'appointment' | 'event';
   }[] = [];
 
+  pastDisplayedListEvents: {
+    id: number | string | undefined;
+    title: string;
+    date: string;
+    type: 'appointment' | 'event';
+  }[] = [];
+
   sortedDates: string[] = [];
+  computedSortedPastDates: string[] = [];
 
-  constructor(
-    private deleteService: DeleteEventService,
-    private appointmentApiService: AppointmentApiService,
-    private eventsApiService: EventsApiService,
-    private eventsService: EventsService,
-    private filterService: EventFilterService
+  includePast: boolean = false;
+  private includePastSub!: Subscription;
 
-  ){}
-  
-  ngOnInit(): void {
-    this.updateFilteredData();
+  @Input()
+  set appointments(value: Appointment[]) {
+    if (value && value.length) {
+      this._appointments = value;
+      this.filterService.updateAppointments(this._appointments);
+    }
   }
 
-  updateFilteredData(): void {
-    const includePast = this.filterService.includePast;
+  get appointments(): Appointment[] {
+    return this._appointments;
+  }
 
-    this.filteredAppointmentsGrouped = includePast
-      ? {
-          ...this.filterService.filteredAppointments,
-          ...this.filterService.filteredPastAppointments,
-        }
-      : this.filterService.filteredAppointments;
+  @Input()
+  set events(value: Event[]) {
 
-    this.filteredEventsGrouped = includePast
-      ? {
-          ...this.filterService.filteredEvents,
-          ...this.filterService.filteredPastEvents,
-        }
-      : this.filterService.filteredEvents;
+    if (value && value.length) {
+      this._events = value;
+      this.filterService.updateEvents(this._events);
+    }
+  }
 
-    const allKeys = new Set([
-      ...Object.keys(this.filteredAppointmentsGrouped),
-      ...Object.keys(this.filteredEventsGrouped),
-    ]);
+  get events(): Event[] {
+    return this._events;
+  }
 
-    this.sortedDates = Array.from(allKeys).sort(
-      (a, b) => new Date(a).getTime() - new Date(b).getTime()
+  constructor(
+    private authService: AuthService,
+    private deleteService: DeleteEventService,
+    public filterService: EventFilterService,
+    private dialog: MatDialog,
+    public eventsService: EventsApiService,
+    private eventStore: EventStoreService
+  ) {}
+
+  ngOnInit(): void {
+    const now = new Date();
+
+    // Subscribe to includePast toggle
+    this.includePastSub = this.filterService.includePast$.subscribe((value) => {
+      this.includePast = value;
+      this.updateListView(); // re-evaluate display list based on toggle
+    });
+
+    // Subscribe to filtered appointments
+    this.subscriptions.push(
+      this.filterService.filteredAppointments$.subscribe((filtered: { [key: string]: Appointment[] }) => {
+        const allAppointments = Object.values(filtered).flat();
+        const future = allAppointments.filter((app) => new Date(app.date) >= now);
+
+        this.filteredAppointmentsGrouped = this.filterService.groupItemsByDate(future, 'date');
+
+        this.updateListView();
+      })
     );
+
+
+    // Subscribe to filtered past appointments
+    this.subscriptions.push(
+      this.filterService.filteredPastAppointments$.subscribe((filtered: { [key: string]: Appointment[] }) => {
+        const allAppointments = Object.values(filtered).flat();
+        const past = allAppointments.filter((app) => new Date(app.date) < now);
+
+        this.pastAppointmentsGrouped = this.filterService.groupItemsByDate(past, 'date');
+
+        this.updateListView();
+      })
+    )
+
+    // Subscribe to filtered events
+    this.subscriptions.push(
+      this.filterService.filteredEvents$.subscribe((filtered: { [key: string]: Event[] }) => {
+        const allEvents = Object.values(filtered).flat();
+        const future = allEvents.filter((event) => new Date(event.startDate) >= now);
+
+        this.filteredEventsGrouped = this.filterService.groupItemsByDate(future, 'startDate');
+
+        this.updateListView();
+      })
+    );
+
+    // Subscribe to filtered past events
+    this.subscriptions.push(
+      this.filterService.filteredPastEvents$.subscribe((filtered: { [key: string]: Event[] }) => {
+        const allEvents = Object.values(filtered).flat();
+        const past = allEvents.filter((event) => new Date(event.startDate) < now);
+
+        this.pastEventsGrouped = this.filterService.groupItemsByDate(past, 'startDate');
+
+        this.updateListView();
+      })
+    );
+
+    // Get auth info once
+    this.authService.user$.pipe(take(1)).subscribe(user => {
+      this.isAdmin = user?.role === 'admin';
+    });
+
+    // Update initial filters
+    this.filterService.updateAppointments(this.appointments);
+    this.filterService.updateEvents(this.events);
+}
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+    this.includePastSub?.unsubscribe();
   }
 
   updateListView(): void {
-    const appointmentList = Object.values(this.filteredAppointmentsGrouped).flat();
-    const eventList = Object.values(this.filteredEventsGrouped).flat();
+    const futureAppointments = Object.values(this.filteredAppointmentsGrouped).flat();
+    const futureEvents = Object.values(this.filteredEventsGrouped).flat();
+
+    const pastAppointments = this.includePast ? Object.values(this.pastAppointmentsGrouped).flat() : [];
+    const pastEvents = this.includePast ? Object.values(this.pastEventsGrouped).flat() : [];
 
     const combined = [
-      ...appointmentList.map(appointment => ({
-        id: appointment.id,
-        title: appointment.name,
-        date: new Date(appointment.date).toISOString(),
-        type: 'appointment' as const,
+      ...futureAppointments.map(app => ({
+        id: app.id,
+        title: app.name,
+        date: new Date(app.date).toISOString(),
+        type: 'appointment' as const
       })),
-      ...eventList.map(event => ({
-        id: event.id,
-        title: event.eventName,
-        date: new Date(event.startDate).toISOString(),
-        type: 'event' as const,
+      ...futureEvents.map(evt => ({
+        id: evt.id,
+        title: evt.eventName,
+        date: new Date(evt.startDate).toISOString(),
+        type: 'event' as const
       })),
+      ...pastAppointments.map(app => ({
+        id: app.id,
+        title: app.name,
+        date: new Date(app.date).toISOString(),
+        type: 'appointment' as const
+      })),
+      ...pastEvents.map(evt => ({
+        id: evt.id,
+        title: evt.eventName,
+        date: new Date(evt.startDate).toISOString(),
+        type: 'event' as const
+      }))
     ];
 
     this.displayedListEvents = combined.sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
+
+    this.sortedDates = Array.from(
+      new Set([...Object.keys(this.filteredAppointmentsGrouped), ...Object.keys(this.filteredEventsGrouped)])
+    ).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+
+    this.computedSortedPastDates = this.filterService.getUnifiedSortedPastKeys(
+      this.pastAppointmentsGrouped,
+      this.pastEventsGrouped
+    );
   }
 
   deleteAppointment(id: number): void {
     this.deleteService.deleteAppointment(
-      id,
+      id.toString(),
       this.appointments,
-      this.filteredAppointmentsGrouped,
-      () => this.updateListView()
-    )
-      ;
+      () => this.updateListView(),
+      () => {}
+    );
   }
 
   deleteEvent(id: number): void {
     this.deleteService.deleteEvent(
-      id,
+      id.toString(),
       this.events,
-      this.filteredEventsGrouped,
       () => this.updateListView(),
+      () => {}
     );
   }
 
-  get filteredPastAppointmentsGrouped() {
-    return this.filterService.filteredPastAppointments;
-  }
-
-  get filteredPastEventsGrouped() {
-    return this.filterService.filteredPastEvents;
-  }
-  
-  get includePast() {
-    return this.filterService.includePast;
-  }
-
   get sortedPastDates() {
-    return this.filterService.getSortedKeys(this.filteredPastAppointmentsGrouped);
+    return this.filterService.getSortedKeys(this.pastAppointmentsGrouped);
+  }
+
+  get unifiedSortedFutureDates(): string[] {
+    return this.filterService.getUnifiedSortedKeys(this.filteredAppointmentsGrouped, this.filteredEventsGrouped);
+  }
+
+  get unifiedSortedPastDates(): string[] {
+    return this.filterService.getUnifiedSortedPastKeys(this.pastAppointmentsGrouped, this.pastEventsGrouped);
+  }
+
+  openEditEventDialog(event: Event): void {
+    const dialogRef = this.dialog.open(CreateEventFormComponent, {
+      width: '600px',
+      data: { eventToEdit: event }
+    });
+
+    const componentInstance = dialogRef.componentInstance;
+    if (componentInstance) {
+      componentInstance.eventSaved.subscribe((updatedEvent: Event) => {
+        this.eventStore.upsertEvent(updatedEvent);
+      });
+    }
+  }
+
+  editEvent(event: Event): void {
+    const dialogRef = this.dialog.open(CreateEventFormComponent, {
+      width: '600px',
+      data: { eventToEdit: event }
+    });
+
+    dialogRef.afterClosed().subscribe((updatedEvent: Event | undefined) => {
+      if (updatedEvent) {
+        this.eventsService.getAllEvents().subscribe((events: Event[]) => {
+          this.events = events;
+          this.filterService.updateEvents(events);
+        });
+      }
+    });
   }
 }

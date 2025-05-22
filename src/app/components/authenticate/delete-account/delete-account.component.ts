@@ -25,10 +25,8 @@ export class DeleteAccountComponent {
 
     if (user) {
       const providerIds = user.providerData.map((provider) => provider.providerId);
-      console.log('Provider IDs:', providerIds);
     
       if (providerIds.includes('google.com')) {
-        console.log('User signed in with Google');
 
         reauthenticateWithPopup(auth.currentUser, provider)
           .then(() => {
@@ -36,10 +34,9 @@ export class DeleteAccountComponent {
             this.router.navigate(['']);
           })
           .catch((error) => {
-            console.log('Error re-authenticating with Google:', error);
+            console.log('TESTING: Error re-authenticating with Google:', error);
           });
       } else if (providerIds.includes('password')) {
-        console.log('User signed in with Email/Password');
         try {
           // TODO: Create a form to get the email and password from the user
           const email = prompt('Please enter your email:');
@@ -59,11 +56,9 @@ export class DeleteAccountComponent {
           // Delete the user account
           await deleteUser(user);
     
-          console.log('User account deleted successfully.');
           this.authService.logout();
           this.router.navigate(['']);
         } catch (error: any) {
-          console.error('Error deleting user:', error);
           if (error.code === 'auth/wrong-password') {
             alert('Incorrect password. Please try again.');
           } else if (error.code === 'auth/user-mismatch') {
@@ -75,10 +70,10 @@ export class DeleteAccountComponent {
           }
         }
       } else {
-        console.log('User signed in with another provider:', providerIds);
+        console.log('TESTING: User signed in with another provider:', providerIds);
       }
     } else {
-      console.log('No user is currently signed in.');
+      console.log('TESTING: No user is currently signed in.');
     }
   }
 

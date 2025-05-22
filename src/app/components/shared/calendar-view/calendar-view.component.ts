@@ -1,56 +1,144 @@
 import { NgIf } from '@angular/common';
-import { Component, inject, Input } from '@angular/core';
+import { Component, Input, OnDestroy } from '@angular/core';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions, EventClickArg, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { take } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 import { Appointment } from 'src/app/interfaces/appointment';
 import { Event } from 'src/app/interfaces/event';
-import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
-import { EventsApiService } from 'src/app/services/apis/events-api.service';
 import { AuthService } from 'src/app/services/authentication/auth.service';
 import { DeleteEventService } from 'src/app/services/delete-event.service';
 import { EventFilterService } from 'src/app/services/event-filter.service';
 import { EventsService } from 'src/app/services/events.service';
 import { EventFilterComponent } from '../../shared/event-filter/event-filter.component';
+
 @Component({
   selector: 'app-calendar-view',
-  imports: [FullCalendarModule, EventFilterComponent, NgIf],
-  inputs: ['calendarOptions'],
+  imports: [NgIf, FullCalendarModule, EventFilterComponent],
   templateUrl: './calendar-view.component.html',
   styleUrls: ['./calendar-view.component.css'],
 })
-export class CalendarViewComponent {
+export class CalendarViewComponent implements OnDestroy {
   @Input() calendarOptions!: CalendarOptions;
 
-  @Input() events: Event[] = [];
-  @Input() appointments: Appointment[] = [];
+  isAdmin = false;
 
-  @Input() filteredEventsGrouped: { [date: string]: Event[] } = {};
-  @Input() filteredAppointmentsGrouped: { [date: string]: Appointment[] } = {};
+  showPanel = false;
+  selectedEvent: EventInput | null = null;
+
+  private events: Event[] = [];
+  private appointments: Appointment[] = [];
+
+  filteredAppointments$ = this.filterService.filteredAppointments$;
+  filteredPastAppointments$ = this.filterService.filteredPastAppointments$;
+  filteredEvents$ = this.filterService.filteredEvents$;
+  filteredPastEvents$ = this.filterService.filteredPastEvents$;
+
+  filteredAppointmentsGrouped: { [date: string]: Appointment[] } = {};
+  filteredEventsGrouped: { [date: string]: Event[] } = {};
+
+  pastAppointmentsGrouped: { [date: string]: Appointment[] } = {};
+  pastEventsGrouped: { [date: string]: Event[] } = {};
 
   sortedDates: string[] = [];
-  showPanel = false;
+  computedSortedPastDates: string[] = [];
 
-  filteredEventsFlat: Event[] = [];
-  filteredAppointmentsFlat: Appointment[] = [];
+  includePast: boolean = false;
+  private includePastSub!: Subscription;
 
-  private authService = inject(AuthService);
-  protected isAdmin: boolean = false;
+  private subscriptions: Subscription[] = [];
+
+  displayedCalendarEvents: {
+    id: number | string | undefined;
+    title: string;
+    date: string;
+    type: 'appointment' | 'event';
+  }[] = [];
+
+  pastDisplayedCalendarEvents: {
+    id: number | string | undefined;
+    title: string;
+    date: string;
+    type: 'appointment' | 'event';
+  }[] = [];
 
   constructor(
+    private authService: AuthService,
     private deleteService: DeleteEventService,
-    private appointmentApiService: AppointmentApiService,
-    private eventsApiService: EventsApiService,
     private eventsService: EventsService,
     private filterService: EventFilterService
   ) {}
 
   ngOnInit(): void {
+    const now = new Date();
+    const today = this.stripTime(new Date());
+
+    // Subscribe to includePast toggle
+    this.includePastSub = this.filterService.includePast$.subscribe((value) => {
+      this.includePast = value;
+      this.updateCalendar();
+    });
+
+    // Subscribe to filtered appointments
+    this.subscriptions.push(
+      this.filterService.filteredAppointments$.subscribe((filtered: { [key: string]: Appointment[] }) => {
+        const allAppointments = Object.values(filtered).flat();
+        const future = allAppointments.filter(app => this.stripTime(new Date(app.date)) >= today);
+
+        this.filteredAppointmentsGrouped = this.filterService.groupItemsByDate(future, 'date');
+
+        this.updateCalendar();
+      })
+    );
+
+    // Subscribe to filtered past appointments
+    this.subscriptions.push(
+      this.filterService.filteredPastAppointments$.subscribe((filtered: { [key: string]: Appointment[] }) => {
+        const allAppointments = Object.values(filtered).flat();
+        const past = allAppointments.filter((app) => new Date(app.date) < now);
+
+        this.pastAppointmentsGrouped = this.filterService.groupItemsByDate(past, 'date');
+
+        this.updateCalendar();
+      })
+    )
+
+    // Subscribe to filtered events
+    this.subscriptions.push(
+      this.filterService.filteredEvents$.subscribe((filtered: { [key: string]: Event[] }) => {
+        const allEvents = Object.values(filtered).flat();
+        const future = allEvents.filter(event => this.stripTime(new Date(event.startDate)) >= today);
+
+        this.filteredEventsGrouped = this.filterService.groupItemsByDate(future, 'startDate');
+
+        this.updateCalendar();
+      })
+    );
+
+    // Subscribe to filtered past events
+    this.subscriptions.push(
+      this.filterService.filteredPastEvents$.subscribe((filtered: { [key: string]: Event[] }) => {
+        const allEvents = Object.values(filtered).flat();
+        const past = allEvents.filter((event) => new Date(event.startDate) < now);
+
+        this.pastEventsGrouped = this.filterService.groupItemsByDate(past, 'startDate');
+
+        this.updateCalendar();
+      })
+    );
+
+    // Get auth info
     this.authService.user$.pipe(take(1)).subscribe(user => {
       this.isAdmin = user?.role === 'admin';
-  
+    });
+
+    // Update initial filters
+    this.filterService.updateAppointments(this.appointments);
+    this.filterService.updateEvents(this.events);
+
+    this.authService.user$.pipe(take(1)).subscribe((user) => {
+      this.isAdmin = user?.role === 'admin';
       this.loadData();
     });
 
@@ -66,120 +154,49 @@ export class CalendarViewComponent {
       eventClick: this.handleEventClick.bind(this),
     };
   }
-  
-  groupByDate(items: Appointment[]): { [date: string]: Appointment[] };
-  groupByDate(items: Event[]): { [date: string]: Event[] };
-  groupByDate<T extends { startDate?: string; date?: string }>(items: T[]): { [date: string]: T[] } {
-    return items.reduce((acc, item) => {
-      const rawDate = item.startDate || item.date;
-  
-      if (!rawDate) {
-        console.warn('Missing date/startDate in item:', item);
-        return acc;
-      }
-  
-      const date = rawDate.split('T')[0];
-      acc[date] = acc[date] || [];
-      acc[date].push(item);
-      return acc;
-    }, {} as { [date: string]: T[] });
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+    this.includePastSub?.unsubscribe();
   }
-  
+
   loadData(): void {
-    this.eventsService.fetchAppointmentsAndEvents(this.isAdmin).subscribe(([appointments, events]) => {
-      this.appointments = appointments;
-      this.events = events;
-  
-      // Filter out malformed data
-      this.appointments = appointments.filter(a => !!a.date);
-      this.events = events.filter(e => !!e.startDate);
+    this.eventsService.fetchAppointmentsAndEvents(this.isAdmin).subscribe(
+      ([appointments, events]) => {
+        this.appointments = appointments.filter((a) => !!a.date);
+        this.events = events.filter((e) => !!e.startDate);
 
-      // Populate grouped data if applicable
-      this.filteredAppointmentsGrouped = this.groupByDate(appointments);
-      this.filteredEventsGrouped = this.groupByDate(events);
+        // Update EventFilterService with new data
+        this.filterService.updateAppointments(this.appointments);
+        this.filterService.updateEvents(this.events);
 
-      // Share data with filter service
-      this.filterService.appointmentsList = appointments;
-      this.filterService.eventsList = events;
-
-      // Grouping data by date
-      this.filterService.groupedAppointments = this.filterService.groupItemsByDate(appointments, 'date');
-      this.filterService.groupedPastAppointments = this.filterService.groupItemsByDate(
-        appointments.filter(a => new Date(a.date) < new Date()), 'date'
-      );
-
-      this.filterService.groupedEvents = this.filterService.groupItemsByDate(events, 'startDate');
-      this.filterService.groupedPastEvents = this.filterService.groupItemsByDate(
-        events.filter(e => new Date(e.startDate) < new Date()), 'startDate'
-      );
-
-      // Apply initial filter
-      this.filterService.setRange(this.filterService.daysRange);
-
-      // Refresh component view with filtered data
-      this.updateFilteredData();
-  
-      this.updateFilteredData();
-      this.updateCalendar();
-    });
-  }
-
-  updateFilteredData(): void {
-    const includePast = this.filterService.includePast;
-
-    this.filteredAppointmentsGrouped = includePast
-      ? {
-          ...this.filterService.filteredAppointments,
-          ...this.filterService.filteredPastAppointments,
-        }
-      : this.filterService.filteredAppointments;
-
-    this.filteredEventsGrouped = includePast
-      ? {
-          ...this.filterService.filteredEvents,
-          ...this.filterService.filteredPastEvents,
-        }
-      : this.filterService.filteredEvents;
-
-    const allKeys = new Set([
-      ...Object.keys(this.filteredAppointmentsGrouped),
-      ...Object.keys(this.filteredEventsGrouped),
-    ]);
-
-    this.sortedDates = Array.from(allKeys).sort(
-      (a, b) => new Date(a).getTime() - new Date(b).getTime()
+        // Trigger filtering (e.g., based on initial days range)
+        this.filterService.setRange(this.filterService.daysRange);
+      },
+      (error) => console.error('TESTING: Error loading data:', error)
     );
   }
 
-  onFilterChange(): void {
-    this.updateFilteredData();
-    this.updateCalendar();
-  }
-  
   updateCalendar(): void {
-    // Flatten grouped appointment and event objects into arrays
-    const flatAppointments = Object.values(this.filteredAppointmentsGrouped).flat();
-    const flatEvents = Object.values(this.filteredEventsGrouped).flat();
-  
-    // Store flattened lists for reference (e.g., deletion)
-    this.filteredAppointmentsFlat = flatAppointments;
-    this.filteredEventsFlat = flatEvents;
-  
-    // Transform for FullCalendar
-    const calendarAppointments = this.eventsService.transformAppointmentsForFullCalendar(flatAppointments);
-    const calendarEvents = this.eventsService.transformEventsForFullCalendar(flatEvents);
-  
-    // Assign to calendar options
-    this.calendarOptions.events = [...calendarAppointments, ...calendarEvents];
+    const futureAppointments = Object.values(this.filteredAppointmentsGrouped).flat();
+    const futureEvents = Object.values(this.filteredEventsGrouped).flat();
+
+    const pastAppointments = this.includePast ? Object.values(this.pastAppointmentsGrouped).flat() : [];
+    const pastEvents = this.includePast ? Object.values(this.pastEventsGrouped).flat() : [];
+
+    const futureCalendarAppointments = this.eventsService.transformAppointmentsForFullCalendar(futureAppointments);
+    const futureCalendarEvents = this.eventsService.transformEventsForFullCalendar(futureEvents);
+
+    const pastCalendarAppointments = this.eventsService.transformAppointmentsForFullCalendar(pastAppointments);
+    const pastCalendarEvents = this.eventsService.transformEventsForFullCalendar(pastEvents)
+
+    this.calendarOptions.events = [...futureCalendarAppointments, ...futureCalendarEvents, ...pastCalendarAppointments, ...pastCalendarEvents];
   }
-  
-  selectedEvent: EventInput | null = null
 
   handleEventClick(clickInfo: EventClickArg) {
-    console.log('Event clicked:', clickInfo.event);
     this.selectedEvent = {
       title: clickInfo.event.title,
-      extendedProps: { ...clickInfo.event.extendedProps }
+      extendedProps: { ...clickInfo.event.extendedProps },
     };
     this.showPanel = true;
   }
@@ -189,69 +206,37 @@ export class CalendarViewComponent {
     this.selectedEvent = null;
   }
 
-  getCustomKeys(props: any): string[] {
-    return Object.keys(props);
-  }
-
   deleteEvent(): void {
     const id = this.selectedEvent?.extendedProps?.['eventId'] || this.selectedEvent?.extendedProps?.['id'];
     if (!id) {
       alert('Invalid event ID');
       return;
     }
-  
+
     this.deleteService.deleteEvent(
       id,
-      this.filteredEventsFlat,
-      this.filteredEventsGrouped,
+      Object.values(this.filteredEventsGrouped).flat(),
       () => this.updateCalendar(),
-      () => {
-        if (
-          this.selectedEvent?.extendedProps?.['eventId'] === id ||
-          this.selectedEvent?.extendedProps?.['id'] === id
-        ) {
-          this.closeEventDetails();
-        }
-      }
+      () => this.closeEventDetails()
     );
   }
-  
+
   deleteAppointment(): void {
     const id = this.selectedEvent?.extendedProps?.['appointmentId'] || this.selectedEvent?.extendedProps?.['id'];
     if (!id) {
       alert('Invalid appointment ID');
       return;
     }
-  
+
     this.deleteService.deleteAppointment(
       id,
-      this.filteredAppointmentsFlat,
-      this.filteredAppointmentsGrouped,
+      Object.values(this.filteredAppointmentsGrouped).flat(),
       () => this.updateCalendar(),
-      () => {
-        if (
-          this.selectedEvent?.extendedProps?.['appointmentId'] === id ||
-          this.selectedEvent?.extendedProps?.['id'] === id
-        ) {
-          this.closeEventDetails();
-        }
-      }
+      () => this.closeEventDetails()
     );
   }
 
-  get filteredPastAppointmentsGrouped() {
-    return this.filterService.filteredPastAppointments;
-  }
-
-  get filteredPastEventsGrouped() {
-    return this.filterService.filteredPastEvents;
-  }
-  
-  get includePast() {
-    return this.filterService.includePast;
-  }
-
-  get sortedPastDates() {
-    return this.filterService.getSortedKeys(this.filteredPastAppointmentsGrouped);
+  stripTime(date: Date): Date {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
   }
 }

@@ -26,7 +26,6 @@ export class EventsService {
     return forkJoin([appointment$, event$]);
   }
   
-
   transformAppointmentsForFullCalendar(appointments: Appointment[]): any[] {
     return appointments.map(appointment => ({
       id: appointment.id?.toString(),

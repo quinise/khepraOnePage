@@ -100,13 +100,12 @@ export class AuthenticateComponent {
     } else if (this.data.authStep === "Login") {
       this.authService.loginWithEmail(email!, password!)
       .then(res => {
-        console.log("✅ Logged in with Email and Password:", res.user);
         this.successMessage = 'Login successful!';
         this.errorMessage = '';
         this._matDialog.closeAll();
       })
       .catch(err => {
-        console.error("🚨 Login error:", err);
+        console.error("TESTING Login error:", err);
         this.successMessage = '';
   
         // Handle specific error codes

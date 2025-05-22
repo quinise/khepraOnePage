@@ -114,11 +114,11 @@ export class AppointmentFormComponent implements OnInit{
         isVirtual: existing.isVirtual
       });
   
-      // ✅ Dynamically extend the min/max to include existing date
+      //  Dynamically extend the min/max to include existing date
       this.minDate = new Date(Math.min(this.minDate.getTime(), date.getTime()));
       this.maxDate = new Date(Math.max(this.maxDate.getTime(), date.getTime()));
   
-      // ✅ Attach the custom validator to the 'date' field
+      // Attach the custom validator to the 'date' field
       const dateControl = this.appointmentForm.get('date');
       dateControl?.addValidators(this.dateValidator(date, this.minDate, this.maxDate));
       dateControl?.updateValueAndValidity();
