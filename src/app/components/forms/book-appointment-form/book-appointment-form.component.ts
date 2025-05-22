@@ -10,7 +10,7 @@ import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTimepickerModule } from '@angular/material/timepicker';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, Observable, take } from 'rxjs';
 import { Appointment } from 'src/app/interfaces/appointment';
 import { AppUser } from 'src/app/interfaces/appUser';
 import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
@@ -47,6 +47,8 @@ interface AppointmentForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppointmentFormComponent implements OnInit{
+  isAdmin = false;
+
   successMessage = '';
   errorMessage = '';
 
@@ -125,6 +127,11 @@ export class AppointmentFormComponent implements OnInit{
     }
   
     this.cdr.markForCheck();
+
+    // Get auth info
+    this.authService.user$.pipe(take(1)).subscribe(user => {
+      this.isAdmin = user?.role === 'admin';
+    });
   }
   
   async onSubmit(form: any): Promise<void> {
