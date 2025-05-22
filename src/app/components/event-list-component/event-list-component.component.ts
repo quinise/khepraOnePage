@@ -150,7 +150,7 @@ export class EventListComponent implements OnInit {
       })
     );
 
-    // Get auth info once
+    // Get auth info
     this.authService.user$.pipe(take(1)).subscribe(user => {
       this.isAdmin = user?.role === 'admin';
     });
@@ -235,12 +235,39 @@ export class EventListComponent implements OnInit {
     return this.filterService.getSortedKeys(this.pastAppointmentsGrouped);
   }
 
+  get sortedPastAppointmentDates(): string[] {
+    return this.filterService.getSortedKeys(this.pastAppointmentsGrouped);
+  }
+
+  get sortedPastEventDates(): string[] {
+    return this.filterService.getSortedKeys(this.pastEventsGrouped);
+  }
+
   get unifiedSortedFutureDates(): string[] {
     return this.filterService.getUnifiedSortedKeys(this.filteredAppointmentsGrouped, this.filteredEventsGrouped);
   }
 
   get unifiedSortedPastDates(): string[] {
-    return this.filterService.getUnifiedSortedPastKeys(this.pastAppointmentsGrouped, this.pastEventsGrouped);
+    const pastAppointmentDates = Object.keys(this.pastAppointmentsGrouped);
+    const pastEventDates = Object.keys(this.pastEventsGrouped);
+    const allDates = new Set([...pastAppointmentDates, ...pastEventDates]);
+    return Array.from(allDates).sort(); // or use a custom date sort if needed
+  }
+
+  get hasPastAppointments(): boolean {
+    return Object.values(this.pastAppointmentsGrouped).some(group => group.length > 0);
+  }
+
+  get hasPastEvents(): boolean {
+    return Object.values(this.pastEventsGrouped).some(group => group.length > 0);
+  }
+
+  get hasFutureAppointments(): boolean {
+    return Object.values(this.filteredAppointmentsGrouped).some(group => group.length > 0);
+  }
+
+  get hasFutureEvents(): boolean {
+    return Object.values(this.filteredEventsGrouped).some(group => group.length > 0);
   }
 
   openEditEventDialog(event: Event): void {
