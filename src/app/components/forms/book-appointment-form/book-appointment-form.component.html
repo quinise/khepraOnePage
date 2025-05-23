@@ -10,6 +10,23 @@
   <!-- TODO: Consolidate error messages -->
     <form class="border border-top-0 mb-5 p-4" [formGroup]="appointmentForm" (ngSubmit)="onSubmit(bookServiceForm)" #bookServiceForm="ngForm">
       <div class="row">
+        <!-- Only visible to admins -->
+        <div class="row w-100" *ngIf="isAdmin">
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Appointment Type</mat-label>
+            <mat-select formControlName="type">
+              <mat-option value="reading">Reading</mat-option>
+              <mat-option value="cleansing">Cleansing</mat-option>
+              <mat-option value="initiation">Initiation</mat-option>
+              <mat-option value="workshop">Workshop</mat-option>
+            </mat-select>
+            <mat-error *ngIf="appointmentForm.controls.type?.hasError('required')">
+              Please select an appointment type
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="row">
         <div class="row w-50">
           <mat-form-field>
             <input type="text" formControlName="name" placeholder="Name" matInput>

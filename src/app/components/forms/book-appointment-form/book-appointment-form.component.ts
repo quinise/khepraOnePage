@@ -10,6 +10,7 @@ import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTimepickerModule } from '@angular/material/timepicker';
+import { MatSelectModule } from '@angular/material/select';
 import { firstValueFrom, Observable, take } from 'rxjs';
 import { Appointment } from 'src/app/interfaces/appointment';
 import { AppUser } from 'src/app/interfaces/appUser';
@@ -23,6 +24,7 @@ interface AppointmentForm {
   date: FormControl<Date>;
   time: FormControl<Date>;
   isVirtual: FormControl<boolean>;
+  type?: FormControl<string>;
 }
 @Component({
   selector: 'app-appointment-form',
@@ -40,6 +42,7 @@ interface AppointmentForm {
     MatDatepickerModule,
     MatFormFieldModule,
     MatTimepickerModule,
+    MatSelectModule
     ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './book-appointment-form.component.html',
@@ -84,6 +87,10 @@ export class AppointmentFormComponent implements OnInit{
     isVirtual: new FormControl<boolean>(false, {
       nonNullable: true,
     }),
+    type: new FormControl<string>('', {
+      nonNullable: true,
+      validators: this.isAdmin ? [Validators.required] : []
+    })
   });
   
 
@@ -113,7 +120,8 @@ export class AppointmentFormComponent implements OnInit{
         phoneNumber: existing.phoneNumber?.toString(),
         date: date,
         time: date,
-        isVirtual: existing.isVirtual
+        isVirtual: existing.isVirtual,
+        type: existing.type ?? ''
       });
   
       //  Dynamically extend the min/max to include existing date
@@ -147,7 +155,7 @@ export class AppointmentFormComponent implements OnInit{
     const user = await firstValueFrom(this.user$);
   
     const appointment: Appointment = {
-      type: this.data.serviceType,
+      type: this.isAdmin ? form.value.type : this.data.serviceType,
       userId: user?.uid ?? '',
       name: form.value.name,
       email: form.value.email,
