@@ -50,8 +50,12 @@
       <img class="mx-4" src="/assets/khepra-brand.png">
       <span class="fs-4">Khepra Ptah</span>
     </a>
-    <a href="/">
-      <span style="font-size: 40px" class="material-symbols-outlined">shopping_cart</span>
-    </a>
+    <ng-container *ngIf="user$ | async as user">
+      <ng-container *ngIf="user.role === 'user'">
+        <a href="/">
+          <span style="font-size: 40px" class="material-symbols-outlined">shopping_cart</span>
+        </a>
+      </ng-container>
+    </ng-container>
   </div>
 </header>
