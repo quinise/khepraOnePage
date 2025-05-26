@@ -12,8 +12,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTimepickerModule } from '@angular/material/timepicker';
+import { debounceTime, distinctUntilChanged, take } from 'rxjs';
 import { Event } from 'src/app/interfaces/event';
 import { EventsApiService } from 'src/app/services/apis/events-api.service';
+import { ConflictCheckService } from 'src/app/services/conflict-check.service';
+import { combineDateAndTime } from 'src/app/utils/date-time.utils';
 interface EventForm {
   eventName: FormControl<string>;
   eventType: FormControl<string>;
@@ -120,7 +123,11 @@ export class CreateEventFormComponent {
   
   successMessage = '';
   errorMessage = '';
+  conflictWarning = '';
 
+  existingEvents: Event[] = [];
+  hasConflict = false
+  
   @Output() eventSaved = new EventEmitter<Event>();
 
   protected eventForm = new FormGroup<EventForm>({
@@ -182,8 +189,9 @@ export class CreateEventFormComponent {
       private _matDialog: MatDialog,
       @Inject(MAT_DIALOG_DATA) public data: { eventType?: string; eventToEdit?: Event },
       public eventsService: EventsApiService,
-      private dialogRef: MatDialogRef<CreateEventFormComponent>
-    ) {}    
+      private dialogRef: MatDialogRef<CreateEventFormComponent>,
+      private conflictCheckService: ConflictCheckService,
+    ) {}
     
 
   ngOnInit(): void {
@@ -223,8 +231,8 @@ export class CreateEventFormComponent {
         clientName: event.clientName,
         startDate: new Date(event.startDate),
         endDate: new Date(event.endDate),
-        startTime: new Date(event.startDate),
-        endTime: new Date(event.endDate),
+        startTime: new Date(event.startTime),
+        endTime: new Date(event.endTime),
         streetAddress: event.streetAddress,
         city: event.city,
         state: event.state,
@@ -233,31 +241,82 @@ export class CreateEventFormComponent {
         isVirtual: event.isVirtual,
       });
     }
+
+    this.loadExistingEvents();
+
+    // Listen for changes in dates or times
+    this.eventForm.get('startDate')?.valueChanges
+      .pipe(distinctUntilChanged(), debounceTime(100))
+      .subscribe(() => this.checkForConflictsFromForm());
+
+    this.eventForm.get('startTime')?.valueChanges
+      .pipe(distinctUntilChanged(), debounceTime(100))
+      .subscribe(() => this.checkForConflictsFromForm());
+
+    this.eventForm.get('endDate')?.valueChanges
+    .pipe(distinctUntilChanged(), debounceTime(100))
+    .subscribe(() => this.checkForConflictsFromForm());
+
+    this.eventForm.get('endTime')?.valueChanges
+      .pipe(distinctUntilChanged(), debounceTime(100))
+      .subscribe(() => this.checkForConflictsFromForm());
   }
 
   onCancel() {
     this._matDialog.closeAll();
   }
 
+  private loadExistingEvents(): void {
+    this.eventsService.getAllEvents().pipe(take(1)).subscribe({
+      next: (events) => {
+        // Optionally filter out the one you're editing
+        const editingId = this.data.eventToEdit?.id;
+        this.existingEvents = events.filter(a => a.id !== editingId);
+      },
+      error: (err) => {
+        console.error('Failed to load appointments', err);
+        this.existingEvents = [];
+      }
+    });
+  }
+
+  private async checkForConflictsFromForm() {
+      const formValue = this.eventForm.value;
+
+      if (!formValue.startDate || !formValue.startTime || !formValue.eventType || formValue.isVirtual == null) return;
+      if (!formValue.endDate || !formValue.endTime || !formValue.eventType || formValue.isVirtual == null) return;
+
+      const start = combineDateAndTime(formValue.startDate, formValue.startTime);
+      const end = combineDateAndTime(formValue.endDate, formValue.endTime);
+      const safeCity = formValue.isVirtual ? "virtual" : "Seattle";
+
+      const hasStartConflict = await this.conflictCheckService.checkForConflicts(
+        start,
+        formValue.eventType,
+        formValue.isVirtual,
+        safeCity
+      );
+
+      const hasEndConflict = await this.conflictCheckService.checkForConflicts(
+        end,
+        formValue.eventType,
+        formValue.isVirtual,
+        safeCity
+      );
+
+      if (hasStartConflict) {
+        this.hasConflict = hasStartConflict;
+      } else if (hasEndConflict) {
+        this.hasConflict = hasEndConflict;
+      }
+    }
+
   onSubmit(): void {
     if (this.eventForm.valid) {
       const formValues = this.eventForm.value;
   
-      const combinedStart = new Date(
-        formValues.startDate!.getFullYear(),
-        formValues.startDate!.getMonth(),
-        formValues.startDate!.getDate(),
-        formValues.startTime!.getHours(),
-        formValues.startTime!.getMinutes()
-      );
-  
-      const combinedEnd = new Date(
-        formValues.endDate!.getFullYear(),
-        formValues.endDate!.getMonth(),
-        formValues.endDate!.getDate(),
-        formValues.endTime!.getHours(),
-        formValues.endTime!.getMinutes()
-      );
+      const combinedStart = combineDateAndTime(formValues.startDate!, formValues.startTime!);
+      const combinedEnd = combineDateAndTime(formValues.endDate!, formValues.endTime!);
   
       const eventPayload: Event = {
         ...this.data.eventToEdit, // In case it's edit mode
@@ -265,7 +324,9 @@ export class CreateEventFormComponent {
         eventType: formValues.eventType!,
         clientName: formValues.clientName,
         startDate: combinedStart,
+        startTime: combinedStart,
         endDate: combinedEnd,
+        endTime: combinedEnd,
         streetAddress: formValues.streetAddress,
         city: formValues.city,
         state: formValues.state,
@@ -298,5 +359,5 @@ export class CreateEventFormComponent {
         });
       }
     }
-  }  
+  }
 }

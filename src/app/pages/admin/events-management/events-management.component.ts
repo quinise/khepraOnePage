@@ -20,16 +20,6 @@ export class EventsManagementComponent {
   }
 
   openBookAppointmentForm() {
-    // if (buttonType == 'readingButton') {
-    //     this.selectedServiceType = "Reading";
-    // } else if (buttonType == 'cleansingButton') {
-    //     this.selectedServiceType = "Cleansing";
-    // } else if (buttonType == 'initiationButton') {
-    //     this.selectedServiceType = "Initiation";
-    // } else if (buttonType == 'workshopButton') {
-    //     this.selectedServiceType = "Workshop";
-    // }
-
     const dialogRef = this.dialog.open(AppointmentFormComponent, {
         minWidth: '500px',
         data: {},

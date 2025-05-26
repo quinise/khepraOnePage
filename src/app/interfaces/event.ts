@@ -4,7 +4,9 @@ export interface Event {
   eventType: string;
   clientName?: string | null;
   startDate: Date;
+  startTime: Date;
   endDate: Date;
+  endTime: Date;
   streetAddress?: string | null;
   city?: string | null;
   state?: string | null;

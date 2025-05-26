@@ -58,7 +58,27 @@
               </mat-error>
             </mat-form-field>
           </div>
-          <div class="date-time-inputs mt-2 col offset-md-4">
+          <div *ngIf="isAdmin" class="date-time-inputs mt-2 col offset-md-4">
+            <div class="col">
+              <mat-form-field>
+                <mat-label>Select a date</mat-label>
+                <input matInput formControlName="date" [matDatepicker]="datepicker" [min]="_todaysDate"/>
+                <mat-datepicker-toggle matIconSuffix [for]="datepicker"></mat-datepicker-toggle>
+                <mat-datepicker #datepicker></mat-datepicker>
+                <mat-error *ngIf="appointmentForm.controls.date?.hasError('required')">This field is required</mat-error>
+              </mat-form-field>
+            </div>
+            <div class="col">
+              <mat-form-field>
+                <mat-label>Select a time</mat-label>
+                <input matInput [matTimepicker]="timepicker" formControlName="time">
+                <mat-timepicker #timepicker/>
+                <mat-timepicker-toggle [for]="timepicker" matSuffix/>
+                <mat-error *ngIf="appointmentForm.controls.time?.hasError('required')">This field is required</mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          <div *ngIf="!isAdmin" class="date-time-inputs mt-2 col offset-md-4">
             <div class="col">
               <mat-form-field>
                 <mat-label>Select a date</mat-label>
