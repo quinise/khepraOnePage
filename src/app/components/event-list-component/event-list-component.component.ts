@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Subscription, take } from 'rxjs';
 import { Appointment } from 'src/app/interfaces/appointment';
 import { Event } from 'src/app/interfaces/event';
+import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
 import { EventsApiService } from 'src/app/services/apis/events-api.service';
 import { AuthService } from 'src/app/services/authentication/auth.service';
 import { DeleteEventService } from 'src/app/services/delete-event.service';
@@ -11,6 +12,7 @@ import { EventFilterService } from 'src/app/services/event-filter.service';
 import { EventStoreService } from 'src/app/services/event-store.service';
 import { CreateEventFormComponent } from '../forms/create-event-form/create-event-form.component';
 import { EventFilterComponent } from '../shared/event-filter/event-filter.component';
+import { AppointmentFormComponent } from '../forms/book-appointment-form/book-appointment-form.component';
 
 @Component({
   selector: 'app-event-list',
@@ -21,6 +23,7 @@ import { EventFilterComponent } from '../shared/event-filter/event-filter.compon
 })
 export class EventListComponent implements OnInit {
   isAdmin: boolean = false;
+  currentUserEmail: string | null = null;
 
   private _appointments: Appointment[] = [];
   private _events: Event[] = [];
@@ -88,6 +91,7 @@ export class EventListComponent implements OnInit {
     private deleteService: DeleteEventService,
     public filterService: EventFilterService,
     private dialog: MatDialog,
+    public appointmentsService: AppointmentApiService,
     public eventsService: EventsApiService,
     private eventStore: EventStoreService
   ) {}
@@ -153,6 +157,7 @@ export class EventListComponent implements OnInit {
     // Get auth info
     this.authService.user$.pipe(take(1)).subscribe(user => {
       this.isAdmin = user?.role === 'admin';
+      this.currentUserEmail = user?.email ?? null;
     });
 
     // Update initial filters
@@ -283,6 +288,32 @@ export class EventListComponent implements OnInit {
       });
     }
   }
+
+  canEditAppointment(appointment: Appointment): boolean {
+    // Admins can edit appointments that admins have created
+    return this.isAdmin && !!appointment.createdByAdmin
+  }
+
+
+  editAppointment(appointment: Appointment): void {
+    const dialogRef = this.dialog.open(AppointmentFormComponent, {
+      width: '600px',
+      data: { 
+        appointmentToEdit: appointment,
+        serviceType: appointment.type
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((updatedAppointment: Appointment | undefined) => {
+      if (updatedAppointment) {
+        this.appointmentsService.getAllAppointments().subscribe((appointments: Appointment[]) => {
+          this.appointments = appointments;
+          this.filterService.updateAppointments(appointments);
+        });
+      }
+    });
+  }
+
 
   editEvent(event: Event): void {
     const dialogRef = this.dialog.open(CreateEventFormComponent, {

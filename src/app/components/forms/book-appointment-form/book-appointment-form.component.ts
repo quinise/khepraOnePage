@@ -1,5 +1,5 @@
 import { NgIf } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnInit, Output } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -9,13 +9,15 @@ import { MAT_DIALOG_DATA, MatDialog, MatDialogModule } from '@angular/material/d
 import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatTimepickerModule } from '@angular/material/timepicker';
 import { MatSelectModule } from '@angular/material/select';
-import { firstValueFrom, Observable, take } from 'rxjs';
+import { MatTimepickerModule } from '@angular/material/timepicker';
+import { debounceTime, distinctUntilChanged, firstValueFrom, Observable, take } from 'rxjs';
 import { Appointment } from 'src/app/interfaces/appointment';
 import { AppUser } from 'src/app/interfaces/appUser';
 import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
 import { AuthService } from 'src/app/services/authentication/auth.service';
+import { ConflictCheckService } from 'src/app/services/conflict-check.service';
+import { combineDateAndTime } from 'src/app/utils/date-time.utils';
 
 interface AppointmentForm {
   name: FormControl<string>;
@@ -24,7 +26,7 @@ interface AppointmentForm {
   date: FormControl<Date>;
   time: FormControl<Date>;
   isVirtual: FormControl<boolean>;
-  type?: FormControl<string>;
+  type: FormControl<string>;
 }
 @Component({
   selector: 'app-appointment-form',
@@ -50,17 +52,28 @@ interface AppointmentForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppointmentFormComponent implements OnInit{
+  private appointmentDurations: Record<string, number> = {
+      READING: 30,
+      CLEANSING: 45,
+      INITIATION: 60,
+      WORKSHOP: 90,
+    };
+
   isAdmin = false;
 
   successMessage = '';
   errorMessage = '';
-
+  
   _todaysDate = new Date();
   minDate = new Date();
   maxDate = new Date();
 
   user$: Observable<AppUser | null>;
 
+  existingAppointments: Appointment[] = [];
+  hasConflict = false;
+
+  @Input() appointmentToEdit?: Appointment;
   @Output() appointmentSaved = new EventEmitter<Appointment>();
 
   protected appointmentForm = new FormGroup<AppointmentForm>({
@@ -92,14 +105,14 @@ export class AppointmentFormComponent implements OnInit{
       validators: this.isAdmin ? [Validators.required] : []
     })
   });
-  
 
   constructor (
     private _matDialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public data: { serviceType: string, appointmentToEdit?: Appointment },
     private cdr: ChangeDetectorRef,
     public appointmentApiService: AppointmentApiService,
-    public authService: AuthService
+    public authService: AuthService,
+    private conflictCheckService: ConflictCheckService,
   ) {
     this.user$ = authService.user$;
   
@@ -108,52 +121,71 @@ export class AppointmentFormComponent implements OnInit{
   }
 
   ngOnInit(): void {
-    if (this.data.appointmentToEdit) {
-      const existing = this.data.appointmentToEdit;
-      const date = new Date(existing.date);
-      const time = new Date(existing.date);
-      time.setHours(date.getHours(), date.getMinutes(), date.getSeconds());
-  
-      this.appointmentForm.patchValue({
-        name: existing.name,
-        email: existing.email,
-        phoneNumber: existing.phoneNumber?.toString(),
-        date: date,
-        time: date,
-        isVirtual: existing.isVirtual,
-        type: existing.type ?? ''
-      });
-  
-      //  Dynamically extend the min/max to include existing date
-      this.minDate = new Date(Math.min(this.minDate.getTime(), date.getTime()));
-      this.maxDate = new Date(Math.max(this.maxDate.getTime(), date.getTime()));
-  
-      // Attach the custom validator to the 'date' field
-      const dateControl = this.appointmentForm.get('date');
-      dateControl?.addValidators(this.dateValidator(date, this.minDate, this.maxDate));
-      dateControl?.updateValueAndValidity();
-    }
-  
-    this.cdr.markForCheck();
-
-    // Get auth info
     this.authService.user$.pipe(take(1)).subscribe(user => {
       this.isAdmin = user?.role === 'admin';
+
+      // Now that isAdmin is available, apply validator to type
+      if (this.isAdmin) {
+        this.appointmentForm.get('type')?.addValidators(Validators.required);
+        this.appointmentForm.get('type')?.updateValueAndValidity();
+      }
+
+      this.patchIfEditing();
+      this.loadExistingAppointments();
+      this.cdr.markForCheck();
+    });
+
+    // Listen for changes in date or time
+    this.appointmentForm.get('date')?.valueChanges
+      .pipe(distinctUntilChanged(), debounceTime(100))
+      .subscribe(() => this.checkForConflictsFromForm());
+
+    this.appointmentForm.get('time')?.valueChanges
+      .pipe(distinctUntilChanged(), debounceTime(100))
+      .subscribe(() => this.checkForConflictsFromForm());
+  }
+
+  private loadExistingAppointments(): void {
+    this.appointmentApiService.getAllAppointments().pipe(take(1)).subscribe({
+      next: (appointments) => {
+        // Optionally filter out the one you're editing
+        const editingId = this.data.appointmentToEdit?.id;
+        this.existingAppointments = appointments.filter(a => a.id !== editingId);
+      },
+      error: (err) => {
+        console.error('Failed to load appointments', err);
+        this.existingAppointments = [];
+      }
     });
   }
-  
-  async onSubmit(form: any): Promise<void> {
-    const combinedDateTime = new Date(
-      form.value.date.getFullYear(),
-      form.value.date.getMonth(),
-      form.value.date.getDate(),
-      form.value.time.getHours(),
-      form.value.time.getMinutes(),
-      form.value.time.getSeconds(),
+
+  private async checkForConflictsFromForm() {
+    const formValue = this.appointmentForm.value;
+
+    if (!formValue.date || !formValue.time || !formValue.type || formValue.isVirtual == null) return;
+
+    const start = combineDateAndTime(formValue.date, formValue.time);
+    // TODO: City is hardcoded for now, should be dynamic based on user input
+    const hardCodedCity = formValue.isVirtual ? "virtual" : "Seattle";
+
+    const hasConflict = await this.conflictCheckService.checkForConflicts(
+      start,
+      formValue.type,
+      formValue.isVirtual,
+      hardCodedCity
     );
+
+    this.hasConflict = hasConflict;
+  }
+
+  async onSubmit(form: any): Promise<void> {
+    const combinedDateTime = combineDateAndTime(form.value.date, form.value.time);
   
     const user = await firstValueFrom(this.user$);
-  
+
+    const durationMinutes = this.appointmentDurations[form.value.type] ?? 30;
+    const endTime = new Date(combinedDateTime.getTime() + durationMinutes * 60000);
+
     const appointment: Appointment = {
       type: this.isAdmin ? form.value.type : this.data.serviceType,
       userId: user?.uid ?? '',
@@ -161,8 +193,11 @@ export class AppointmentFormComponent implements OnInit{
       email: form.value.email,
       phoneNumber: form.value.phoneNumber,
       date: combinedDateTime,
+      startTime: combinedDateTime,
+      endTime: endTime,
       isVirtual: form.value.isVirtual,
-      id: this.data.appointmentToEdit?.id
+      id: this.data.appointmentToEdit?.id,
+      createdByAdmin: this.isAdmin ? true : false,
     };
   
     const appointmentOperation$ = this.data.appointmentToEdit
@@ -201,5 +236,30 @@ export class AppointmentFormComponent implements OnInit{
   
       return null;
     };
+  }
+
+  private patchIfEditing() {
+    if (this.data.appointmentToEdit) {
+      const existing = this.data.appointmentToEdit;
+      const date = new Date(existing.date);
+      const time = new Date(existing.date);
+
+      this.appointmentForm.patchValue({
+        name: existing.name,
+        email: existing.email,
+        phoneNumber: existing.phoneNumber?.toString(),
+        date: date,
+        time: time,
+        isVirtual: existing.isVirtual,
+        type: existing.type ?? ''
+      });
+
+      this.minDate = new Date(Math.min(this.minDate.getTime(), date.getTime()));
+      this.maxDate = new Date(Math.max(this.maxDate.getTime(), date.getTime()));
+
+      const dateControl = this.appointmentForm.get('date');
+      dateControl?.addValidators(this.dateValidator(date, this.minDate, this.maxDate));
+      dateControl?.updateValueAndValidity();
+    }
   }
 }
