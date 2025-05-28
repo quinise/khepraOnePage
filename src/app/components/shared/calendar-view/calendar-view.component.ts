@@ -1,7 +1,7 @@
 import { NgIf } from '@angular/common';
 import { Component, Input, OnDestroy } from '@angular/core';
 import { FullCalendarModule } from '@fullcalendar/angular';
-import { CalendarOptions, EventClickArg, EventInput } from '@fullcalendar/core';
+import { CalendarOptions, EventClickArg, EventInput, EventApi } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { Subscription, take } from 'rxjs';
@@ -25,7 +25,8 @@ export class CalendarViewComponent implements OnDestroy {
   isAdmin = false;
 
   showPanel = false;
-  selectedEvent: EventInput | null = null;
+  selectedEvent: EventApi | null = null;
+  selectedEventDetails: EventInput | null = null;
 
   private events: Event[] = [];
   private appointments: Appointment[] = [];
@@ -194,8 +195,10 @@ export class CalendarViewComponent implements OnDestroy {
   }
 
   handleEventClick(clickInfo: EventClickArg) {
-    this.selectedEvent = {
+    this.selectedEvent = clickInfo.event;
+    this.selectedEventDetails = {
       title: clickInfo.event.title,
+      startTime: clickInfo.event.start,
       extendedProps: { ...clickInfo.event.extendedProps },
     };
     this.showPanel = true;
@@ -206,31 +209,50 @@ export class CalendarViewComponent implements OnDestroy {
     this.selectedEvent = null;
   }
 
+  isFuture(startTime: string | Date | undefined | null): boolean {
+    if (!startTime) return false;
+    const date = new Date(startTime);
+    return date.getTime() > new Date().getTime();
+  }
+
   deleteEvent(): void {
-    const id = this.selectedEvent?.extendedProps?.['eventId'] || this.selectedEvent?.extendedProps?.['id'];
+    const id = this.selectedEvent?.id || this.selectedEvent?.id;
     if (!id) {
       alert('Invalid event ID');
       return;
     }
 
+    // Include both future and past events for deletion
+    const allEvents = [
+      ...Object.values(this.filteredEventsGrouped).flat(),
+      ...Object.values(this.pastEventsGrouped).flat()
+    ];
+
     this.deleteService.deleteEvent(
       id,
-      Object.values(this.filteredEventsGrouped).flat(),
+      allEvents,
       () => this.updateCalendar(),
       () => this.closeEventDetails()
     );
   }
 
+
   deleteAppointment(): void {
-    const id = this.selectedEvent?.extendedProps?.['appointmentId'] || this.selectedEvent?.extendedProps?.['id'];
+    const id = this.selectedEvent?.id || this.selectedEvent?.id;
     if (!id) {
       alert('Invalid appointment ID');
       return;
     }
 
+    // Include both future and past appointments for deletion
+    const allAppointments = [
+      ...Object.values(this.filteredAppointmentsGrouped).flat(),
+      ...Object.values(this.pastAppointmentsGrouped).flat()
+    ];
+
     this.deleteService.deleteAppointment(
       id,
-      Object.values(this.filteredAppointmentsGrouped).flat(),
+      allAppointments,
       () => this.updateCalendar(),
       () => this.closeEventDetails()
     );

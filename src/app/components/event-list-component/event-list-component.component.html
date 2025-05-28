@@ -21,16 +21,6 @@
               Email: {{ appointment.email }}<br>
               Phone: {{ appointment.phoneNumber }}<br>
               <span *ngIf="isAdmin && appointment.createdByAdmin">Created by: {{ appointment.createdByAdmin }}</span>
-              <button class="btn btn-sm btn-danger mt-2" (click)="deleteAppointment(+appointment.id!)">
-                Delete
-              </button>
-              <button
-              *ngIf="canEditAppointment(appointment)"
-              class="btn btn-sm btn-primary mt-2 mx-2"
-              (click)="editAppointment(appointment)"
-              >
-              Edit Appointment
-            </button>
             </li>
           </ul>
         </div>
@@ -53,14 +43,6 @@
               {{ event.startDate | date: 'shortTime' }}<br>
               Type: {{ event.eventType }}<br>
               Virtual: {{ event.isVirtual ? 'Yes' : 'No' }}<br>
-              <div>
-                <button *ngIf="isAdmin" class="btn btn-sm btn-primary mt-2 mx-3" (click)="openEditEventDialog(event)">
-                  Edit Event Details
-                </button>
-                <button class="btn btn-sm btn-danger mt-2" (click)="deleteEvent(+event.id!)">
-                  Delete
-                </button>
-              </div>
             </li>
           </ul>
         </div>

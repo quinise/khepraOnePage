@@ -39,6 +39,7 @@ export class EventsService {
         appointmentEmail: appointment.email,
         appointmentPhone: appointment.phoneNumber,
         appointmentDate: appointment.date,
+        appointmentStartTime: appointment.startTime,
         appointmentVirtual: appointment.isVirtual,
       },
     }));
@@ -56,6 +57,7 @@ export class EventsService {
         eventName: event.eventName,
         eventType: event.eventType,
         eventStart: event.startDate,
+        eventStartTime: event.startTime,
         eventEnd: event.endDate,
         eventDescription: event.description,
         eventVirtual: event.isVirtual,
