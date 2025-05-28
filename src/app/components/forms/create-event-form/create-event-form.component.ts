@@ -183,7 +183,7 @@ export class CreateEventFormComponent {
       isVirtual: new FormControl<boolean>(false, {
         nonNullable: true,
       }),
-    });
+    }, { validators: (form) => this.validateStartBeforeEnd(form as FormGroup<EventForm>) });
 
     constructor(
       private _matDialog: MatDialog,
@@ -280,6 +280,20 @@ export class CreateEventFormComponent {
     });
   }
 
+  private validateStartBeforeEnd(form: FormGroup<EventForm>) {
+    const startDate = form.get('startDate')?.value;
+    const endDate = form.get('endDate')?.value;
+    const startTime = form.get('startTime')?.value;
+    const endTime = form.get('endTime')?.value;
+
+    if (!startDate || !endDate || !startTime || !endTime) return null;
+
+    const start = combineDateAndTime(startDate, startTime);
+    const end = combineDateAndTime(endDate, endTime);
+
+    return start > end ? { startAfterEnd: true } : null;
+  }
+
   private async checkForConflictsFromForm() {
       const formValue = this.eventForm.value;
 
@@ -312,14 +326,19 @@ export class CreateEventFormComponent {
     }
 
   onSubmit(): void {
+    if (this.eventForm.errors?.['startAfterEnd']) {
+      this.errorMessage = 'Start time must be before end time.';
+      return;
+    }
+
     if (this.eventForm.valid) {
       const formValues = this.eventForm.value;
-  
+
       const combinedStart = combineDateAndTime(formValues.startDate!, formValues.startTime!);
       const combinedEnd = combineDateAndTime(formValues.endDate!, formValues.endTime!);
-  
+
       const eventPayload: Event = {
-        ...this.data.eventToEdit, // In case it's edit mode
+        ...this.data.eventToEdit,
         eventName: formValues.eventName!,
         eventType: formValues.eventType!,
         clientName: formValues.clientName,
@@ -334,9 +353,8 @@ export class CreateEventFormComponent {
         description: formValues.description!,
         isVirtual: formValues.isVirtual!
       };
-  
+
       if (this.data.eventToEdit) {
-        // EDIT MODE
         this.eventsService.updateEvent(this.data.eventToEdit.id!, eventPayload).subscribe({
           next: (updatedEvent) => {
             this.eventSaved.emit(updatedEvent);
@@ -347,7 +365,6 @@ export class CreateEventFormComponent {
           }
         });
       } else {
-        // CREATE MODE
         this.eventsService.createEvent(eventPayload).subscribe({
           next: (newEvent) => {
             this.eventSaved.emit(newEvent);
