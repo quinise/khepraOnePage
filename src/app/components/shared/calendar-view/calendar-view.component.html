@@ -13,7 +13,7 @@
         <!-- Header -->
         <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
           <h5 class="mb-0">
-            {{ selectedEvent.extendedProps?.['appointmentId'] ? 'Appointment Details' : 'Event Details' }}
+            {{ selectedEventDetails?.extendedProps?.['appointmentId'] ? 'Appointment Details' : 'Event Details' }}
           </h5>
           <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="closeEventDetails()"></button>
         </div>
@@ -21,49 +21,49 @@
         <!-- Body -->
         <div class="card-body">
           <!-- Name -->
-          <p *ngIf="selectedEvent.extendedProps?.['appointmentName']">
-            <strong>Name:</strong> {{ selectedEvent.extendedProps?.['appointmentName'] }}
+          <p *ngIf="selectedEventDetails?.extendedProps?.['appointmentName']">
+            <strong>Name:</strong> {{ selectedEventDetails?.extendedProps?.['appointmentName'] }}
           </p>
-          <p *ngIf="selectedEvent.extendedProps?.['eventName']">
-            <strong>Name:</strong> {{ selectedEvent.extendedProps?.['eventName'] }}
+          <p *ngIf="selectedEventDetails?.extendedProps?.['eventName']">
+            <strong>Name:</strong> {{ selectedEventDetails?.extendedProps?.['eventName'] }}
           </p>
 
           <!-- Time -->
           <p>
             <strong>Time:</strong>
-            {{ selectedEvent.extendedProps?.['eventStart'] }}
-            <ng-container *ngIf="selectedEvent.extendedProps?.['eventEnd']">
-              - {{ selectedEvent.extendedProps?.['eventEnd'] }}
+            {{ selectedEventDetails?.extendedProps?.['eventStart'] }}
+            <ng-container *ngIf="selectedEventDetails?.extendedProps?.['eventEnd']">
+              - {{ selectedEventDetails?.extendedProps?.['eventEnd'] }}
             </ng-container>
           </p>
 
           <!-- Contact Info -->
-          <p *ngIf="selectedEvent.extendedProps?.['appointmentEmail']">
-            <strong>Email:</strong> {{ selectedEvent.extendedProps?.['appointmentEmail'] }}
+          <p *ngIf="selectedEventDetails?.extendedProps?.['appointmentEmail']">
+            <strong>Email:</strong> {{ selectedEventDetails?.extendedProps?.['appointmentEmail'] }}
           </p>
-          <p *ngIf="selectedEvent.extendedProps?.['appointmentPhone']">
-            <strong>Phone:</strong> {{ selectedEvent.extendedProps?.['appointmentPhone'] }}
+          <p *ngIf="selectedEventDetails?.extendedProps?.['appointmentPhone']">
+            <strong>Phone:</strong> {{ selectedEventDetails?.extendedProps?.['appointmentPhone'] }}
           </p>
 
           <!-- Description -->
           <p *ngIf="selectedEvent.extendedProps?.['eventDescription']">
-            <strong>Description:</strong> {{ selectedEvent.extendedProps?.['eventDescription'] }}
+            <strong>Description:</strong> {{ selectedEventDetails?.extendedProps?.['eventDescription'] }}
           </p>
 
           <!-- Virtual Field -->
-          <p *ngIf="selectedEvent.extendedProps?.['appointmentVirtual'] || selectedEvent.extendedProps?.['eventVirtual']">
+          <p *ngIf="selectedEventDetails?.extendedProps?.['appointmentVirtual'] || selectedEvent.extendedProps?.['eventVirtual']">
             <strong>Virtual:</strong> Yes
           </p>
 
           <!-- Address (non-virtual events only) -->
-          <ng-container *ngIf="!selectedEvent.extendedProps?.['appointmentId'] && !selectedEvent.extendedProps?.['eventVirtual']">
+          <ng-container *ngIf="!selectedEventDetails?.extendedProps?.['appointmentId'] && !selectedEvent.extendedProps?.['eventVirtual']">
             <p><strong>Address:</strong></p>
             <div class="mb-2">
-              <div>{{ selectedEvent.extendedProps?.['eventStreet'] }}</div>
+              <div>{{ selectedEventDetails?.extendedProps?.['eventStreet'] }}</div>
               <div>
-                {{ selectedEvent.extendedProps?.['eventCity'] }},
-                {{ selectedEvent.extendedProps?.['eventState'] }}
-                {{ selectedEvent.extendedProps?.['eventZip'] }}
+                {{ selectedEventDetails?.extendedProps?.['eventCity'] }},
+                {{ selectedEventDetails?.extendedProps?.['eventState'] }}
+                {{ selectedEventDetails?.extendedProps?.['eventZip'] }}
               </div>
             </div>
           </ng-container>
@@ -71,10 +71,10 @@
 
         <!-- Footer Actions -->
         <div class="card-footer">
-          <button *ngIf="isAdmin && selectedEvent.extendedProps?.['appointmentId']" class="btn btn-sm btn-danger me-2" (click)="deleteAppointment()">
+          <button *ngIf="isAdmin && selectedEventDetails?.extendedProps?.['appointmentId'] && isFuture(selectedEvent.start)" class="btn btn-sm btn-danger me-2" (click)="deleteAppointment()">
             Cancel Appointment
           </button>
-          <button *ngIf="isAdmin && selectedEvent.extendedProps?.['eventId']" class="btn btn-sm btn-danger" (click)="deleteEvent()">
+          <button *ngIf="isAdmin && selectedEventDetails?.extendedProps?.['eventId'] && isFuture(selectedEvent.start)" class="btn btn-sm btn-danger" (click)="deleteEvent()">
             Cancel Event
           </button>
         </div>

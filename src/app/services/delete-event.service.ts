@@ -10,20 +10,14 @@ import { EventStoreService } from './event-store.service';
 })
 export class DeleteEventService {
   constructor(
-    // private eventsService: EventsService,
     private eventStore: EventStoreService,
     private eventsApiService: EventsApiService,
     private appointmentApiService: AppointmentApiService
   ) {}
 
-  deleteEvent(
-    id: string,
-    events: Event[],
-    onSuccess: () => void,
-    onComplete: () => void
-  ): void {
+  deleteEvent(id: string, events: Event[], onSuccess: () => void, onComplete: () => void): void {
     const numericId = Number(id); // Convert string to number
-    const event = events.find(e => e.id === numericId || e.id === numericId);
+    const event = events.find(e => e.id === numericId);
 
     if (!event) {
       alert('Event not found');
@@ -33,8 +27,17 @@ export class DeleteEventService {
 
     if (event.id === undefined) {
       console.error('Cannot delete event: missing event ID');
-    return;
-}
+      return;
+    }
+
+    const now = new Date();
+    const eventDate = new Date(event.startDate); // Ensure event.date is an ISO string or Date object
+
+    if (eventDate < now) {
+      alert('Cannot delete events that have already occurred.');
+      onComplete();
+      return;
+    }
 
     if (!confirm(`Are you sure you want to delete this event: "${event.eventName}"?`)) {
       onComplete();
@@ -56,14 +59,9 @@ export class DeleteEventService {
     });
   }
 
-  deleteAppointment(
-    id: string,
-    appointments: Appointment[],
-    onSuccess: () => void,
-    onComplete: () => void
-  ): void {
-    const numericId = Number(id); // Convert string to number
-    const appointment = appointments.find(a => a.id === numericId || a.id === numericId);
+  deleteAppointment(id: string, appointments: Appointment[], onSuccess: () => void, onComplete: () => void): void {
+    const numericId = Number(id);
+    const appointment = appointments.find(a => a.id === numericId);
 
     if (!appointment) {
       alert('Appointment not found');
@@ -72,7 +70,16 @@ export class DeleteEventService {
     }
 
     if (appointment.id === undefined) {
-      console.error('Cannot delete apointment: missing appointment ID');
+      console.error('Cannot delete appointment: missing appointment ID');
+      return;
+    }
+
+    const now = new Date();
+    const appointmentDate = new Date(appointment.date); // Ensure `appointment.date` is a proper ISO string or Date
+
+    if (appointmentDate < now) {
+      alert('Cannot delete appointments that have already occurred.');
+      onComplete();
       return;
     }
 
@@ -83,7 +90,6 @@ export class DeleteEventService {
 
     this.appointmentApiService.deleteAppointment(appointment.id).subscribe({
       next: () => {
-        // Remove the appointment from the store
         this.eventStore.removeAppointmentById(String(appointment.id));
         onSuccess();
       },
