@@ -10,9 +10,9 @@ import { AuthService } from 'src/app/services/authentication/auth.service';
 import { DeleteEventService } from 'src/app/services/delete-event.service';
 import { EventFilterService } from 'src/app/services/event-filter.service';
 import { EventStoreService } from 'src/app/services/event-store.service';
+import { AppointmentFormComponent } from '../forms/book-appointment-form/book-appointment-form.component';
 import { CreateEventFormComponent } from '../forms/create-event-form/create-event-form.component';
 import { EventFilterComponent } from '../shared/event-filter/event-filter.component';
-import { AppointmentFormComponent } from '../forms/book-appointment-form/book-appointment-form.component';
 
 @Component({
   selector: 'app-event-list',
@@ -313,7 +313,6 @@ export class EventListComponent implements OnInit {
       }
     });
   }
-
 
   editEvent(event: Event): void {
     const dialogRef = this.dialog.open(CreateEventFormComponent, {
