@@ -73,7 +73,10 @@
             </mat-form-field>
           </div>
         </div>
-
+        <!-- Prevent invalid combinations of start/end -->
+        <div *ngIf="eventForm.hasError('startAfterEnd') && (eventForm.dirty || eventForm.touched)" class="error-message">
+          Start date/time must be before or equal to end date/time.
+        </div>
         <!-- Virtual Checkbox -->
         <div class="row mb-3">
           <mat-checkbox formControlName="isVirtual">Is this event virtual?</mat-checkbox>
