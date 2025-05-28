@@ -34,6 +34,7 @@ export class EventsService {
       allDay: false,
       extendedProps: {
         appointmentId: appointment.id,
+        appointment: appointment,
         appointmentType: appointment.type,
         appointmentName: appointment.name,
         appointmentEmail: appointment.email,
@@ -41,6 +42,7 @@ export class EventsService {
         appointmentDate: appointment.date,
         appointmentStartTime: appointment.startTime,
         appointmentVirtual: appointment.isVirtual,
+        appointmentCreatedByAdmin: appointment.createdByAdmin,
       },
     }));
   }
@@ -54,6 +56,7 @@ export class EventsService {
       allDay: true,
       extendedProps: {
         eventId: event.id,
+        event: event,
         eventName: event.eventName,
         eventType: event.eventType,
         eventStart: event.startDate,

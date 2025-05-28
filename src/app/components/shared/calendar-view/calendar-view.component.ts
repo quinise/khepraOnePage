@@ -1,17 +1,23 @@
 import { NgIf } from '@angular/common';
 import { Component, Input, OnDestroy } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { FullCalendarModule } from '@fullcalendar/angular';
-import { CalendarOptions, EventClickArg, EventInput, EventApi } from '@fullcalendar/core';
+import { CalendarOptions, EventApi, EventClickArg, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { Subscription, take } from 'rxjs';
 import { Appointment } from 'src/app/interfaces/appointment';
 import { Event } from 'src/app/interfaces/event';
 import { AuthService } from 'src/app/services/authentication/auth.service';
+import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
+import { EventsApiService } from 'src/app/services/apis/events-api.service';
+import { EventStoreService } from 'src/app/services/event-store.service';
 import { DeleteEventService } from 'src/app/services/delete-event.service';
 import { EventFilterService } from 'src/app/services/event-filter.service';
 import { EventsService } from 'src/app/services/events.service';
 import { EventFilterComponent } from '../../shared/event-filter/event-filter.component';
+import { AppointmentFormComponent } from '../../forms/book-appointment-form/book-appointment-form.component';
+import { CreateEventFormComponent } from '../../forms/create-event-form/create-event-form.component';
 
 @Component({
   selector: 'app-calendar-view',
@@ -68,7 +74,11 @@ export class CalendarViewComponent implements OnDestroy {
     private authService: AuthService,
     private deleteService: DeleteEventService,
     private eventsService: EventsService,
-    private filterService: EventFilterService
+    private filterService: EventFilterService,
+    private dialog: MatDialog,
+    public appointmentsService: AppointmentApiService,
+    public eventsApiService: EventsApiService,
+    private eventStore: EventStoreService
   ) {}
 
   ngOnInit(): void {
@@ -194,8 +204,20 @@ export class CalendarViewComponent implements OnDestroy {
     this.calendarOptions.events = [...futureCalendarAppointments, ...futureCalendarEvents, ...pastCalendarAppointments, ...pastCalendarEvents];
   }
 
+  isValidEvent(obj: any): obj is Event {
+    return obj && typeof obj === 'object' && 'id' in obj && 'title' in obj && 'startDate' in obj;
+  }
+
   handleEventClick(clickInfo: EventClickArg) {
     this.selectedEvent = clickInfo.event;
+    const maybeEvent = clickInfo.event.extendedProps?.['event'];
+
+    if (maybeEvent && this.isValidEvent(maybeEvent)) {
+      this.openEditEventDialog(maybeEvent);  // <-- directly open dialog with full event
+    } else {
+      console.warn('Invalid event data in extendedProps:', maybeEvent);
+    }
+
     this.selectedEventDetails = {
       title: clickInfo.event.title,
       startTime: clickInfo.event.start,
@@ -236,7 +258,6 @@ export class CalendarViewComponent implements OnDestroy {
     );
   }
 
-
   deleteAppointment(): void {
     const id = this.selectedEvent?.id || this.selectedEvent?.id;
     if (!id) {
@@ -260,5 +281,59 @@ export class CalendarViewComponent implements OnDestroy {
 
   stripTime(date: Date): Date {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
+  openEditEventDialog(event: Event): void {
+    const dialogRef = this.dialog.open(CreateEventFormComponent, {
+      width: '600px',
+      data: { eventToEdit: event }
+    });
+
+    const componentInstance = dialogRef.componentInstance;
+    if (componentInstance) {
+      componentInstance.eventSaved.subscribe((updatedEvent: Event) => {
+        this.eventStore.upsertEvent(updatedEvent);
+      });
+    }
+  }
+
+  canEditAppointment(appointment: Appointment): boolean {
+    // Admins can edit appointments that admins have created
+    return this.isAdmin && !!appointment.createdByAdmin
+  }
+
+  editAppointment(appointment: Appointment): void {
+    const dialogRef = this.dialog.open(AppointmentFormComponent, {
+      width: '600px',
+      data: { 
+        appointmentToEdit: appointment,
+        serviceType: appointment.type
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((updatedAppointment: Appointment | undefined) => {
+      if (updatedAppointment) {
+        this.appointmentsService.getAllAppointments().subscribe((appointments: Appointment[]) => {
+          this.appointments = appointments;
+          this.filterService.updateAppointments(appointments);
+        });
+      }
+    });
+  }
+
+  editEvent(event: Event): void {
+    const dialogRef = this.dialog.open(CreateEventFormComponent, {
+      width: '600px',
+      data: { eventToEdit: event }
+    });
+
+    dialogRef.afterClosed().subscribe((updatedEvent: Event | undefined) => {
+      if (updatedEvent) {
+        this.eventsApiService.getAllEvents().subscribe((events: Event[]) => {
+          this.events = events;
+          this.filterService.updateEvents(events);
+        });
+      }
+    });
   }
 }
