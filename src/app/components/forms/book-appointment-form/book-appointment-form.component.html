@@ -58,6 +58,45 @@
               </mat-error>
             </mat-form-field>
           </div>
+          <!-- Event Location (Conditional) -->
+          <div class="row mb-3" *ngIf="appointmentForm.get('type')?.value === 'cleansing' || this.data.serviceType === 'Cleansing'">
+            <mat-label class="mb-3">Location</mat-label>
+            <div class="address-group">
+              <div class="row">
+                <div class="col-md-6">
+                  <mat-form-field appearance="fill" class="w-100">
+                    <mat-label>Street Address</mat-label>
+                    <input matInput formControlName="streetAddress" placeholder="123 Main St" />
+                  </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                  <mat-form-field appearance="fill" class="w-100">
+                    <mat-label>City</mat-label>
+                    <input matInput formControlName="city" placeholder="Seattle" />
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <mat-form-field appearance="fill" class="w-100">
+                    <mat-label>State</mat-label>
+                    <mat-select formControlName="state">
+                      <mat-option *ngFor="let state of usStates" [value]="state.abbreviation">
+                        {{ state.name }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                  <mat-form-field appearance="fill" class="w-100">
+                    <mat-label>ZIP Code</mat-label>
+                    <input matInput formControlName="zipCode" placeholder="98101" maxlength="10" />
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div *ngIf="isAdmin" class="date-time-inputs mt-2 col offset-md-4">
             <div class="col">
               <mat-form-field>
@@ -100,7 +139,7 @@
             </div>
           </div>
         </div>
-        <div class="row flex-row">
+        <div class="row flex-row" *ngIf="appointmentForm.get('type')?.value != 'cleansing' && this.data.serviceType != 'Cleansing'">
           <mat-checkbox class="d-flex justify-content-start" formControlName="isVirtual">Virtual meeting</mat-checkbox>
         </div>
       </div>

@@ -16,7 +16,7 @@ import { debounceTime, distinctUntilChanged, take } from 'rxjs';
 import { Event } from 'src/app/interfaces/event';
 import { EventsApiService } from 'src/app/services/apis/events-api.service';
 import { ConflictCheckService } from 'src/app/services/conflict-check.service';
-import { combineDateAndTime } from 'src/app/utils/date-time.utils';
+import { mergeDateAndTime } from 'src/app/utils/date-time.utils';
 interface EventForm {
   eventName: FormControl<string>;
   eventType: FormControl<string>;
@@ -288,8 +288,8 @@ export class CreateEventFormComponent {
 
     if (!startDate || !endDate || !startTime || !endTime) return null;
 
-    const start = combineDateAndTime(startDate, startTime);
-    const end = combineDateAndTime(endDate, endTime);
+    const start = mergeDateAndTime(startDate, startTime);
+    const end = mergeDateAndTime(endDate, endTime);
 
     return start > end ? { startAfterEnd: true } : null;
   }
@@ -300,8 +300,8 @@ export class CreateEventFormComponent {
       if (!formValue.startDate || !formValue.startTime || !formValue.eventType || formValue.isVirtual == null) return;
       if (!formValue.endDate || !formValue.endTime || !formValue.eventType || formValue.isVirtual == null) return;
 
-      const start = combineDateAndTime(formValue.startDate, formValue.startTime);
-      const end = combineDateAndTime(formValue.endDate, formValue.endTime);
+      const start = mergeDateAndTime(formValue.startDate, formValue.startTime);
+      const end = mergeDateAndTime(formValue.endDate, formValue.endTime);
       const safeCity = formValue.isVirtual ? "virtual" : "Seattle";
 
       const hasStartConflict = await this.conflictCheckService.checkForConflicts(
@@ -334,8 +334,8 @@ export class CreateEventFormComponent {
     if (this.eventForm.valid) {
       const formValues = this.eventForm.value;
 
-      const combinedStart = combineDateAndTime(formValues.startDate!, formValues.startTime!);
-      const combinedEnd = combineDateAndTime(formValues.endDate!, formValues.endTime!);
+      const combinedStart = mergeDateAndTime(formValues.startDate!, formValues.startTime!);
+      const combinedEnd = mergeDateAndTime(formValues.endDate!, formValues.endTime!);
 
       const eventPayload: Event = {
         ...this.data.eventToEdit,
