@@ -42,6 +42,10 @@ export class EventsService {
         appointmentDate: appointment.date,
         appointmentStartTime: appointment.startTime,
         appointmentVirtual: appointment.isVirtual,
+        appointmentStreet: appointment.streetAddress,
+        appointmentCity: appointment.city,
+        appointmentState: appointment.state,
+        appointmentZip: appointment.zipCode,
         appointmentCreatedByAdmin: appointment.createdByAdmin,
       },
     }));
@@ -62,6 +66,7 @@ export class EventsService {
         eventStart: event.startDate,
         eventStartTime: event.startTime,
         eventEnd: event.endDate,
+        eventEndTime: event.endTime,
         eventDescription: event.description,
         eventVirtual: event.isVirtual,
         eventStreet: event.streetAddress,

@@ -5,10 +5,13 @@ export interface Appointment {
   name:string;
   email:string;
   phoneNumber:string;
+  streetAddress?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zipCode?: number | null;
   date:Date;
   startTime: Date;
   endTime: Date;
-  city?: string;
   isVirtual:boolean;
   createdByAdmin: boolean;
 }

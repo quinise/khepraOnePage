@@ -29,13 +29,16 @@
           </p>
 
           <!-- Time -->
-          <p>
-            <strong>Time:</strong>
-            {{ selectedEventDetails?.extendedProps?.['eventStart'] }}
-            <ng-container *ngIf="selectedEventDetails?.extendedProps?.['eventEnd']">
-              - {{ selectedEventDetails?.extendedProps?.['eventEnd'] }}
-            </ng-container>
-          </p>
+            <div>
+              <strong>Time:</strong>
+              <div *ngIf="selectedEventDetails?.extendedProps?.['appointmentId']">
+              {{ selectedEventDetails?.extendedProps?.['appointmentStartTime'] }}
+              </div>
+              <div *ngIf="selectedEventDetails?.extendedProps?.['eventId']">
+              {{ selectedEventDetails?.extendedProps?.['eventStartTime'] }} - {{ selectedEventDetails?.extendedProps?.['eventEndTime'] }}
+              </div>
+            </div>
+            
 
           <!-- Contact Info -->
           <p *ngIf="selectedEventDetails?.extendedProps?.['appointmentEmail']">
@@ -56,14 +59,14 @@
           </p>
 
           <!-- Address (non-virtual events only) -->
-          <ng-container *ngIf="!selectedEventDetails?.extendedProps?.['appointmentId'] && !selectedEvent.extendedProps?.['eventVirtual']">
+          <ng-container *ngIf="(!selectedEventDetails?.extendedProps?.['appointmentVirtual'] &&  selectedEventDetails?.extendedProps?.['appointmentCity']) && !selectedEvent.extendedProps?.['eventVirtual']">
             <p><strong>Address:</strong></p>
             <div class="mb-2">
-              <div>{{ selectedEventDetails?.extendedProps?.['eventStreet'] }}</div>
+              <div>{{ selectedEventDetails?.extendedProps?.['appointmentStreet'] }}</div>
               <div>
-                {{ selectedEventDetails?.extendedProps?.['eventCity'] }},
-                {{ selectedEventDetails?.extendedProps?.['eventState'] }}
-                {{ selectedEventDetails?.extendedProps?.['eventZip'] }}
+                {{ selectedEventDetails?.extendedProps?.['appointmentCity'] }},
+                {{ selectedEventDetails?.extendedProps?.['appointmentState'] }}
+                {{ selectedEventDetails?.extendedProps?.['appointmentZip'] }}
               </div>
             </div>
           </ng-container>

@@ -5,6 +5,12 @@
       <li class="list-group-item" *ngFor="let appointment of upcoming">
         <strong>{{ appointment.name }}</strong> - {{ appointment.type }}<br>
         Date: {{ appointment.date | date:'medium' }}<br>
+        <div *ngIf="appointment.city">
+          Location:<br>
+            {{ appointment.streetAddress }}<br>
+            {{ appointment.city }}, {{ appointment.state }}<br>
+            {{ appointment.zipCode }}
+        </div>
         Mode: {{ appointment.isVirtual ? 'Virtual' : 'In-Person' }}<br>
         <button class="btn btn-sm btn-primary mt-2 mx-3" (click)="openEditDialog(appointment)">
           Edit Appointment Details
