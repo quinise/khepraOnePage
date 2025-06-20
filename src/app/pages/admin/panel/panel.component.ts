@@ -15,6 +15,7 @@ import { AuthService } from 'src/app/services/authentication/auth.service';
 import { EventStoreService } from 'src/app/services/event-store.service';
 import { EventsService } from 'src/app/services/events.service';
 import { IfViewDirective } from 'src/app/shared/ifViewDirective';
+
 @Component({
   selector: 'app-panel',
   standalone: true,
@@ -36,6 +37,9 @@ export class PanelComponent implements OnInit {
   
   isAdmin: boolean = false;
 
+  // Optional: Add error message fields if you want to show errors in the UI
+  errorMessage: string | null = null;
+
   constructor(
     private appointmentsApiService: AppointmentApiService,
     private eventsApiService: EventsApiService,
@@ -45,28 +49,39 @@ export class PanelComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.authService.user$.pipe(take(1)).subscribe(user => {
-      this.isAdmin = user?.role === 'admin';
-      this.fetchData();
-    });
-  
-    this.eventsApiService.getAllEvents().subscribe(events => {
-      this.eventStore.setEvents(events);
-    });
-
-    this.appointmentsApiService.getAllAppointments().subscribe(appointments => {
-      this.appointments = appointments;
+    this.authService.user$.pipe(take(1)).subscribe({
+      next: (user) => {
+        this.isAdmin = user?.role === 'admin';
+        this.fetchData();
+      },
+      error: () => {
+        this.handleError('Failed to load user data');
+      }
     });
   }
 
   fetchData(): void {
-    this.eventsService.fetchAppointmentsAndEvents(this.isAdmin).subscribe(
-      ([appointments, events]) => {
+    this.eventsService.fetchAppointmentsAndEvents(this.isAdmin).subscribe({
+      next: ([appointments, events]) => {
         this.appointments = appointments;
         this.events = events;
+        this.eventStore.setEvents(events);
+        this.errorMessage = '';
+      },
+      error: () => {
+        this.appointments = [];
+        this.events = [];
+        this.errorMessage = 'Failed to load calendar data';
       }
-    );
+    });
   }
+
+  handleError(message: string): void {
+    this.appointments = [];
+    this.events = [];
+    this.errorMessage = message;
+  }
+
 
   toggleView(): void {
     this.showCalendar = !this.showCalendar;
@@ -80,5 +95,6 @@ export class PanelComponent implements OnInit {
       left: 'prev,next today',
       center: 'title',
       right: 'dayGridMonth,timeGridWeek,timeGridDay',
-    },};
+    },
+  };
 }

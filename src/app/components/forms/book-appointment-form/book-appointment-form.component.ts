@@ -1,16 +1,15 @@
-import { NgIf, NgForOf } from '@angular/common';
+import { NgForOf, NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnInit, Output } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatOption } from '@angular/material/select';
+import { MatOption, MatSelectModule } from '@angular/material/select';
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import { debounceTime, distinctUntilChanged, firstValueFrom, Observable, take } from 'rxjs';
 import { Appointment } from 'src/app/interfaces/appointment';
@@ -184,7 +183,7 @@ export class AppointmentFormComponent implements OnInit{
   });
 
   constructor (
-    private _matDialog: MatDialog,
+    private dialogRef: MatDialogRef<AppointmentFormComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { serviceType: string, appointmentToEdit?: Appointment },
     private cdr: ChangeDetectorRef,
     public appointmentApiService: AppointmentApiService,
@@ -284,34 +283,63 @@ export class AppointmentFormComponent implements OnInit{
     this.hasConflict = hasConflict;
   }
 
-  async onSubmit(form: any): Promise<void> {
-    const mergedDateTime = mergeDateAndTime(form.value.date, form.value.time);
+  public get form() {
+    return this.appointmentForm;
+  }
+
+  async onSubmit(): Promise<void> {
+    const form = this.form.getRawValue();
+
+    if (!form.type) {
+      console.error('Missing appointment type in form:', form);
+      return;
+    } else if (!form.name) {
+        console.error('Missing client name in form:', form);
+        return;
+    } else if (!form.email) {
+        console.error('Missing client email in form:', form);
+        return;
+    } else if (!form.phoneNumber) {
+        console.error('Missing client phone number in form:', form);
+        return;
+    } else if (!form.isVirtual) {
+        console.error('Missing isVirtual in form:', form);
+        return;
+    }
+
+    const { date, time } = form;
+
+    if (!date || !time) {
+      console.error('Invalid date or time passed to onSubmit:', { date, time });
+      return;
+    }
+
+    const mergedDateTime = mergeDateAndTime(date, time);
   
     const user = await firstValueFrom(this.user$);
 
-    const durationMinutes = this.appointmentDurations[form.value.type] ?? 30;
+    const durationMinutes = this.appointmentDurations[form.type] ?? 30;
     const endTime = new Date(mergedDateTime.getTime() + durationMinutes * 60000);
 
     const appointment: Appointment = {
-      type: this.isAdmin ? form.value.type : this.data.serviceType,
+      type: this.isAdmin ? form.type : this.data.serviceType,
       userId: user?.uid ?? '',
-      name: form.value.name,
-      email: form.value.email,
-      phoneNumber: form.value.phoneNumber,
-      streetAddress: form.value.streetAddress || null,
-      city: form.value.city || null,
-      state: form.value.state || null,
-      zipCode: form.value.zipCode || null,
+      name: form.name,
+      email: form.email,
+      phoneNumber: form.phoneNumber,
+      streetAddress: form.streetAddress || null,
+      city: form.city || null,
+      state: form.state || null,
+      zipCode: form.zipCode || null,
       date: mergedDateTime,
       startTime: mergedDateTime,
       endTime: endTime,
-      isVirtual: form.value.isVirtual,
+      isVirtual: form.isVirtual,
       id: this.data.appointmentToEdit?.id,
       createdByAdmin: this.isAdmin ? true : false,
     };
   
     console.log('Updating appointment with ID in onSubmit:', this.data.appointmentToEdit?.id);
-
 
     const appointmentOperation$ = this.data.appointmentToEdit
       ? this.appointmentApiService.updateAppointment(this.data.appointmentToEdit.id!, appointment)
@@ -325,7 +353,7 @@ export class AppointmentFormComponent implements OnInit{
         this.errorMessage = '';
         this.appointmentForm.reset();
         this.appointmentSaved.emit(savedAppointment);
-        this._matDialog.closeAll();
+        this.dialogRef.close(savedAppointment);
       },
       error: (err) => {
         this.successMessage = '';

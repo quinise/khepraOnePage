@@ -1,66 +1,62 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import {
   Auth,
   GoogleAuthProvider,
   UserCredential,
-  authState,
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut
+  authState
 } from '@angular/fire/auth';
-import { Firestore, doc, docData, getDoc, setDoc } from '@angular/fire/firestore';
+import { Firestore, docData } from '@angular/fire/firestore';
 import { Observable, of, switchMap } from 'rxjs';
 import { AppUser } from '../../interfaces/appUser';
+import { FirebaseAuthHelper } from './firebase-auth-helpers';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private auth: Auth;
   user$: Observable<AppUser | null>;
 
-  constructor(private firestore: Firestore, auth: Auth) {
+  constructor(private firestore: Firestore, @Inject('auth') auth: Auth) {
     this.auth = auth;
 
     this.user$ = authState(this.auth).pipe(
       switchMap(user => {
         if (!user) return of(null);
-        const ref = doc(this.firestore, 'users', user.uid);
+        const ref = FirebaseAuthHelper.doc(this.firestore, 'users', user.uid);
         return docData(ref) as Observable<AppUser>;
       })
     );
   }
 
   async signUpWithEmail(email: string, password: string): Promise<UserCredential> {
-    const userCredential = await createUserWithEmailAndPassword(this.auth, email, password)
+    const userCredential = await FirebaseAuthHelper.createUserWithEmailAndPassword(this.auth, email, password);
     const user = userCredential.user;
-    // 👇 Save user to Firestore
-    await setDoc(doc(this.firestore, 'users', user.uid), {
+
+    const userRef = FirebaseAuthHelper.doc(this.firestore, 'users', user.uid);
+    await FirebaseAuthHelper.setDoc(userRef, {
       uid: user.uid,
       displayName: user.displayName,
       email: user.email,
       role: 'user',
       createdAt: new Date(),
     });
-    return await userCredential;
+
+    return userCredential;
   }
 
   async loginWithEmail(email: string, password: string): Promise<UserCredential> {
-    return await signInWithEmailAndPassword(this.auth, email, password)
+    return FirebaseAuthHelper.signInWithEmailAndPassword(this.auth, email, password);
   }
 
   async loginWithGoogle(): Promise<UserCredential> {
     const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(this.auth, provider);
+    const result = await FirebaseAuthHelper.signInWithPopup(this.auth, provider);
     const user = result.user;
 
-    // Check if user already exists in Firestore
-    const userRef = doc(this.firestore, 'users', user.uid);
-    const docSnap = await getDoc(userRef);
+    const userRef = FirebaseAuthHelper.doc(this.firestore, 'users', user.uid);
+    const docSnap = await FirebaseAuthHelper.getDoc(userRef);
 
     if (!docSnap.exists()) {
-      // Save new user to Firestore
-      await setDoc(userRef, {
+      await FirebaseAuthHelper.setDoc(userRef, {
         uid: user.uid,
         email: user.email,
         role: 'user',
@@ -74,11 +70,11 @@ export class AuthService {
   }
 
   logout(): Promise<void> {
-    return signOut(this.auth);
+    return FirebaseAuthHelper.signOut(this.auth);
   }
 
   sendPasswordResetEmail(email: string): Promise<void> {
-    return sendPasswordResetEmail(this.auth, email);
+    return FirebaseAuthHelper.sendPasswordResetEmail(this.auth, email);
   }
 
   getAppUser(): Promise<AppUser | null> {

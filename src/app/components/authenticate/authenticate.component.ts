@@ -1,14 +1,14 @@
 import { NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormField, MatInputModule } from '@angular/material/input';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/authentication/auth.service';
 import { UserService } from 'src/app/services/authentication/user.service';
-import { PasswordResetComponent } from './password-reset/password-reset.component'; // adjust path as needed
+import { PasswordResetComponent } from './password-reset/password-reset.component';
 
 @Component({
   selector: 'app-signup',
@@ -27,14 +27,19 @@ import { PasswordResetComponent } from './password-reset/password-reset.componen
   styleUrl: './authenticate.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-
 export class AuthenticateComponent {
   errorMessage: string;
   successMessage: string;
 
   protected authForm: FormGroup = new FormGroup({});
 
-  constructor(private router: Router, private _matDialog: MatDialog, @Inject(MAT_DIALOG_DATA) public data: {authStep: string}, private authService: AuthService, private userService: UserService) {
+  constructor(
+    private router: Router,
+    private dialogRef: MatDialogRef<AuthenticateComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { authStep: string },
+    private authService: AuthService,
+    private userService: UserService
+  ) {
     this.errorMessage = "";
     this.successMessage = "";
 
@@ -44,7 +49,7 @@ export class AuthenticateComponent {
         validators: [Validators.required, Validators.email],
       })
     );
-  
+
     this.authForm.addControl(
       'password', new FormControl<string>('', {
         nonNullable: true,
@@ -69,9 +74,17 @@ export class AuthenticateComponent {
   }
 
   googleLogin() {
-    this.authService.loginWithGoogle().then(res => {
-      this._matDialog.closeAll();
-    }).catch(console.error);
+    this.authService.loginWithGoogle()
+      .then(res => {
+        this.dialogRef.close();
+      })
+      .catch(err => {
+        console.error('[googleLogin] loginWithGoogle rejected:', err);
+      });
+  }
+
+  public get form() {
+    return this.authForm;
   }
 
   public onSubmit(): void {
@@ -79,61 +92,62 @@ export class AuthenticateComponent {
 
     if (this.data.authStep === "Sign up") {
       this.authService.signUpWithEmail(email!, password!)
-      .then(async res => {
-        this.successMessage = 'Account created successfully!';
-        this.errorMessage = '';
+        .then(async res => {
+          this.successMessage = 'Account created successfully!';
+          this.errorMessage = '';
 
-        const role = await this.userService.getUserRole(res.user.uid);
+          this.dialogRef.close();
 
-        if (role === 'admin') {
-          this.router.navigate(['/admin-panel']);
-        } else {
-          this.router.navigate(['/']);
-        }
+          const role = await this.userService.getUserRole(res.user.uid);
 
-        this._matDialog.closeAll();
-      })
-      .catch(err => {
-        this.errorMessage = err.message;
-        this.successMessage = '';
-      });
+          if (role === 'admin') {
+            this.router.navigate(['/admin-panel']);
+          } else {
+            this.router.navigate(['/']);
+          }
+        })
+        .catch(err => {
+          this.errorMessage = err.message;
+          this.successMessage = '';
+        });
     } else if (this.data.authStep === "Login") {
       this.authService.loginWithEmail(email!, password!)
-      .then(res => {
-        this.successMessage = 'Login successful!';
-        this.errorMessage = '';
-        this._matDialog.closeAll();
-      })
-      .catch(err => {
-        console.error("TESTING Login error:", err);
-        this.successMessage = '';
-  
-        // Handle specific error codes
-        switch (err.code) {
-          case 'auth/user-not-found':
-            this.errorMessage = 'No account found with that email.';
-            break;
-          case 'auth/wrong-password':
-            this.errorMessage = 'Incorrect password.';
-            break;
-          case 'auth/invalid-email':
-            this.errorMessage = 'Please enter a valid email address.';
-            break;
-          case 'auth/too-many-requests':
-            this.errorMessage = 'Too many failed login attempts. Try again later.';
-            break;
-          default:
-            this.errorMessage = 'Login failed. Please try again.';
-            break;
-        }
-      });
+        .then(res => {
+          this.successMessage = 'Login successful!';
+          this.errorMessage = '';
+          this.dialogRef.close();
+        })
+        .catch(err => {
+          this.successMessage = '';
+
+          switch (err.code) {
+            case 'auth/user-not-found':
+              this.errorMessage = 'No account found with that email.';
+              break;
+            case 'auth/wrong-password':
+              this.errorMessage = 'Incorrect password.';
+              break;
+            case 'auth/invalid-email':
+              this.errorMessage = 'Please enter a valid email address.';
+              break;
+            case 'auth/too-many-requests':
+              this.errorMessage = 'Too many failed login attempts. Try again later.';
+              break;
+            default:
+              this.errorMessage = 'Login failed. Please try again.';
+              break;
+          }
+        });
     }
   }
 
   resetPassword(): void {
-    const dialogRef = this._matDialog.open(PasswordResetComponent);
-  
-    dialogRef.afterClosed().subscribe(email => {
+    const dialogRef = this.dialogRef;
+
+    const passwordDialog = dialogRef as unknown as { open: (component: any) => { afterClosed: () => any } };
+    const result = passwordDialog.open(PasswordResetComponent);
+
+    result.afterClosed().subscribe((email: string | undefined) => {
       if (email) {
         this.authService.sendPasswordResetEmail(email)
           .then(() => {

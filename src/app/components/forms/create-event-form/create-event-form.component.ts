@@ -128,72 +128,72 @@ export class CreateEventFormComponent {
   existingEvents: Event[] = [];
   hasConflict = false
   
+  eventForm : FormGroup;
+
   @Output() eventSaved = new EventEmitter<Event>();
-
-  protected eventForm = new FormGroup<EventForm>({
-      eventName: new FormControl<string>('', {
-        nonNullable: true,
-        validators: [Validators.pattern(/[a-zA-Z ]/), Validators.required]
-      }),
-      eventType: new FormControl<string>('', {
-        nonNullable: true,
-        validators: [Validators.pattern(/[a-zA-Z ]/), Validators.required]
-      }),
-      clientName: new FormControl<string | null>('', {
-        nonNullable: false,
-        validators: [Validators.pattern(/[a-zA-Z ]/)]
-      }),
-      startDate: new FormControl<Date>(new Date(), {
-        nonNullable: true,
-        validators: Validators.required
-      }),
-      endDate: new FormControl<Date>(new Date(), {
-        nonNullable: true,
-        validators: Validators.required
-      }),
-      startTime: new FormControl<Date>(new Date(), {
-        nonNullable: true,
-        validators: Validators.required
-      }),
-      endTime: new FormControl<Date>(new Date(), {
-        nonNullable: true,
-        validators: Validators.required
-      }),
-      streetAddress: new FormControl<string>('', {
-        nonNullable: false,
-        validators: [Validators.pattern(/[a-zA-Z ]/)]
-      }),
-      city: new FormControl<string>('', {
-        nonNullable: false,
-        validators: [Validators.pattern(/[a-zA-Z ]/)]
-      }),
-      state: new FormControl<string>('', {
-        nonNullable: false,
-        // TODO: validators: []
-      }),
-      // TODO: Change to string
-      zipCode: new FormControl<number | null>(null, {
-        nonNullable: false,
-        validators: [Validators.pattern(/[0-9]/)]
-      }),
-      description: new FormControl<string>('', {
-        nonNullable: true,
-        validators: [Validators.pattern(/^[A-Za-z0-9 .,!?'"()\-:;\n\r]*$/), Validators.required]
-      }),
-      isVirtual: new FormControl<boolean>(false, {
-        nonNullable: true,
-      }),
-    }, { validators: (form) => this.validateStartBeforeEnd(form as FormGroup<EventForm>) });
-
     constructor(
       private _matDialog: MatDialog,
       @Inject(MAT_DIALOG_DATA) public data: { eventType?: string; eventToEdit?: Event },
       public eventsService: EventsApiService,
       private dialogRef: MatDialogRef<CreateEventFormComponent>,
       private conflictCheckService: ConflictCheckService,
-    ) {}
+    ) {
+        this.eventForm = new FormGroup<EventForm>({
+        eventName: new FormControl<string>('', {
+          nonNullable: true,
+          validators: [Validators.pattern(/[a-zA-Z ]/), Validators.required]
+        }),
+        eventType: new FormControl<string>('', {
+          nonNullable: true,
+          validators: [Validators.pattern(/[a-zA-Z ]/), Validators.required]
+        }),
+        clientName: new FormControl<string | null>('', {
+          nonNullable: false,
+          validators: [Validators.pattern(/[a-zA-Z ]/)]
+        }),
+        startDate: new FormControl<Date>(new Date(), {
+          nonNullable: true,
+          validators: Validators.required
+        }),
+        endDate: new FormControl<Date>(new Date(), {
+          nonNullable: true,
+          validators: Validators.required
+        }),
+        startTime: new FormControl<Date>(new Date(), {
+          nonNullable: true,
+          validators: Validators.required
+        }),
+        endTime: new FormControl<Date>(new Date(), {
+          nonNullable: true,
+          validators: Validators.required
+        }),
+        streetAddress: new FormControl<string>('', {
+          nonNullable: false,
+          validators: [Validators.pattern(/[a-zA-Z ]/)]
+        }),
+        city: new FormControl<string>('', {
+          nonNullable: false,
+          validators: [Validators.pattern(/[a-zA-Z ]/)]
+        }),
+        state: new FormControl<string>('', {
+          nonNullable: false,
+          // TODO: validators: []
+        }),
+        // TODO: Change to string
+        zipCode: new FormControl<number | null>(null, {
+          nonNullable: false,
+          validators: [Validators.pattern(/[0-9]/)]
+        }),
+        description: new FormControl<string>('', {
+          nonNullable: true,
+          validators: [Validators.pattern(/^[A-Za-z0-9 .,!?'"()\-:;\n\r]*$/), Validators.required]
+        }),
+        isVirtual: new FormControl<boolean>(false, {
+          nonNullable: true,
+        }),
+      }, { validators: (form) => this.validateStartBeforeEnd(form as FormGroup<EventForm>) }) as FormGroup;
+    }
     
-
   ngOnInit(): void {
     this.eventForm.get('isVirtual')?.valueChanges.subscribe((isVirtual) => {
       const streetAddress = this.eventForm.get('streetAddress');
@@ -243,27 +243,29 @@ export class CreateEventFormComponent {
     }
 
     this.loadExistingEvents();
+  }
+
+  ngAfterViewInit(): void {
+    console.log('Form exists?', this.eventForm);
+    console.log('Start Date Control:', this.eventForm.get('startDate'));
 
     // Listen for changes in dates or times
-    this.eventForm.get('startDate')?.valueChanges
-      .pipe(distinctUntilChanged(), debounceTime(100))
-      .subscribe(() => this.checkForConflictsFromForm());
+    const controls = ['startDate', 'startTime', 'endDate', 'endTime'] as const;
 
-    this.eventForm.get('startTime')?.valueChanges
-      .pipe(distinctUntilChanged(), debounceTime(100))
-      .subscribe(() => this.checkForConflictsFromForm());
-
-    this.eventForm.get('endDate')?.valueChanges
-    .pipe(distinctUntilChanged(), debounceTime(100))
-    .subscribe(() => this.checkForConflictsFromForm());
-
-    this.eventForm.get('endTime')?.valueChanges
-      .pipe(distinctUntilChanged(), debounceTime(100))
-      .subscribe(() => this.checkForConflictsFromForm());
+    for (const key of controls) {
+      const control = this.eventForm.get(key);
+      if (control && control.valueChanges) {
+        control.valueChanges
+          .pipe(distinctUntilChanged(), debounceTime(100))
+          .subscribe(() => this.checkForConflictsFromForm());
+      } else {
+        console.warn(`Control ${key} not found in ngAfterViewInit`);
+      }
+    }
   }
 
   onCancel() {
-    this._matDialog.closeAll();
+    this.dialogRef.close();
   }
 
   private loadExistingEvents(): void {
@@ -324,6 +326,10 @@ export class CreateEventFormComponent {
         this.hasConflict = hasEndConflict;
       }
     }
+
+  public get form() {
+    return this.eventForm;
+  }
 
   onSubmit(): void {
     if (this.eventForm.errors?.['startAfterEnd']) {

@@ -7,6 +7,7 @@ import { Appointment } from 'src/app/interfaces/appointment';
 import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
 import { AuthService } from 'src/app/services/authentication/auth.service';
 import { DeleteEventService } from 'src/app/services/delete-event.service';
+
 @Component({
   selector: 'app-appointment-history',
   standalone: true,
