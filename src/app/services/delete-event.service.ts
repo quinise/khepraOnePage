@@ -38,7 +38,6 @@ export class DeleteEventService {
       onComplete();
       return;
     }
-
     if (!confirm(`Are you sure you want to delete this event: "${event.eventName}"?`)) {
       onComplete();
       return;
@@ -54,6 +53,7 @@ export class DeleteEventService {
       error: (err) => {
         console.error('Failed to delete event', err);
         alert('Failed to delete event');
+        onComplete();
       },
       complete: onComplete,
     });
@@ -96,6 +96,7 @@ export class DeleteEventService {
       error: (err) => {
         console.error('Failed to delete appointment', err);
         alert('Failed to delete appointment');
+        onComplete();
       },
       complete: onComplete,
     });

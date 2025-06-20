@@ -8,16 +8,16 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { Subscription, take } from 'rxjs';
 import { Appointment } from 'src/app/interfaces/appointment';
 import { Event } from 'src/app/interfaces/event';
-import { AuthService } from 'src/app/services/authentication/auth.service';
 import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
 import { EventsApiService } from 'src/app/services/apis/events-api.service';
-import { EventStoreService } from 'src/app/services/event-store.service';
+import { AuthService } from 'src/app/services/authentication/auth.service';
 import { DeleteEventService } from 'src/app/services/delete-event.service';
 import { EventFilterService } from 'src/app/services/event-filter.service';
+import { EventStoreService } from 'src/app/services/event-store.service';
 import { EventsService } from 'src/app/services/events.service';
-import { EventFilterComponent } from '../../shared/event-filter/event-filter.component';
 import { AppointmentFormComponent } from '../../forms/book-appointment-form/book-appointment-form.component';
 import { CreateEventFormComponent } from '../../forms/create-event-form/create-event-form.component';
+import { EventFilterComponent } from '../../shared/event-filter/event-filter.component';
 
 @Component({
   selector: 'app-calendar-view',

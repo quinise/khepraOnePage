@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Firestore, doc, getDoc } from '@angular/fire/firestore';
+import { Firestore } from '@angular/fire/firestore';
+import { FirebaseAuthHelper } from './firebase-auth-helpers'; // adjust path as needed
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
   constructor(private firestore: Firestore) {}
 
   async getUserRole(uid: string): Promise<string | null> {
-    const docRef = doc(this.firestore, 'users', uid);
-    const docSnap = await getDoc(docRef);
+    const docRef = FirebaseAuthHelper.doc(this.firestore, 'users', uid); // ✅ use wrapper
+    const docSnap = await FirebaseAuthHelper.getDoc(docRef);             // ✅ use wrapper
     return docSnap.exists() ? docSnap.data()['role'] : null;
   }
 }

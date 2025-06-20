@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { EventsApiService } from './apis/events-api.service';
+import { firstValueFrom, take } from 'rxjs';
 import { AppointmentApiService } from './apis/appointmentApi.service';
-import { take, firstValueFrom } from 'rxjs';
+import { EventsApiService } from './apis/events-api.service';
 
 interface ConflictItem {
   start: Date;
