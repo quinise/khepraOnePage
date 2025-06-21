@@ -30,11 +30,13 @@ export class AppointmentHistoryComponent implements OnInit {
   ngOnInit(): void {
     this.authService.user$.subscribe(user => {
       if (user?.uid) {
-        this.appointmentApiService.getAppointmentsByUserId(user.uid, 'upcoming').subscribe(appointments => {
+        // Fetch both user and admin-created upcoming appointments for the user
+        this.appointmentApiService.getAppointmentsByEmail(user.email, 'upcoming').subscribe(appointments => {
           this.upcomingAppointments = appointments;
           this.upcomingAppointments$.next(this.upcomingAppointments);
         });
 
+        // Fetch both user and admin-created past appointments for the user
         this.pastAppointments$ = this.appointmentApiService.getAppointmentsByUserId(user.uid, 'past');
       }
     });
