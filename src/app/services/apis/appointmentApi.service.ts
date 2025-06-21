@@ -28,7 +28,6 @@ export class AppointmentApiService {
   return this.http.get<Appointment[]>('/api/appointments', { params });
 }
 
-
   // Get one appointment by its ID
   getAppointmentById(id: number): Observable<Appointment> {
     return this.http.get<Appointment>(`${this.baseUrl}/${id}`);
@@ -42,6 +41,15 @@ export class AppointmentApiService {
     return this.http.get<Appointment[]>(`/api/appointments`, { params });
   }
   
+  getAppointmentsByEmail(email: string, filter?: 'upcoming' | 'past'): Observable<Appointment[]> {
+    let params = new HttpParams().set('email', email);
+
+    if (filter) {
+      params = params.set('filter', filter);
+    }
+
+    return this.http.get<Appointment[]>(this.baseUrl, { params });
+  }
 
   // Create new appointment
   createAppointment(appointment: Appointment): Observable<Appointment> {

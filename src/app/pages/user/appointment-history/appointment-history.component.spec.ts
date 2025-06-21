@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of, BehaviorSubject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-import { AppointmentHistoryComponent } from './appointment-history.component';
+import { BehaviorSubject, of } from 'rxjs';
+import { Appointment } from 'src/app/interfaces/appointment';
 import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
 import { AuthService } from 'src/app/services/authentication/auth.service';
 import { DeleteEventService } from 'src/app/services/delete-event.service';
-import { Appointment } from 'src/app/interfaces/appointment';
+import { AppointmentHistoryComponent } from './appointment-history.component';
 
 describe('AppointmentHistoryComponent', () => {
   let component: AppointmentHistoryComponent;
