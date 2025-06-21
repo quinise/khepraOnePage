@@ -5,6 +5,7 @@ import { Firestore } from '@angular/fire/firestore';
 import { Auth, GoogleAuthProvider, UserCredential, User, UserMetadata } from 'firebase/auth';
 import { of } from 'rxjs';
 import { AppUser } from 'src/app/interfaces/appUser';
+import { AuthWrapperService, GET_AUTH_TOKEN } from './auth-wrapper.service';
 
 const mockUser: User = {
   uid: 'test123',
@@ -41,8 +42,13 @@ describe('AuthService', () => {
     TestBed.configureTestingModule({
       providers: [
         AuthService,
-        { provide: 'auth', useValue: mockAuth },
-        { provide: Firestore, useValue: mockFirestore }
+        { provide: Firestore, useValue: mockFirestore },
+        { provide: GET_AUTH_TOKEN, useValue: () => mockAuth }, // 👈 Provide GET_AUTH_TOKEN
+        {
+          provide: AuthWrapperService,
+          useFactory: (getAuthFn: () => Auth) => new AuthWrapperService(getAuthFn),
+          deps: [GET_AUTH_TOKEN]
+        }
       ]
     });
 
