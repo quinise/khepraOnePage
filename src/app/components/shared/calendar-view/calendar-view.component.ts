@@ -212,18 +212,22 @@ export class CalendarViewComponent implements OnDestroy {
     this.selectedEvent = clickInfo.event;
     const maybeEvent = clickInfo.event.extendedProps?.['event'];
 
-    if (maybeEvent && this.isValidEvent(maybeEvent)) {
-      this.openEditEventDialog(maybeEvent);  // <-- directly open dialog with full event
-    } else {
-      console.warn('Invalid event data in extendedProps:', maybeEvent);
-    }
-
     this.selectedEventDetails = {
       title: clickInfo.event.title,
       startTime: clickInfo.event.start,
       extendedProps: { ...clickInfo.event.extendedProps },
     };
     this.showPanel = true;
+
+    if (this.isFuture(clickInfo.event.start)) {
+      if (maybeEvent && this.isValidEvent(maybeEvent)) {
+        this.openEditEventDialog(maybeEvent);
+      } else {
+        console.warn('Invalid event data in extendedProps:', maybeEvent);
+      }
+    } else {
+      console.log('Past events cannot be edited.');
+    }
   }
 
   closeEventDetails() {
@@ -298,9 +302,11 @@ export class CalendarViewComponent implements OnDestroy {
   }
 
   canEditAppointment(appointment: Appointment): boolean {
-    // Admins can edit appointments that admins have created
-    return this.isAdmin && !!appointment.createdByAdmin
-  }
+    const isFuture = new Date(appointment.startTime).getTime() > new Date().getTime();
+
+    // Admins can edit appointments that they have created, and only if the appointment is in the future
+    return this.isAdmin && !!appointment.createdByAdmin && isFuture;
+}
 
   editAppointment(appointment: Appointment): void {
     const dialogRef = this.dialog.open(AppointmentFormComponent, {

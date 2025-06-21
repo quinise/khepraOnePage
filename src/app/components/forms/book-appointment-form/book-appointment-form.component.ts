@@ -1,4 +1,4 @@
-import { NgForOf, NgIf } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnInit, Output } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -44,7 +44,6 @@ interface AppointmentForm {
     MatInputModule,
     FormsModule,
     NgIf,
-    NgForOf,
     ReactiveFormsModule,
     MatDatepickerModule,
     MatFormFieldModule,
@@ -294,17 +293,22 @@ export class AppointmentFormComponent implements OnInit{
       console.error('Missing appointment type in form:', form);
       return;
     } else if (!form.name) {
-        console.error('Missing client name in form:', form);
-        return;
+      console.error('Missing client name in form:', form);
+      return;
     } else if (!form.email) {
-        console.error('Missing client email in form:', form);
-        return;
+      console.error('Missing client email in form:', form);
+      return;
     } else if (!form.phoneNumber) {
-        console.error('Missing client phone number in form:', form);
-        return;
-    } else if (!form.isVirtual) {
-        console.error('Missing isVirtual in form:', form);
-        return;
+      console.error('Missing client phone number in form:', form);
+      return;
+    }
+
+    // Check if email exists before proceeding
+    const emailExists = await firstValueFrom(this.authService.checkEmailExists(form.email));
+    if (!emailExists) {
+      console.error('Email is not associated with an existing account.');
+      this.errorMessage = 'The email you provided does not correspond to an existing account.';
+      return;
     }
 
     const { date, time } = form;
@@ -315,7 +319,7 @@ export class AppointmentFormComponent implements OnInit{
     }
 
     const mergedDateTime = mergeDateAndTime(date, time);
-  
+
     const user = await firstValueFrom(this.user$);
 
     const durationMinutes = this.appointmentDurations[form.type] ?? 30;
@@ -338,13 +342,13 @@ export class AppointmentFormComponent implements OnInit{
       id: this.data.appointmentToEdit?.id,
       createdByAdmin: this.isAdmin ? true : false,
     };
-  
+
     console.log('Updating appointment with ID in onSubmit:', this.data.appointmentToEdit?.id);
 
     const appointmentOperation$ = this.data.appointmentToEdit
       ? this.appointmentApiService.updateAppointment(this.data.appointmentToEdit.id!, appointment)
       : this.appointmentApiService.createAppointment(appointment);
-  
+
     appointmentOperation$.subscribe({
       next: (savedAppointment) => {
         this.successMessage = this.data.appointmentToEdit
