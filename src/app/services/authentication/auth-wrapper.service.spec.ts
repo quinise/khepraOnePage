@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthWrapperService, GET_AUTH_TOKEN } from './auth-wrapper.service';
 import {
   Auth,
-  User,
-  AuthProvider,
   AuthCredential,
+  AuthProvider,
+  User,
 } from 'firebase/auth';
+import { AuthWrapperService, GET_AUTH_TOKEN } from './auth-wrapper.service';
 import { FirebaseAuthHelper } from './firebase-auth-helpers';
 
 describe('AuthWrapperService', () => {

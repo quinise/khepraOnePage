@@ -3,12 +3,18 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { AuthService } from 'src/app/services/authentication/auth.service';
 import { AccountSettingsComponent } from './account-settings.component';
-
+import { AuthWrapperService } from 'src/app/services/authentication/auth-wrapper.service';
+import { GET_AUTH_TOKEN } from 'src/app/services/authentication/auth-wrapper.service';
 @Component({ selector: 'app-change-password', standalone: true, template: '' })
 class MockChangePasswordComponent {}
 
 @Component({ selector: 'app-delete-account', standalone: true, template: '' })
 class MockDeleteAccountComponent {}
+
+const mockAuthWrapperService = {
+  user$: of({ role: 'user' }),
+  getCurrentUser: jasmine.createSpy('getCurrentUser').and.returnValue(Promise.resolve({ uid: 'test-user' }))
+};
 
 describe('AccountSettingsComponent', () => {
   let component: AccountSettingsComponent;
@@ -22,6 +28,11 @@ describe('AccountSettingsComponent', () => {
         MockDeleteAccountComponent,
       ],
       providers: [
+        { provide: GET_AUTH_TOKEN, useValue: of('mock-token') },
+        {
+          provide: AuthWrapperService,
+          useValue: mockAuthWrapperService,
+        },
         {
           provide: AuthService,
           useValue: {

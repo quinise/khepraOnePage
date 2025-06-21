@@ -1,24 +1,20 @@
-import { Inject, Injectable } from '@angular/core';
-import {
-  Auth,
-  GoogleAuthProvider,
-  UserCredential,
-  authState
-} from '@angular/fire/auth';
+import { Injectable } from '@angular/core';
 import { Firestore, docData } from '@angular/fire/firestore';
 import { Observable, of, switchMap } from 'rxjs';
 import { AppUser } from '../../interfaces/appUser';
 import { FirebaseAuthHelper } from './firebase-auth-helpers';
+import { AuthWrapperService } from './auth-wrapper.service';
+import { GoogleAuthProvider, UserCredential, authState } from '@angular/fire/auth';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private auth: Auth;
   user$: Observable<AppUser | null>;
 
-  constructor(private firestore: Firestore, @Inject('auth') auth: Auth) {
-    this.auth = auth;
-
-    this.user$ = authState(this.auth).pipe(
+  constructor(
+    private firestore: Firestore,
+    private authWrapper: AuthWrapperService
+  ) {
+    this.user$ = authState(this.authWrapper.getAuth()).pipe(
       switchMap(user => {
         if (!user) return of(null);
         const ref = FirebaseAuthHelper.doc(this.firestore, 'users', user.uid);
@@ -28,7 +24,8 @@ export class AuthService {
   }
 
   async signUpWithEmail(email: string, password: string): Promise<UserCredential> {
-    const userCredential = await FirebaseAuthHelper.createUserWithEmailAndPassword(this.auth, email, password);
+    const auth = this.authWrapper.getAuth();
+    const userCredential = await FirebaseAuthHelper.createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
     const userRef = FirebaseAuthHelper.doc(this.firestore, 'users', user.uid);
@@ -44,12 +41,13 @@ export class AuthService {
   }
 
   async loginWithEmail(email: string, password: string): Promise<UserCredential> {
-    return FirebaseAuthHelper.signInWithEmailAndPassword(this.auth, email, password);
+    return FirebaseAuthHelper.signInWithEmailAndPassword(this.authWrapper.getAuth(), email, password);
   }
 
   async loginWithGoogle(): Promise<UserCredential> {
+    const auth = this.authWrapper.getAuth();
     const provider = new GoogleAuthProvider();
-    const result = await FirebaseAuthHelper.signInWithPopup(this.auth, provider);
+    const result = await FirebaseAuthHelper.signInWithPopup(auth, provider);
     const user = result.user;
 
     const userRef = FirebaseAuthHelper.doc(this.firestore, 'users', user.uid);
@@ -70,11 +68,11 @@ export class AuthService {
   }
 
   logout(): Promise<void> {
-    return FirebaseAuthHelper.signOut(this.auth);
+    return FirebaseAuthHelper.signOut(this.authWrapper.getAuth());
   }
 
   sendPasswordResetEmail(email: string): Promise<void> {
-    return FirebaseAuthHelper.sendPasswordResetEmail(this.auth, email);
+    return FirebaseAuthHelper.sendPasswordResetEmail(this.authWrapper.getAuth(), email);
   }
 
   getAppUser(): Promise<AppUser | null> {

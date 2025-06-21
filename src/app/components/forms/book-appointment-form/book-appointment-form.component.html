@@ -8,7 +8,7 @@
   </div>
   <mat-dialog-content align="center">
   <!-- TODO: Consolidate error messages -->
-    <form class="border border-top-0 mb-5 p-4" [formGroup]="appointmentForm" (ngSubmit)="onSubmit(bookServiceForm)" #bookServiceForm="ngForm">
+    <form class="border border-top-0 mb-5 p-4" [formGroup]="appointmentForm" (ngSubmit)="onSubmit()" #bookServiceForm="ngForm">
       <div class="row">
         <!-- Only visible to admins -->
         <div class="row w-100" *ngIf="isAdmin">
