@@ -1,8 +1,8 @@
-import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-import { AppointmentApiService } from './appointmentApi.service';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
 import { Appointment } from '../../interfaces/appointment';
+import { AppointmentApiService } from './appointmentApi.service';
 
 describe('AppointmentApiService', () => {
   let service: AppointmentApiService;
@@ -44,27 +44,6 @@ describe('AppointmentApiService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should fetch all appointments', () => {
-    service.getAllAppointments().subscribe(appointments => {
-      expect(appointments.length).toBe(1);
-      expect(appointments[0]).toEqual(mockAppointment);
-    });
-
-    const req = httpMock.expectOne('http://localhost:8080/api/appointments');
-    expect(req.request.method).toBe('GET');
-    req.flush([mockAppointment]);
-  });
-
-  it('should fetch appointment by ID', () => {
-    service.getAppointmentById(1).subscribe(appointment => {
-      expect(appointment).toEqual(mockAppointment);
-    });
-
-    const req = httpMock.expectOne('http://localhost:8080/api/appointments/1');
-    expect(req.request.method).toBe('GET');
-    req.flush(mockAppointment);
-  });
-
   it('should create a new appointment', () => {
     service.createAppointment(mockAppointment).subscribe(appointment => {
       expect(appointment).toEqual(mockAppointment);
@@ -97,6 +76,27 @@ describe('AppointmentApiService', () => {
     req.flush(null);
   });
 
+it('should fetch all appointments', () => {
+    service.getAllAppointments().subscribe(appointments => {
+      expect(appointments.length).toBe(1);
+      expect(appointments[0]).toEqual(mockAppointment);
+    });
+
+    const req = httpMock.expectOne('http://localhost:8080/api/appointments');
+    expect(req.request.method).toBe('GET');
+    req.flush([mockAppointment]);
+  });
+
+  it('should fetch appointment by ID', () => {
+    service.getAppointmentById(1).subscribe(appointment => {
+      expect(appointment).toEqual(mockAppointment);
+    });
+
+    const req = httpMock.expectOne('http://localhost:8080/api/appointments/1');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockAppointment);
+  });
+
   it('should fetch appointments by user ID with filter', () => {
     service.getAppointmentsByUserId('test-user', 'upcoming').subscribe(appointments => {
       expect(appointments.length).toBe(1);
@@ -127,4 +127,54 @@ describe('AppointmentApiService', () => {
     expect(req.request.method).toBe('GET');
     req.flush([mockAppointment]);
   });
+
+  it('should fetch appointments by email without filter', () => {
+    service.getAppointmentsByEmail('test@example.com').subscribe(appointments => {
+      expect(appointments.length).toBe(1);
+      expect(appointments[0]).toEqual(mockAppointment);
+    });
+
+    const req = httpMock.expectOne(r =>
+      r.url === 'http://localhost:8080/api/appointments' &&
+      r.params.get('email') === 'test@example.com' &&
+      !r.params.has('filter')
+    );
+
+    expect(req.request.method).toBe('GET');
+    req.flush([mockAppointment]);
+  });
+
+  it('should fetch appointments by email with upcoming filter', () => {
+    service.getAppointmentsByEmail('test@example.com', 'upcoming').subscribe(appointments => {
+      expect(appointments.length).toBe(1);
+      expect(appointments[0]).toEqual(mockAppointment);
+    });
+
+    const req = httpMock.expectOne(r =>
+      r.url === 'http://localhost:8080/api/appointments' &&
+      r.params.get('email') === 'test@example.com' &&
+      r.params.get('filter') === 'upcoming'
+    );
+
+    expect(req.request.method).toBe('GET');
+    req.flush([mockAppointment]);
+  });
+
+  it('should fetch appointments by email with past filter', () => {
+    service.getAppointmentsByEmail('test@example.com', 'past').subscribe(appointments => {
+      expect(appointments.length).toBe(1);
+      expect(appointments[0]).toEqual(mockAppointment);
+    });
+
+    const req = httpMock.expectOne(r =>
+      r.url === 'http://localhost:8080/api/appointments' &&
+      r.params.get('email') === 'test@example.com' &&
+      r.params.get('filter') === 'past'
+    );
+
+    expect(req.request.method).toBe('GET');
+    req.flush([mockAppointment]);
+  });
+
+
 });

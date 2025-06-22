@@ -16,18 +16,19 @@ describe('AppointmentHistoryComponent', () => {
   ];
 
   const authServiceStub = {
-    user$: of({ uid: '123' })
+    checkEmailExists: jasmine.createSpy().and.returnValue(of(true)),
+    user$: of({ uid: '123', role: 'user', email: 'test@example.com' }) // if needed
   };
 
   const appointmentApiServiceStub = {
     getAppointmentsByUserId: jasmine.createSpy().and.callFake((uid: string, type: string) => {
       return of(mockAppointments);
-    })
+    }),
+    getAppointmentsByEmail: jasmine.createSpy('getAppointmentsByEmail')
+      .and.returnValue(of(mockAppointments))
   };
 
-  const deleteEventServiceStub = {
-    deleteAppointment: jasmine.createSpy()
-  };
+  const deleteEventServiceStub = { deleteAppointment: jasmine.createSpy() };
 
   const matDialogStub = {
     open: jasmine.createSpy().and.returnValue({
@@ -58,7 +59,7 @@ describe('AppointmentHistoryComponent', () => {
   });
 
   it('should fetch upcoming and past appointments on init', () => {
-    expect(appointmentApiServiceStub.getAppointmentsByUserId).toHaveBeenCalledWith('123', 'upcoming');
+    expect(appointmentApiServiceStub.getAppointmentsByEmail).toHaveBeenCalledWith('test@example.com', 'upcoming');
     expect(appointmentApiServiceStub.getAppointmentsByUserId).toHaveBeenCalledWith('123', 'past');
     expect(component.upcomingAppointments.length).toBe(1);
   });
