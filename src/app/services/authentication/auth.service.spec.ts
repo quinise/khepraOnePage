@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthService } from './auth.service';
-import { FirebaseAuthHelper } from './firebase-auth-helpers';
 import { Firestore } from '@angular/fire/firestore';
-import { Auth, GoogleAuthProvider, UserCredential, User, UserMetadata } from 'firebase/auth';
+import { Auth, GoogleAuthProvider, User, UserCredential, UserMetadata } from 'firebase/auth';
 import { of } from 'rxjs';
 import { AppUser } from 'src/app/interfaces/appUser';
 import { AuthWrapperService, GET_AUTH_TOKEN } from './auth-wrapper.service';
+import { AuthService } from './auth.service';
+import { FirebaseAuthHelper } from './firebase-auth-helpers';
 
 const mockUser: User = {
   uid: 'test123',

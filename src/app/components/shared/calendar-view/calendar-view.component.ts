@@ -306,7 +306,7 @@ export class CalendarViewComponent implements OnDestroy {
 
     // Admins can edit appointments that they have created, and only if the appointment is in the future
     return this.isAdmin && !!appointment.createdByAdmin && isFuture;
-}
+  }
 
   editAppointment(appointment: Appointment): void {
     const dialogRef = this.dialog.open(AppointmentFormComponent, {

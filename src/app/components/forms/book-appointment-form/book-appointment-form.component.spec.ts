@@ -1,13 +1,22 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AppointmentFormComponent } from './book-appointment-form.component';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { AuthService } from 'src/app/services/authentication/auth.service';
-import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
-import { ConflictCheckService } from 'src/app/services/conflict-check.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { of } from 'rxjs';
+import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
+import { AuthService } from 'src/app/services/authentication/auth.service';
+import { ConflictCheckService } from 'src/app/services/conflict-check.service';
 import { createMockAppointment } from 'src/app/testing/mocks';
+import { AppointmentFormComponent } from './book-appointment-form.component';
+
+const authServiceSpy = jasmine.createSpyObj('AuthService', ['checkEmailExists'], {
+  user$: of({
+    uid: 'user1',
+    role: 'user',
+    displayName: 'Test User',
+    email: 'test@example.com'
+  })
+});
 
 describe('AppointmentFormComponent', () => {
 
@@ -22,7 +31,7 @@ describe('AppointmentFormComponent', () => {
           provideHttpClient(withInterceptorsFromDi()),
           provideHttpClientTesting,
           { provide: AppointmentApiService, useValue: jasmine.createSpyObj('AppointmentApiService', ['getAllAppointments', 'createAppointment', 'updateAppointment']) },
-          { provide: AuthService, useValue: jasmine.createSpyObj('AuthService', [], { user$: of({ uid: 'user1', role: 'user' }) }) },
+          { provide: AuthService, useValue: authServiceSpy },
           { provide: ConflictCheckService, useValue: jasmine.createSpyObj('ConflictCheckService', ['checkForConflicts']) },
           { provide: MatDialogRef, useValue: jasmine.createSpyObj('MatDialogRef', ['close']) },
           { provide: MAT_DIALOG_DATA, useValue: { serviceType: 'READING' } }
@@ -47,24 +56,16 @@ describe('AppointmentFormComponent', () => {
     beforeEach(async () => {
       appointmentApiSpy = jasmine.createSpyObj('AppointmentApiService', ['getAllAppointments', 'createAppointment', 'updateAppointment']);
       appointmentApiSpy.getAllAppointments.and.returnValue(of([]));
-
+      
+      authServiceSpy.checkEmailExists.and.returnValue(of(true));
+      
       await TestBed.configureTestingModule({
         imports: [AppointmentFormComponent, MatDialogModule],
         providers: [
           provideHttpClient(withInterceptorsFromDi()),
           provideHttpClientTesting,
           { provide: AppointmentApiService, useValue: appointmentApiSpy },
-          {
-            provide: AuthService,
-            useValue: jasmine.createSpyObj('AuthService', [], {
-              user$: of({
-                uid: 'user1',
-                role: 'user',
-                displayName: 'Test User',
-                email: 'test@example.com'
-              })
-            })
-          },
+          { provide: AuthService, useValue: authServiceSpy },
           { provide: ConflictCheckService, useValue: jasmine.createSpyObj('ConflictCheckService', ['checkForConflicts']) },
           { provide: MatDialogRef, useValue: jasmine.createSpyObj('MatDialogRef', ['close']) },
           { provide: MAT_DIALOG_DATA, useValue: { serviceType: 'READING' } }
@@ -118,7 +119,7 @@ describe('AppointmentFormComponent', () => {
           provideHttpClient(withInterceptorsFromDi()),
           provideHttpClientTesting,
           { provide: AppointmentApiService, useValue: jasmine.createSpyObj('AppointmentApiService', ['getAllAppointments', 'createAppointment', 'updateAppointment']) },
-          { provide: AuthService, useValue: jasmine.createSpyObj('AuthService', [], { user$: of({ uid: 'user1', role: 'admin' }) }) },
+          { provide: AuthService, useValue: authServiceSpy },
           { provide: ConflictCheckService, useValue: jasmine.createSpyObj('ConflictCheckService', ['checkForConflicts']) },
           { provide: MatDialogRef, useValue: jasmine.createSpyObj('MatDialogRef', ['close']) },
           { provide: MAT_DIALOG_DATA, useValue: { serviceType: 'INITIATION', appointmentToEdit: mock } }

@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
+import { GoogleAuthProvider, UserCredential, authState } from '@angular/fire/auth';
 import { Firestore, collection, docData, getDocs, query, where } from '@angular/fire/firestore';
 import { Observable, of, switchMap } from 'rxjs';
 import { AppUser } from '../../interfaces/appUser';
-import { FirebaseAuthHelper } from './firebase-auth-helpers';
 import { AuthWrapperService } from './auth-wrapper.service';
-import { GoogleAuthProvider, UserCredential, authState } from '@angular/fire/auth';
+import { FirebaseAuthHelper } from './firebase-auth-helpers';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -82,33 +82,32 @@ export class AuthService {
   }
 
   // Modify the checkEmailExists method to ensure it does not return admin emails
-checkEmailExists(email: string): Observable<boolean> {
-  const usersRef = collection(this.firestore, 'users');
-  const q = query(usersRef, where('email', '==', email));
+  checkEmailExists(email: string): Observable<boolean> {
+    const usersRef = collection(this.firestore, 'users');
+    const q = query(usersRef, where('email', '==', email));
 
-  return new Observable<boolean>((observer) => {
-    getDocs(q)
-      .then((querySnapshot) => {
-        if (querySnapshot.empty) {
-          observer.next(false); // Email doesn't exist
-        } else {
-          // Check if the email belongs to an admin user
-          const user = querySnapshot.docs[0].data(); // Assuming only one user with the email
-          const isAdmin = user['isAdmin']; // Assume `isAdmin` is a boolean field in user data
-
-          if (isAdmin) {
-            observer.next(false);
+    return new Observable<boolean>((observer) => {
+      getDocs(q)
+        .then((querySnapshot) => {
+          if (querySnapshot.empty) {
+            observer.next(false); // Email doesn't exist
           } else {
-            observer.next(true);
-          }
-        }
-        observer.complete();
-      })
-      .catch((error) => {
-        console.error('Error checking email existence:', error);
-        observer.error(false); // Assume email doesn't exist in case of error
-      });
-  });
-}
+            // Check if the email belongs to an admin user
+            const user = querySnapshot.docs[0].data(); // Assuming only one user with the email
+            const isAdmin = user['isAdmin']; // Assume `isAdmin` is a boolean field in user data
 
+            if (isAdmin) {
+              observer.next(false);
+            } else {
+              observer.next(true);
+            }
+          }
+          observer.complete();
+        })
+        .catch((error) => {
+          console.error('Error checking email existence:', error);
+          observer.error(false); // Assume email doesn't exist in case of error
+        });
+    });
+  }
 }

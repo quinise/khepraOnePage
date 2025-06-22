@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
-import { CalendarViewComponent } from './calendar-view.component';
-import { AuthService } from 'src/app/services/authentication/auth.service';
-import { EventsService } from 'src/app/services/events.service';
-import { EventFilterService } from 'src/app/services/event-filter.service';
-import { DeleteEventService } from 'src/app/services/delete-event.service';
-import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
-import { EventsApiService } from 'src/app/services/apis/events-api.service';
-import { EventStoreService } from 'src/app/services/event-store.service';
 import { MatDialog } from '@angular/material/dialog';
+import { EventClickArg } from '@fullcalendar/core';
+import { of } from 'rxjs';
 import { Appointment } from 'src/app/interfaces/appointment';
 import { Event } from 'src/app/interfaces/event';
-import { EventClickArg } from '@fullcalendar/core';
+import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
+import { EventsApiService } from 'src/app/services/apis/events-api.service';
+import { AuthService } from 'src/app/services/authentication/auth.service';
+import { DeleteEventService } from 'src/app/services/delete-event.service';
+import { EventFilterService } from 'src/app/services/event-filter.service';
+import { EventStoreService } from 'src/app/services/event-store.service';
+import { EventsService } from 'src/app/services/events.service';
+import { CalendarViewComponent } from './calendar-view.component';
 
 describe('CalendarViewComponent – loadData and updateCalendar', () => {
   let component: CalendarViewComponent;
@@ -153,17 +153,26 @@ describe('CalendarViewComponent – loadData and updateCalendar', () => {
   });
 
   it('should open edit dialog for valid event in handleEventClick()', () => {
+    component['isAdmin'] = true;
+
+    const futureDate = new Date();
+    futureDate.setMinutes(futureDate.getMinutes() + 60);
+
+    const mockEventData = { id: 1, title: 'Test', startDate: futureDate };
+
     const mockClickInfo: EventClickArg = {
       event: {
         id: '1',
         title: 'Test Event',
-        start: new Date(),
+        start: futureDate,
         extendedProps: {
-          event: { id: 1, title: 'Test', startDate: new Date() }
+          event: mockEventData
         }
       }
     } as any;
 
+    spyOn(component, 'isFuture').and.returnValue(true);
+    spyOn(component, 'isValidEvent').and.returnValue(true);
     spyOn(component, 'openEditEventDialog');
 
     component.handleEventClick(mockClickInfo);
@@ -287,8 +296,31 @@ describe('CalendarViewComponent – loadData and updateCalendar', () => {
 
   it('should return true if user is admin and appointment was created by admin', () => {
     component['isAdmin'] = true;
-    const appointment = { createdByAdmin: true } as any;
+
+    const futureDate = new Date();
+    futureDate.setMinutes(futureDate.getMinutes() + 30); // 30 minutes in the future
+
+    const appointment = {
+      createdByAdmin: true,
+      startTime: futureDate
+    } as any;
+
     expect(component.canEditAppointment(appointment)).toBeTrue();
+  });
+
+
+  it('should return false if appointment is in the past', () => {
+    component['isAdmin'] = true;
+
+    const pastDate = new Date();
+    pastDate.setMinutes(pastDate.getMinutes() - 30); // 30 minutes ago
+
+    const appointment = {
+      createdByAdmin: true,
+      startTime: pastDate
+    } as any;
+
+    expect(component.canEditAppointment(appointment)).toBeFalse();
   });
 
   it('should return false if user is not admin', () => {
