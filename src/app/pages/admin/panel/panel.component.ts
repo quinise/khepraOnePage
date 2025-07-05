@@ -12,6 +12,7 @@ import { Event } from 'src/app/interfaces/event';
 import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
 import { EventsApiService } from 'src/app/services/apis/events-api.service';
 import { AuthService } from 'src/app/services/authentication/auth.service';
+import { AuthWrapperService } from 'src/app/services/authentication/auth-wrapper.service';
 import { EventStoreService } from 'src/app/services/event-store.service';
 import { EventsService } from 'src/app/services/events.service';
 import { IfViewDirective } from 'src/app/shared/ifViewDirective';
@@ -45,6 +46,7 @@ export class PanelComponent implements OnInit {
     private eventsApiService: EventsApiService,
     private eventsService: EventsService,
     private authService: AuthService,
+    private authWrapperService: AuthWrapperService,
     private eventStore: EventStoreService
   ) {}
 
@@ -61,7 +63,9 @@ export class PanelComponent implements OnInit {
   }
 
   fetchData(): void {
-    this.eventsService.fetchAppointmentsAndEvents(this.isAdmin).subscribe({
+    const userId = this.authWrapperService.getCurrentUser()?.uid || '';
+
+    this.eventsService.fetchAppointmentsAndEvents(this.isAdmin, userId, null).subscribe({
       next: ([appointments, events]) => {
         this.appointments = appointments;
         this.events = events;

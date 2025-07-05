@@ -12,6 +12,7 @@ import { EventFilterService } from 'src/app/services/event-filter.service';
 import { EventStoreService } from 'src/app/services/event-store.service';
 import { EventsService } from 'src/app/services/events.service';
 import { CalendarViewComponent } from './calendar-view.component';
+import { AuthWrapperService } from 'src/app/services/authentication/auth-wrapper.service';
 
 describe('CalendarViewComponent – loadData and updateCalendar', () => {
   let component: CalendarViewComponent;
@@ -54,8 +55,15 @@ describe('CalendarViewComponent – loadData and updateCalendar', () => {
     zipCode: 98101
   }];
 
+  const mockAdminUser = { role: 'admin', uid: 'admin-123' };
+  const mockRegularUser = { role: 'user', uid: 'user-456' };
+
   const mockAuthService = {
-    user$: of({ role: 'admin' })
+    user$: of(mockAdminUser)
+  };
+
+  const mockAuthWrapperService = {
+    getCurrentUser: () => mockAdminUser
   };
 
   const mockEventsService = {
@@ -100,6 +108,7 @@ describe('CalendarViewComponent – loadData and updateCalendar', () => {
       imports: [CalendarViewComponent],
       providers: [
         { provide: AuthService, useValue: mockAuthService },
+        { provide: AuthWrapperService, useValue: mockAuthWrapperService },
         { provide: EventsService, useValue: mockEventsService },
         { provide: EventFilterService, useValue: mockFilterService },
         { provide: DeleteEventService, useValue: mockDeleteService },
