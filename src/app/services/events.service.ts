@@ -15,14 +15,13 @@ export class EventsService {
     private eventApiService: EventsApiService
   ) {}
 
-  fetchAppointmentsAndEvents(isAdmin: boolean): Observable<[Appointment[], Event[]]> {
+  fetchAppointmentsAndEvents(isAdmin: boolean, userId: string, filter: 'past' | 'upcoming' | null): Observable<[Appointment[], Event[]]> {
     const appointment$ = isAdmin
-      ? this.appointmentApiService.getAllAppointments().pipe(
-          take(1),) : of([]);
-  
-    const event$ = this.eventApiService.getAllEvents().pipe(
-      take(1));
-  
+      ? this.appointmentApiService.getAppointments(userId, filter).pipe(take(1))
+      : of([]);
+    
+    const event$ = this.eventApiService.getAllEvents().pipe(take(1));
+
     return forkJoin([appointment$, event$]);
   }
   

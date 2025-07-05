@@ -11,6 +11,7 @@ import { Event } from 'src/app/interfaces/event';
 import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
 import { EventsApiService } from 'src/app/services/apis/events-api.service';
 import { AuthService } from 'src/app/services/authentication/auth.service';
+import { AuthWrapperService } from 'src/app/services/authentication/auth-wrapper.service';
 import { DeleteEventService } from 'src/app/services/delete-event.service';
 import { EventFilterService } from 'src/app/services/event-filter.service';
 import { EventStoreService } from 'src/app/services/event-store.service';
@@ -72,6 +73,7 @@ export class CalendarViewComponent implements OnDestroy {
 
   constructor(
     private authService: AuthService,
+    private authWrapperService: AuthWrapperService,
     private deleteService: DeleteEventService,
     private eventsService: EventsService,
     private filterService: EventFilterService,
@@ -172,8 +174,10 @@ export class CalendarViewComponent implements OnDestroy {
   }
 
   loadData(): void {
-    this.eventsService.fetchAppointmentsAndEvents(this.isAdmin).subscribe(
-      ([appointments, events]) => {
+    const userId = this.authWrapperService.getCurrentUser()?.uid || '';
+
+    this.eventsService.fetchAppointmentsAndEvents(this.isAdmin, userId, null).subscribe({
+      next: ([appointments, events]) => {
         this.appointments = appointments.filter((a) => !!a.date);
         this.events = events.filter((e) => !!e.startDate);
 
@@ -184,8 +188,8 @@ export class CalendarViewComponent implements OnDestroy {
         // Trigger filtering (e.g., based on initial days range)
         this.filterService.setRange(this.filterService.daysRange);
       },
-      (error) => console.error('TESTING: Error loading data:', error)
-    );
+      error: (error) => console.error('TESTING: Error loading data:', error)
+    });
   }
 
   updateCalendar(): void {

@@ -1,10 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Component } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { AuthService } from 'src/app/services/authentication/auth.service';
 import { EventsComponent } from './events.component';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { GET_AUTH_TOKEN } from 'src/app/services/authentication/auth-wrapper.service';
+
 @Component({
   selector: 'app-calendar-view',
   standalone: true,
@@ -30,8 +32,10 @@ describe('EventsComponent', () => {
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting,
         { provide: AuthService, useClass: MockAuthService },
+        { provide: GET_AUTH_TOKEN, useValue: () => Promise.resolve('fake-token') }, // ✅ Add this
       ]
     });
+
     fixture = TestBed.createComponent(EventsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
