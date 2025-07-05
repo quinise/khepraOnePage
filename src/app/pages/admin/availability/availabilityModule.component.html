@@ -1,0 +1,70 @@
+<div *ngIf="isScheduler">
+  <div class="availability-modal container">
+    <h2 class="mb-4 text-center">Update Scheduling Availability</h2>
+
+    <div class="border p-4 mb-4 w-50 mx-auto">
+      <!-- Calendar to select date -->
+      <form [formGroup]="availabilityForm" (ngSubmit)="onSubmit()">
+        <div class="form-group mb-3">
+          <label for="selectedDate">Select Date</label>
+          <input
+            type="date"
+            class="form-control"
+            id="selectedDate"
+            formControlName="selectedDate"
+            required
+          />
+          <div *ngIf="availabilityForm.get('selectedDate')?.invalid && (availabilityForm.get('selectedDate')?.dirty || availabilityForm.get('selectedDate')?.touched)" class="text-danger">
+            <small *ngIf="availabilityForm.get('selectedDate')?.hasError('required')">Date is required.</small>
+            <small *ngIf="availabilityForm.get('selectedDate')?.hasError('dateInPast')">The date must be in the future.</small>
+          </div>
+        </div>
+
+        <!-- Time input fields for start and end time -->
+        <div class="form-group mb-3">
+          <label for="startTime">Start Time</label>
+          <input
+            type="time"
+            class="form-control"
+            id="startTime"
+            formControlName="startTime"
+            required
+          />
+          <div *ngIf="availabilityForm.get('startTime')?.invalid && (availabilityForm.get('startTime')?.dirty || availabilityForm.get('startTime')?.touched)" class="text-danger">
+            <small *ngIf="availabilityForm.get('startTime')?.hasError('required')">Start time is required.</small>
+          </div>
+        </div>
+
+        <div class="form-group mb-3">
+          <label for="endTime">End Time</label>
+          <input
+            type="time"
+            class="form-control"
+            id="endTime"
+            formControlName="endTime"
+            required
+          />
+          <div *ngIf="availabilityForm.get('endTime')?.invalid && (availabilityForm.get('endTime')?.dirty || availabilityForm.get('endTime')?.touched)" class="text-danger">
+            <small *ngIf="availabilityForm.get('endTime')?.hasError('required')">End time is required.</small>
+          </div>
+        </div>
+
+        <!-- Prevent invalid combinations of start/end -->
+        <div *ngIf="availabilityForm.hasError('timeInvalid') && (availabilityForm.dirty || availabilityForm.touched)" class="text-danger">
+          Start time cannot be after end time.
+        </div>
+
+        <!-- Save Button -->
+        <div class="text-center mt-4">
+          <button
+            class="btn btn-primary"
+            [disabled]="!availabilityForm.valid"
+            type="submit"
+          >
+            Save
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
