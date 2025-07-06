@@ -14,26 +14,16 @@ export class AppointmentApiService {
 
   constructor(private http: HttpClient) {}
 
-  // Get all appointments
   getAllAppointments(): Observable<Appointment[]> {
     return this.http.get<Appointment[]>(this.baseUrl);
   }
 
-  // TODO: Switch to this method for getting appointments (instead of getAllAppointments)
-  getAppointments(userId: string, filter: 'past' | 'upcoming' | null) {
-    const params = new HttpParams()
-    .set('userId', userId)
-    .set('filter', filter ?? '');
-
-  return this.http.get<Appointment[]>('/api/appointments', { params });
-}
-
-  // Get one appointment by its ID
+  // Get an appointment by the appointment's ID
   getAppointmentById(id: number): Observable<Appointment> {
     return this.http.get<Appointment>(`${this.baseUrl}/${id}`);
   }
 
-  getAppointmentsByUserId(userId: string, filter?: 'past' | 'upcoming'): Observable<Appointment[]> {
+  getAppointmentsByUserId(userId: string, filter?: 'past' | 'upcoming' | null): Observable<Appointment[]> {
     let params = new HttpParams().set('userId', userId);
     if (filter) {
       params = params.set('filter', filter);
@@ -41,6 +31,7 @@ export class AppointmentApiService {
     return this.http.get<Appointment[]>(`/api/appointments`, { params });
   }
   
+  // Get appointments by email with optional filter for upcoming or past appointments
   getAppointmentsByEmail(email: string, filter?: 'upcoming' | 'past'): Observable<Appointment[]> {
     let params = new HttpParams().set('email', email);
 

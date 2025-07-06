@@ -69,30 +69,27 @@ const mockEvents: Event[] = [
 describe('EventsService', () => {
   let service: EventsService;
 
-  const mockAppointmentApiService = {
-    getAllAppointments: jasmine.createSpy().and.returnValue(of(mockAppointments)),
-    getAppointments: jasmine.createSpy().and.returnValue(of(mockAppointments))
-  };
-
-  const mockEventsApiService = {
-    getAllEvents: jasmine.createSpy().and.returnValue(of(mockEvents))
-  };
-
   describe('as admin user', () => {
+    let mockAppointmentApiService: jasmine.SpyObj<AppointmentApiService>;
+    let mockEventsApiService: jasmine.SpyObj<EventsApiService>;
+
     beforeEach(() => {
-    mockAppointmentApiService.getAppointments.calls.reset();
-    mockEventsApiService.getAllEvents.calls.reset();
+      mockAppointmentApiService = jasmine.createSpyObj('AppointmentApiService', ['getAppointmentsByUserId']);
+      mockEventsApiService = jasmine.createSpyObj('EventsApiService', ['getAllEvents']);
 
-    TestBed.configureTestingModule({
-      providers: [
-        EventsService,
-        { provide: AppointmentApiService, useValue: mockAppointmentApiService },
-        { provide: EventsApiService, useValue: mockEventsApiService },
-        { provide: AuthWrapperService, useValue: createMockAuthWrapper(mockAdminUser) }
-      ]
-    });
+      mockAppointmentApiService.getAppointmentsByUserId.and.returnValue(of(mockAppointments));
+      mockEventsApiService.getAllEvents.and.returnValue(of(mockEvents));
 
-    service = TestBed.inject(EventsService);
+      TestBed.configureTestingModule({
+        providers: [
+          EventsService,
+          { provide: AppointmentApiService, useValue: mockAppointmentApiService },
+          { provide: EventsApiService, useValue: mockEventsApiService },
+          { provide: AuthWrapperService, useValue: createMockAuthWrapper(mockAdminUser) }
+        ]
+      });
+
+      service = TestBed.inject(EventsService);
     });
 
     it('should be created', () => {
@@ -103,7 +100,7 @@ describe('EventsService', () => {
       service.fetchAppointmentsAndEvents(true, mockAdminUser.uid, null).subscribe(([appointments, events]) => {
         expect(appointments.length).toBe(1);
         expect(events.length).toBe(1);
-        expect(mockAppointmentApiService.getAppointments).toHaveBeenCalled();
+        expect(mockAppointmentApiService.getAppointmentsByUserId).toHaveBeenCalledWith(mockAdminUser.uid, null);
         expect(mockEventsApiService.getAllEvents).toHaveBeenCalled();
         done();
       });
@@ -125,7 +122,16 @@ describe('EventsService', () => {
   });
 
   describe('as non-admin user', () => {
+    let mockAppointmentApiService: jasmine.SpyObj<AppointmentApiService>;
+    let mockEventsApiService: jasmine.SpyObj<EventsApiService>;
+
     beforeEach(() => {
+      mockAppointmentApiService = jasmine.createSpyObj('AppointmentApiService', ['getAppointmentsByUserId']);
+      mockEventsApiService = jasmine.createSpyObj('EventsApiService', ['getAllEvents']);
+
+      mockAppointmentApiService.getAppointmentsByUserId.and.returnValue(of(mockAppointments));
+      mockEventsApiService.getAllEvents.and.returnValue(of(mockEvents));
+
       TestBed.configureTestingModule({
         providers: [
           EventsService,
@@ -142,7 +148,7 @@ describe('EventsService', () => {
       service.fetchAppointmentsAndEvents(false, mockNonAdminUser.uid, null).subscribe(([appointments, events]) => {
         expect(appointments.length).toBe(0);
         expect(events.length).toBe(1);
-        expect(mockAppointmentApiService.getAllAppointments).not.toHaveBeenCalled();
+        expect(mockAppointmentApiService.getAppointmentsByUserId).not.toHaveBeenCalled();
         expect(mockEventsApiService.getAllEvents).toHaveBeenCalled();
         done();
       });
