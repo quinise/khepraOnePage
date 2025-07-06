@@ -31,7 +31,6 @@ export class EventsApiService {
   updateEvent(id: number, event: Event): Observable<Event> {
     return this.http.put<Event>(`${this.baseUrl}/${id}`, event);
   }
-  
 
   // Delete event by ID
   deleteEvent(id: number): Observable<void> {

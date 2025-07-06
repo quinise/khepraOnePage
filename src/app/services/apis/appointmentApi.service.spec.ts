@@ -114,7 +114,7 @@ it('should fetch all appointments', () => {
   });
 
   it('should use getAppointments with filter and userId', () => {
-    service.getAppointments('abc123', 'past').subscribe(appointments => {
+    service.getAppointmentsByUserId('abc123', 'past').subscribe(appointments => {
       expect(appointments).toEqual([mockAppointment]);
     });
 

@@ -17,7 +17,7 @@ export class EventsService {
 
   fetchAppointmentsAndEvents(isAdmin: boolean, userId: string, filter: 'past' | 'upcoming' | null): Observable<[Appointment[], Event[]]> {
     const appointment$ = isAdmin
-      ? this.appointmentApiService.getAppointments(userId, filter).pipe(take(1))
+      ? this.appointmentApiService.getAppointmentsByUserId(userId, filter).pipe(take(1))
       : of([]);
     
     const event$ = this.eventApiService.getAllEvents().pipe(take(1));
