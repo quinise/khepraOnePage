@@ -1,25 +1,25 @@
-<!-- Top Controls: Toggle Button + Filters -->
-<div class="row justify-content-center">
+<div class="container">
+  <div class="row m-5 float-start">
   <div class="col">
-    <div class="text-end me-5">
-      <button mat-raised-button class="float-end mt-0 mb-2 p-2" color="primary" (click)="toggleView()">
+    <div class="text-end w-100 me-5">
+      <button mat-raised-button class="float-end mt-0 mb-2 p-4" color="primary" (click)="toggleView()">
         {{ showCalendar ? 'Switch to List View' : 'Switch to Calendar View' }}
       </button>
     </div>
   </div>
   <div class="col"></div>
-</div>
+  </div>
 
-<div *appIfView="showCalendar">
-  <app-calendar-view [calendarOptions]="calendarOptions"></app-calendar-view>
-</div>
+  <div *appIfView="showCalendar">
+    <app-calendar-view [calendarOptions]="calendarOptions"></app-calendar-view>
+  </div>
 
-<div *appIfView="!showCalendar">
-  <app-event-list
-    *ngIf="events?.length"
-    [events]="events"
-    [appointments]="appointments"
-    [attr.key]="showCalendar ? 'calendar' : 'list'">
-  </app-event-list>
+  <div *appIfView="!showCalendar">
+    <app-event-list
+      *ngIf="events?.length"
+      [events]="events"
+      [appointments]="appointments"
+      [attr.key]="showCalendar ? 'calendar' : 'list'">
+    </app-event-list>
+  </div>
 </div>
-

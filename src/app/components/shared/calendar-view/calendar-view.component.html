@@ -1,6 +1,8 @@
-<app-event-filter></app-event-filter>
-
 <div class="container-fluid">
+  <div *ngIf="userId" class="row mb-3">
+    <app-event-filter></app-event-filter>
+  </div>
+
   <div class="row">
     <!-- Calendar Column -->
     <div class="col-lg-8 col-md-12 mb-3">
@@ -84,8 +86,8 @@
           (click)="openEditEventDialog(selectedEventDetails?.extendedProps?.['event'])">
           Edit Event
         </button>
-        <div class="card-footer">
-          <button *ngIf="isAdmin && selectedEventDetails?.extendedProps?.['appointmentId'] && isFuture(selectedEvent.start)" class="btn btn-sm btn-danger me-2" (click)="deleteAppointment()">
+        <div *ngIf="isAdmin && selectedEventDetails?.extendedProps?.['appointmentId'] && isFuture(selectedEvent.start)" class="card-footer">
+          <button class="btn btn-sm btn-danger me-2" (click)="deleteAppointment()">
             Cancel Appointment
           </button>
           <button *ngIf="isAdmin && selectedEventDetails?.extendedProps?.['eventId'] && isFuture(selectedEvent.start)" class="btn btn-sm btn-danger" (click)="deleteEvent()">

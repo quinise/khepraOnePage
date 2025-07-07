@@ -1,1 +1,8 @@
-<app-calendar-view [calendarOptions]="calendarOptions"></app-calendar-view>
+<div class="container">
+  <h1 class="text-center display-1 mb-5">Events</h1>
+  <div [ngClass]="{'row' : userId === ''}">
+  <div [ngClass]="{ 'col-lg-12 offset-lg-2': userId === '' }">
+    <app-calendar-view class="" [calendarOptions]="calendarOptions"></app-calendar-view>
+  </div>
+  </div>
+</div>

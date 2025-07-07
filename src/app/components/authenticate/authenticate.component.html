@@ -28,15 +28,20 @@
   <mat-dialog-actions align="center">
     <div>
       <button *ngIf="data.authStep === 'Sign up'" type="submit" [disabled]="authForm.invalid" class="btn btn-primary mx-4">Create Account</button>
-      <button *ngIf="data.authStep === 'Sign up'" (click)="googleLogin()" class="btn btn-primary mx-4">Sign up with Google</button>
+      <button *ngIf="data.authStep === 'Sign up'" (click)="googleLogin()" class="btn btn-primary mx-4">
+        <img src="assets/google-logo.png" alt="Google logo" style="width: 20px; height: 20px; margin-right: 8px;" />
+        Sign up with Google</button>
     </div>
     <button *ngIf="data.authStep === 'Login'" type="submit" class="btn btn-primary mx-4">Log in</button>
-  <button *ngIf="data.authStep === 'Login'" (click)="googleLogin()" class="btn btn-primary mx-4 my-3">Login with Google</button>
+    <button *ngIf="data.authStep === 'Login'" (click)="googleLogin()" class="btn btn-primary mx-4 my-3">
+      <img src="assets/google-logo.png" alt="Google logo" style="width: 20px; height: 20px; margin-right: 8px;" />
+      Login with Google
+    </button>
 </mat-dialog-actions>
 </form>
-<span>
+<div class="m-4">
   <a (click)="resetPassword()" class="text-primary" style="cursor: pointer;">Forgot your password?</a>
-</span>
+</div>
 </div>
 
 

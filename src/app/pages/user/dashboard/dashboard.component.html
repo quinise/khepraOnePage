@@ -1,6 +1,6 @@
 <div>
   <ng-container *ngIf="user$ | async as user; else loading">
-    <h1 class="text-center display-1">
+    <h1 class="text-center display-1 my-5">
       Welcome{{ user.displayName ? ', ' + user.displayName : '' }}!
     </h1>
   </ng-container>
