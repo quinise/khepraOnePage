@@ -1,39 +1,44 @@
-<h2>Upcoming Appointments</h2>
-<ng-container *ngIf="upcomingAppointments$ | async as upcoming">
-  <div *ngIf="upcoming.length > 0; else noUpcoming">
-    <ul class="list-group">
-      <li class="list-group-item" *ngFor="let appointment of upcoming">
-        <strong>{{ appointment.name }}</strong> - {{ appointment.type }}<br>
-        Date: {{ appointment.date | date:'medium' }}<br>
-        <div *ngIf="appointment.city">
-          Location:<br>
-            {{ appointment.streetAddress }}<br>
-            {{ appointment.city }}, {{ appointment.state }}<br>
-            {{ appointment.zipCode }}
-        </div>
-        Mode: {{ appointment.isVirtual ? 'Virtual' : 'In-Person' }}<br>
-        <button class="btn btn-sm btn-primary mt-2 mx-3" (click)="openEditDialog(appointment)">
-          Edit Appointment Details
-        </button>
-        <button class="btn btn-sm btn-danger mt-2" (click)="deleteAppointment(appointment.id!)">
-          Cancel
-        </button>
-      </li>
-    </ul>
+<div class="container">
+  <div class="row w-50 mb-5">
+    <h2>Upcoming Appointments</h2>
+    <ng-container *ngIf="upcomingAppointments$ | async as upcoming">
+      <div *ngIf="upcoming.length > 0; else noUpcoming">
+        <ul class="list-group">
+          <li class="list-group-item" *ngFor="let appointment of upcoming">
+            <strong>{{ appointment.name }}</strong> - {{ appointment.type }}<br>
+            Date: {{ appointment.date | date:'medium' }}<br>
+            <div *ngIf="appointment.city">
+              Location:<br>
+                {{ appointment.streetAddress }}<br>
+                {{ appointment.city }}, {{ appointment.state }}<br>
+                {{ appointment.zipCode }}
+            </div>
+            Mode: {{ appointment.isVirtual ? 'Virtual' : 'In-Person' }}<br>
+            <button class="btn btn-sm btn-primary mt-2 mx-3" (click)="openEditDialog(appointment)">
+              Edit Appointment Details
+            </button>
+            <button class="btn btn-sm btn-danger mt-2" (click)="deleteAppointment(appointment.id!)">
+              Cancel
+            </button>
+          </li>
+        </ul>
+      </div>
+      <ng-template #noUpcoming><p>No upcoming appointments.</p></ng-template>
+    </ng-container>
   </div>
-  <ng-template #noUpcoming><p>No upcoming appointments.</p></ng-template>
-</ng-container>
-
-<h2>Past Appointments</h2>
-<ng-container *ngIf="pastAppointments$ | async as past">
-  <div *ngIf="past.length > 0; else noPast">
-    <ul class="list-group">
-      <li class="list-group-item" *ngFor="let appointment of past">
-        <strong>{{ appointment.name }}</strong> - {{ appointment.type }}<br>
-        Date: {{ appointment.date | date:'medium' }}<br>
-        Mode: {{ appointment.isVirtual ? 'Virtual' : 'In-Person' }}
-      </li>
-    </ul>
+  <div class="row w-50 mb-5">
+    <h2>Past Appointments</h2>
+    <ng-container *ngIf="pastAppointments$ | async as past">
+      <div *ngIf="past.length > 0; else noPast">
+        <ul class="list-group">
+          <li class="list-group-item" *ngFor="let appointment of past">
+            <strong>{{ appointment.name }}</strong> - {{ appointment.type }}<br>
+            Date: {{ appointment.date | date:'medium' }}<br>
+            Mode: {{ appointment.isVirtual ? 'Virtual' : 'In-Person' }}
+          </li>
+        </ul>
+      </div>
+      <ng-template #noPast><p>No past appointments.</p></ng-template>
+    </ng-container>
   </div>
-  <ng-template #noPast><p>No past appointments.</p></ng-template>
-</ng-container>
+</div>

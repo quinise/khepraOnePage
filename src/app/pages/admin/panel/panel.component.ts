@@ -96,9 +96,8 @@ export class PanelComponent implements OnInit {
     initialView: 'dayGridMonth',
     events: [],
     headerToolbar: {
-      left: 'prev,next today',
+      left: 'prev,next',
       center: 'title',
-      right: 'dayGridMonth,timeGridWeek,timeGridDay',
     },
   };
 }

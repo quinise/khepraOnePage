@@ -10,8 +10,8 @@ import { Appointment } from 'src/app/interfaces/appointment';
 import { Event } from 'src/app/interfaces/event';
 import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
 import { EventsApiService } from 'src/app/services/apis/events-api.service';
-import { AuthService } from 'src/app/services/authentication/auth.service';
 import { AuthWrapperService } from 'src/app/services/authentication/auth-wrapper.service';
+import { AuthService } from 'src/app/services/authentication/auth.service';
 import { DeleteEventService } from 'src/app/services/delete-event.service';
 import { EventFilterService } from 'src/app/services/event-filter.service';
 import { EventStoreService } from 'src/app/services/event-store.service';
@@ -30,6 +30,8 @@ export class CalendarViewComponent implements OnDestroy {
   @Input() calendarOptions!: CalendarOptions;
 
   isAdmin = false;
+  userId = this.authWrapperService.getCurrentUser()?.uid || '';
+
 
   showPanel = false;
   selectedEvent: EventApi | null = null;
@@ -160,9 +162,9 @@ export class CalendarViewComponent implements OnDestroy {
       initialView: 'dayGridMonth',
       events: [],
       headerToolbar: {
-        left: 'prev,next today',
+        left: 'prev,next',
         center: 'title',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay',
+        right: 'dayGridMonth',
       },
       eventClick: this.handleEventClick.bind(this),
     };
@@ -174,9 +176,7 @@ export class CalendarViewComponent implements OnDestroy {
   }
 
   loadData(): void {
-    const userId = this.authWrapperService.getCurrentUser()?.uid || '';
-
-    this.eventsService.fetchAppointmentsAndEvents(this.isAdmin, userId, null).subscribe({
+    this.eventsService.fetchAppointmentsAndEvents(this.isAdmin, this.userId, null).subscribe({
       next: ([appointments, events]) => {
         this.appointments = appointments.filter((a) => !!a.date);
         this.events = events.filter((e) => !!e.startDate);
