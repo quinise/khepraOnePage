@@ -1,5 +1,4 @@
 // admin.guard.ts
-import { Injectable } from '@angular/core';
 import { CanActivateFn } from '@angular/router';
 import { inject } from '@angular/core';
 import { Auth } from '@angular/fire/auth';

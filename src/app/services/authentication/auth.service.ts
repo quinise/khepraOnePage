@@ -5,6 +5,7 @@ import { Observable, of, switchMap } from 'rxjs';
 import { AppUser } from '../../interfaces/appUser';
 import { AuthWrapperService } from './auth-wrapper.service';
 import { FirebaseAuthHelper } from './firebase-auth-helpers';
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -12,16 +13,17 @@ export class AuthService {
 
   constructor(
     private firestore: Firestore,
-    private authWrapper: AuthWrapperService
-  ) {
-    this.user$ = authState(this.authWrapper.getAuth()).pipe(
-      switchMap(user => {
-        if (!user) return of(null);
-        const ref = FirebaseAuthHelper.doc(this.firestore, 'users', user.uid);
-        return docData(ref) as Observable<AppUser>;
-      })
-    );
-  }
+    private authWrapper: AuthWrapperService,
+    private router: Router
+    ) {
+      this.user$ = authState(this.authWrapper.getAuth()).pipe(
+        switchMap(user => {
+          if (!user) return of(null);
+          const ref = FirebaseAuthHelper.doc(this.firestore, 'users', user.uid);
+          return docData(ref) as Observable<AppUser>;
+        })
+      );
+    }
 
   async signUpWithEmail(email: string, password: string): Promise<UserCredential> {
     const auth = this.authWrapper.getAuth();
@@ -67,8 +69,14 @@ export class AuthService {
     return result;
   }
 
-  logout(): Promise<void> {
-    return FirebaseAuthHelper.signOut(this.authWrapper.getAuth());
+  async logout(): Promise<void> {
+    return FirebaseAuthHelper.signOut(this.authWrapper.getAuth())
+      .then(() => {
+        this.router.navigate(['/']);
+      })
+      .catch((error) => {
+        console.error('Logout failed:', error);
+      });
   }
 
   sendPasswordResetEmail(email: string): Promise<void> {
