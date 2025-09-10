@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Event } from '../../interfaces/event';
+import { environment } from 'src/environments/environment';
 @Injectable({
   providedIn: 'root'
 })
@@ -9,7 +10,7 @@ export class EventsApiService {
   events: Event[] = [];
   event: Event | {} = {};
 
-  private baseUrl = 'http://localhost:8080/api/events';
+  private readonly baseUrl = `${environment.apiBase}/events`;
 
   constructor(private http: HttpClient) {}
 

@@ -3,6 +3,9 @@
 # Environment Variables
 /src/firebase-config.ts
 
+# Spring Boot Credentials
+environment.ts
+
 # Compiled output
 /dist
 /tmp

@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Appointment } from '../../interfaces/appointment';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ export class AppointmentApiService {
   appointments: Appointment[] = [];
   appointment: Appointment | {} = {};
 
-  private baseUrl = 'http://localhost:8080/api/appointments';
+  private readonly baseUrl = `${environment.apiBase}/appointments`;
 
   constructor(private http: HttpClient) {}
 
