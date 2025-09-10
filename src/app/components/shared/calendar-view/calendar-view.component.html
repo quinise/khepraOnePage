@@ -77,7 +77,7 @@
         <!-- Footer Actions -->
         <button
           *ngIf="isAdmin && selectedEventDetails?.extendedProps?.['appointmentCreatedByAdmin'] && selectedEventDetails?.extendedProps?.['appointmentId'] && isFuture(selectedEventDetails?.extendedProps?.['appointment'].startTime)"
-          class="btn btn-sm btn-primary mt-2 mx-3"
+          class="btn btn-sm btn-primary mt-2 mx-3 my-3"
           (click)="editAppointment(selectedEventDetails?.extendedProps?.['appointment'])">
           Edit Appointment
         </button>

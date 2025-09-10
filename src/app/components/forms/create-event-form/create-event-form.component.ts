@@ -115,10 +115,10 @@ export class CreateEventFormComponent {
 
   eventTypes = [
     { name: 'Workshop', value: 'workshop' },
-    { name: 'Bembe', value: 'bembe' },
+    { name: 'Community Networking Event', value: 'bembe' },
     { name: 'Lecture', value: 'lecture' },
-    { name: 'Community Egungun', value: 'egungun' },
-    { name: 'Priest Training', value: 'priestTraining' },
+    { name: 'Professional Development Workshop', value: 'egungun' },
+    { name: 'Leadership Training Seminar', value: 'priestTraining' },
   ];
   
   successMessage = '';

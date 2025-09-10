@@ -15,9 +15,9 @@
           <mat-form-field appearance="fill" class="w-100">
             <mat-label>Appointment Type</mat-label>
             <mat-select formControlName="type">
-              <mat-option value="reading">Reading</mat-option>
-              <mat-option value="cleansing">Cleansing</mat-option>
-              <mat-option value="initiation">Initiation</mat-option>
+              <mat-option value="reading">Consultation</mat-option>
+              <mat-option value="cleansing">Workspace Organization</mat-option>
+              <mat-option value="initiation">Technology Setup Assistance</mat-option>
               <mat-option value="workshop">Workshop</mat-option>
             </mat-select>
             <mat-error *ngIf="appointmentForm.controls.type?.hasError('required')">
