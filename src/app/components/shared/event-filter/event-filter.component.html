@@ -2,13 +2,13 @@
   <div class="row">
     <div class="col-md-6 text-end">
       <mat-form-field appearance="fill" class="mt-4 mb-3 w-100">
-        <mat-label>Show items within</mat-label>
+        <mat-label>Show calendar items in range</mat-label>
         <mat-select (selectionChange)="onRangeChangeWrapper($event)" [value]="daysRange">
-          <mat-option [value]="3">Next 3 Days</mat-option>
-          <mat-option [value]="7">Next 7 Days</mat-option>
-          <mat-option [value]="14">Next 14 Days</mat-option>
-          <mat-option [value]="30">Next 30 Days</mat-option>
-          <mat-option [value]="365">Next 365 Days</mat-option>
+          <mat-option [value]="3">3 Days</mat-option>
+          <mat-option [value]="7">7 Days</mat-option>
+          <mat-option [value]="14">14 Days</mat-option>
+          <mat-option [value]="30">30 Days</mat-option>
+          <mat-option [value]="365">365 Days</mat-option>
         </mat-select>
       </mat-form-field>
     </div>

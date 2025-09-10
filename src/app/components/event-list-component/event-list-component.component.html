@@ -20,7 +20,7 @@
               Virtual: {{ appointment.isVirtual ? 'Yes' : 'No' }}<br>
               Email: {{ appointment.email }}<br>
               Phone: {{ appointment.phoneNumber }}<br>
-              <span *ngIf="isAdmin && appointment.createdByAdmin">Created by: {{ appointment.createdByAdmin }}</span>
+              <span *ngIf="isAdmin && appointment.createdByAdmin">Created by admin: {{ appointment.createdByAdmin }}</span>
             </li>
           </ul>
         </div>
