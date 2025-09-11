@@ -31,6 +31,8 @@ export class AuthenticateComponent {
   errorMessage: string;
   successMessage: string;
 
+  submitted = false;
+
   protected authForm: FormGroup = new FormGroup({});
 
   constructor(
@@ -73,7 +75,15 @@ export class AuthenticateComponent {
     }
   }
 
+  showError(ctrlName: string): boolean {
+    const c = this.authForm.get(ctrlName);
+    return !!c && c.invalid && (c.touched || c.dirty || this.submitted);
+  }
+
+
   googleLogin() {
+    this.submitted = false;
+
     this.authService.loginWithGoogle()
       .then(res => {
         this.dialogRef.close();
@@ -88,6 +98,12 @@ export class AuthenticateComponent {
   }
 
   public onSubmit(): void {
+    this.submitted = true;
+    if (this.authForm.invalid) {
+      this.authForm.markAllAsTouched();
+      return;
+    }
+
     const { email, password } = this.authForm.value;
 
     if (this.data.authStep === "Sign up") {

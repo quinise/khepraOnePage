@@ -1,20 +1,20 @@
 <div class="container">
-  <form [formGroup]="authForm" (ngSubmit)="onSubmit()">
+  <form [formGroup]="authForm" (ngSubmit)="onSubmit()" novalidate [class.was-validated]="submitted">
   <div mat-dialog-title><h3 class="text-center display-6">{{ data.authStep }}</h3></div>
   <mat-dialog-content align="center">
     <div>
       <mat-form-field>
         <input type="email" formControlName="email"
-          matInput placeholder="Email" matInput>
+          matInput placeholder="Email" [class.is-invalid]="showError('email')" matInput>
         <mat-icon fontIcon="email" matSuffix></mat-icon>
-        <mat-error *ngIf="authForm.get('email')?.errors">Please enter a valid email address</mat-error>
+        <mat-error *ngIf="showError('email')">Please enter a valid email address</mat-error>
       </mat-form-field>
     </div>
     <div>
       <mat-form-field>
         <input type="password" formControlName="password" placeholder="Password" matInput>
         <mat-icon fontIcon="person" matSuffix></mat-icon>
-        <mat-error *ngIf="authForm.get('password')?.errors">Password must be be 8-20 characters, include one uppercase letter, one lowercase letter, and one special character (!&#64;#$%^&*()_+&#123;&#125;[]:;<>,.?~\-=/\\|)</mat-error>
+        <mat-error *ngIf="showError('password')">Password must be be 8-20 characters, include one uppercase letter, one lowercase letter, and one special character (!&#64;#$%^&*()_+&#123;&#125;[]:;<>,.?~\-=/\\|)</mat-error>
       </mat-form-field>
     </div>
     <div>
@@ -28,13 +28,24 @@
   <mat-dialog-actions align="center">
     <div>
       <button *ngIf="data.authStep === 'Sign up'" type="submit" [disabled]="authForm.invalid" class="btn btn-primary py-3 mx-4 bg-primary border-0">Create Account</button>
-      <button *ngIf="data.authStep === 'Sign up'" (click)="googleLogin()" class="btn btn-primary bg-primary border-0 py-3 mx-4">
-        <img src="assets/google-logo.png" alt="Google logo" style="width: 20px; height: 20px; margin-right: 8px;" />
-        Sign up with Google</button>
+      <button
+        *ngIf="data.authStep === 'Sign up'"
+        type="button"
+        (click)="googleLogin()"
+        class="btn btn-primary bg-primary border-0 py-3 mx-4">
+        <img src="assets/google-logo.png" alt="Google logo"
+            style="width: 20px; height: 20px; margin-right: 8px;" />
+        Sign up with Google
+      </button>
     </div>
     <button *ngIf="data.authStep === 'Login'" type="submit" class="btn btn-primary bg-primary border-0 py-3 px-3 mx-4">Log In</button>
-    <button *ngIf="data.authStep === 'Login'" (click)="googleLogin()" class="btn btn-primary bg-primary border-0 py-3 mx-4 my-3">
-      <img src="assets/google-logo.png" alt="Google logo" style="width: 20px; height: 20px; margin-right: 8px;" />
+    <button
+      *ngIf="data.authStep === 'Login'"
+      type="button"
+      (click)="googleLogin()"
+      class="btn btn-primary bg-primary border-0 py-3 mx-4 my-3">
+      <img src="assets/google-logo.png" alt="Google logo"
+          style="width: 20px; height: 20px; margin-right: 8px;" />
       Login with Google
     </button>
 </mat-dialog-actions>
