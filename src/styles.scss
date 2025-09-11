@@ -1,0 +1,202 @@
+@use '@angular/material' as mat;
+@use 'assets/styles/material-theme';
+
+/* Make FullCalendar month/year title use brand secondary */
+.fc .fc-toolbar-title {
+  color: var(--bs-secondary) !important;
+}
+
+/* FullCalendar buttons */
+.fc .fc-button {
+  background-color: var(--bs-secondary) !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+/* Hover */
+.fc .fc-button:hover {
+  background-color: color-mix(in srgb, var(--bs-secondary) 85%, #000) !important;
+}
+
+/* Active state */
+.fc .fc-button.fc-button-active {
+  background-color: var(--bs-secondary) !important;
+  filter: brightness(90%);
+}
+
+/* Day headers (Sun, Mon, Tue...) */
+.fc .fc-col-header-cell-cushion {
+  color: var(--bs-secondary) !important;
+  font-weight: 600; /* optional for emphasis */
+}
+
+/* Day numbers inside cells */
+.fc .fc-daygrid-day-number {
+  color: var(--bs-secondary) !important;
+  font-weight: 500; /* optional */
+}
+
+/* Ensure raised PRIMARY buttons get the brand background */
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  --mdc-filled-button-container-color: var(--brand-primary) !important;
+  --mdc-filled-button-label-text-color: #fff !important;
+
+  background-color: var(--brand-primary) !important; /* hard fallback */
+  color: #fff !important;
+  border: none !important;
+}
+
+/* Dropdown chevron */
+.mat-mdc-select-arrow svg {
+  color: var(--brand-secondary);
+  fill: currentColor; /* ensure the svg uses the color */
+}
+
+/* Dropdown chevron */
+.mat-mdc-select-arrow svg {
+  color: var(--brand-secondary);
+  fill: currentColor; /* ensure the svg uses the color */
+}
+
+/* ===== Make ALL form-related icons use brand secondary ===== */
+
+/* Common Material icon elements in form fields */
+.mat-mdc-form-field .mat-icon,
+.mat-mdc-form-field .mat-mdc-icon-button .mat-icon,
+.mat-mdc-form-field-icon-prefix .mat-icon,
+.mat-mdc-form-field-icon-suffix .mat-icon,
+.mat-mdc-icon-button .mat-icon {
+  color: var(--brand-secondary) !important;
+}
+
+/* Datepicker toggle icon (Angular Material) */
+.mat-datepicker-toggle .mat-icon,
+.mat-datepicker-toggle-default-icon {
+  color: var(--brand-secondary) !important;
+}
+
+/* mat-select dropdown arrow */
+.mat-mdc-select-arrow,
+.mat-mdc-select-arrow svg,
+.mat-mdc-select-arrow svg * {
+  color: var(--brand-secondary) !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* Make inline SVGs adopt CSS color (overrides stubborn black paths) */
+.mat-icon svg,
+.mat-icon svg *,
+.mat-datepicker-toggle-default-icon,
+.mat-datepicker-toggle-default-icon * {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* Icons inside buttons should inherit button text color */
+.mat-mdc-button .mat-icon,
+.mat-mdc-raised-button .mat-icon,
+.mdc-icon-button .mat-icon {
+  color: inherit !important;
+}
+
+/* Optional: keep disabled icons teal but faded */
+.mat-mdc-form-field.mat-form-field-disabled .mat-icon {
+  color: var(--brand-secondary) !important;
+  opacity: .54; /* tweak to taste */
+}
+
+/* ---- Timepicker toggle: force brand secondary color ---- */
+
+/* If toggle is wrapped in a button, color the button itself */
+.mat-timepicker-toggle .mat-mdc-icon-button,
+.mat-timepicker-toggle .mat-mdc-icon-button .mat-icon {
+  color: var(--brand-secondary) !important;
+}
+
+/* Target the default icon element explicitly */
+.mat-timepicker-toggle-default-icon,
+.mat-timepicker-toggle-default-icon svg,
+.mat-timepicker-toggle-default-icon * {
+  color: var(--brand-secondary) !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* Also catch the icon when used directly as <mat-icon> inside the toggle */
+.mat-timepicker-toggle .mat-icon {
+  color: var(--brand-secondary) !important;
+}
+
+/* Remove the small bullet-dot style */
+.fc-daygrid-event-dot {
+  display: none !important;
+}
+
+/* General “highlighted” style */
+.fc-event-highlight {
+  display: block !important;
+  width: 100% !important;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-weight: 500;
+  text-align: center;
+  color: #fff !important;
+}
+
+/* Events = darker orange highlight */
+.fc-event-orange {
+  background-color: #cc6600 !important;  /* complementary darker orange */
+  border: 1px solid #b35900 !important;
+}
+
+/* Appointments = tealish-blue highlight */
+.fc-event-teal {
+  background-color: #008c99 !important;  /* bluer teal */
+  border: 1px solid #007580 !important;
+}
+
+/* Remove dots */
+.fc-daygrid-event-dot {
+  display: none !important;
+}
+
+/* Shared highlight style */
+.fc-event-highlight {
+  display: block !important;
+  width: 100% !important;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-weight: 500;
+  text-align: center;
+  color: #fff !important;
+}
+
+/* Events = darker orange */
+.fc-event-orange {
+  background-color: #cc6600 !important;
+  border: 1px solid #b35900 !important;
+}
+
+/* Appointments = tealish-blue */
+.fc-event-teal {
+  background-color: #008c99 !important;
+  border: 1px solid #007580 !important;
+}
+
+/* Appointment header = dark teal */
+.appointment-header {
+  background-color: #007580; /* dark teal */
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem 0.25rem 0 0; /* rounded top if inside a card */
+}
+
+/* Event header = dark orange */
+.event-header {
+  background-color: #b35900; /* dark orange */
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem 0.25rem 0 0;
+}

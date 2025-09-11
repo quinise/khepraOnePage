@@ -27,13 +27,13 @@
   </mat-dialog-content>
   <mat-dialog-actions align="center">
     <div>
-      <button *ngIf="data.authStep === 'Sign up'" type="submit" [disabled]="authForm.invalid" class="btn btn-primary mx-4">Create Account</button>
-      <button *ngIf="data.authStep === 'Sign up'" (click)="googleLogin()" class="btn btn-primary mx-4">
+      <button *ngIf="data.authStep === 'Sign up'" type="submit" [disabled]="authForm.invalid" class="btn btn-primary py-3 mx-4 bg-primary border-0">Create Account</button>
+      <button *ngIf="data.authStep === 'Sign up'" (click)="googleLogin()" class="btn btn-primary bg-primary border-0 py-3 mx-4">
         <img src="assets/google-logo.png" alt="Google logo" style="width: 20px; height: 20px; margin-right: 8px;" />
         Sign up with Google</button>
     </div>
-    <button *ngIf="data.authStep === 'Login'" type="submit" class="btn btn-primary mx-4">Log in</button>
-    <button *ngIf="data.authStep === 'Login'" (click)="googleLogin()" class="btn btn-primary mx-4 my-3">
+    <button *ngIf="data.authStep === 'Login'" type="submit" class="btn btn-primary bg-primary border-0 py-3 px-3 mx-4">Log In</button>
+    <button *ngIf="data.authStep === 'Login'" (click)="googleLogin()" class="btn btn-primary bg-primary border-0 py-3 mx-4 my-3">
       <img src="assets/google-logo.png" alt="Google logo" style="width: 20px; height: 20px; margin-right: 8px;" />
       Login with Google
     </button>

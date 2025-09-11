@@ -31,7 +31,9 @@ export class EventsService {
       title: `${appointment.name} - ${appointment.type}`,
       start: appointment.date,
       allDay: false,
+      classNames: ['fc-event-highlight', 'fc-event-teal'],
       extendedProps: {
+        type: 'appointment',
         appointmentId: appointment.id,
         appointment: appointment,
         appointmentType: appointment.type,
@@ -57,7 +59,9 @@ export class EventsService {
       start: event.startDate,
       end: event.endDate,
       allDay: true,
+      classNames: ['fc-event-highlight', 'fc-event-orange'],
       extendedProps: {
+        type: 'event',
         eventId: event.id,
         event: event,
         eventName: event.eventName,

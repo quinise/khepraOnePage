@@ -11,8 +11,8 @@ import { Appointment } from 'src/app/interfaces/appointment';
 import { Event } from 'src/app/interfaces/event';
 import { AppointmentApiService } from 'src/app/services/apis/appointmentApi.service';
 import { EventsApiService } from 'src/app/services/apis/events-api.service';
-import { AuthService } from 'src/app/services/authentication/auth.service';
 import { AuthWrapperService } from 'src/app/services/authentication/auth-wrapper.service';
+import { AuthService } from 'src/app/services/authentication/auth.service';
 import { EventStoreService } from 'src/app/services/event-store.service';
 import { EventsService } from 'src/app/services/events.service';
 import { IfViewDirective } from 'src/app/shared/ifViewDirective';
@@ -99,5 +99,15 @@ export class PanelComponent implements OnInit {
       left: 'prev,next',
       center: 'title',
     },
+    eventClassNames: (arg) => {
+      const type = arg.event.extendedProps['type'];
+      if (type === 'event') {
+        return ['fc-event-highlight', 'fc-event-orange'];
+      }
+      if (type === 'appointment') {
+        return ['fc-event-highlight', 'fc-event-teal'];
+      }
+      return [];
+  }
   };
 }

@@ -1,9 +1,9 @@
-<nav class="py-2 bg-body-tertiary border-bottom d-flex">
+<nav class="py-2 bg-brand-gradient border-bottom d-flex">
   <div class="container-fluid container d-flex flex-wrap">
     <ul class="nav me-auto">
-      <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2 active" aria-current="page">Home</a></li>
-      <li class="nav-item"><a routerLink="/services" class="nav-link link-body-emphasis px-2">Services</a></li>
-      <li class="nav-item"><a routerLink="/events" class="nav-link link-body-emphasis px-2">Events</a></li>
+      <li class="nav-item"><a href="#" class="nav-link link-body-emphasis text-white px-2 active" aria-current="page">Home</a></li>
+      <li class="nav-item"><a routerLink="/services" class="nav-link link-body-emphasis text-white px-2">Services</a></li>
+      <li class="nav-item"><a routerLink="/events" class="nav-link link-body-emphasis text-white px-2">Events</a></li>
       <ng-container *ngIf="user$ | async as user">
         <!-- Admin header items -->
         <ng-container *ngIf="user.role === 'admin'">
@@ -11,10 +11,10 @@
             <div class="vr my-auto mx-5" style="height: 30px;"></div>
           </li>
           <li class="nav-item">
-            <a routerLink="/admin-panel" class="nav-link link-body-emphasis px-2">Admin Panel</a>
+            <a routerLink="/admin-panel" class="nav-link link-body-emphasis text-white px-2">Admin Panel</a>
           </li>
           <li class="nav-item">
-            <a routerLink="/event-management" class="nav-link link-body-emphasis px-2">Event Management</a>
+            <a routerLink="/event-management" class="nav-link link-body-emphasis text-white px-2">Event Management</a>
           </li>
         </ng-container>
         <!-- User header items -->
@@ -23,39 +23,32 @@
             <div class="vr my-auto mx-5" style="height: 30px;"></div>
           </li>
           <li class="nav-item">
-            <a routerLink="/user-dashboard" class="nav-link link-body-emphasis px-2">Dashboard</a>
+            <a routerLink="/user-dashboard" class="nav-link link-body-emphasis text-white px-2">Dashboard</a>
           </li>
           <li class="nav-item">
-            <a routerLink="/account-settings" class="nav-link link-body-emphasis px-2">Account Settings</a>
+            <a routerLink="/account-settings" class="nav-link link-body-emphasis text-white px-2">Account Settings</a>
           </li>
         </ng-container>
       </ng-container>
     </ul>
     <ng-container *ngIf="user$ | async as user; else showAuthOptions">
       <ul class="nav">
-        <li class="nav-item"><button (click)="logout()" class="nav-link link-body-emphasis px-2">Logout</button></li>
+        <li class="nav-item"><button (click)="logout()" class="nav-link link-body-emphasis text-white px-2">Logout</button></li>
       </ul>
     </ng-container>
     <ng-template #showAuthOptions>
       <ul class="nav">
-        <li class="nav-item"><button (click)="openAuthForm('loginButton')" class="nav-link link-body-emphasis px-2">Login</button></li>
-        <li class="nav-item"><button (click)="openAuthForm('signupButton')" class="nav-link link-body-emphasis px-2">Sign up</button></li>
+        <li class="nav-item"><button (click)="openAuthForm('loginButton')" class="nav-link link-body-emphasis text-white px-2">Login</button></li>
+        <li class="nav-item"><button (click)="openAuthForm('signupButton')" class="nav-link link-body-emphasis text-white px-2">Sign up</button></li>
       </ul>
     </ng-template>
   </div>
 </nav>
 <header class="py-3 mb-4 border-bottom">
   <div class="container d-flex flex-wrap justify-content-center">
-    <a href="/" class="d-flex align-items-center mb-3 mb-lg-0 me-lg-auto link-body-emphasis text-decoration-none">
+    <a href="/" class="d-flex align-items-center mb-3 mb-lg-0 me-lg-auto link-body-emphasis text-decoration-none text-primary">
       <img class="mx-4" src="/assets/SHLogo-nav.png">
-      <span class="fs-4">Schedule Hub</span>
+      <span class="fs-4 text-secondary">Schedule Hub</span>
     </a>
-    <ng-container *ngIf="user$ | async as user">
-      <ng-container *ngIf="user.role === 'user'">
-        <a href="/">
-          <span style="font-size: 40px" class="material-symbols-outlined">shopping_cart</span>
-        </a>
-      </ng-container>
-    </ng-container>
   </div>
 </header>

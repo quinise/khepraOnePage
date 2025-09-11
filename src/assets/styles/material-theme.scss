@@ -1,0 +1,119 @@
+@use '@angular/material' as mat;
+
+$theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: mat.$cyan-palette  // close to #00bfbf
+  ),
+));
+
+:root {
+  @include mat.all-component-colors($theme);
+}
+
+html {
+  @include mat.all-component-themes($theme);
+}
+
+/* Brand tokens */
+:root {
+  --brand-primary:   #00bfbf;   /* cyan */
+  --brand-secondary: #009191;   /* teal */
+  --brand-warn:      #dc4c46;
+}
+
+/* ==== Component overrides ==== */
+/* Buttons */
+/* Use brand PRIMARY only when the button has no Material color */
+.mat-mdc-raised-button:not(.mat-primary):not(.mat-warn):not(.mat-accent),
+.mat-mdc-unelevated-button:not(.mat-primary):not(.mat-warn):not(.mat-accent) {
+  --mdc-filled-button-container-color: var(--brand-primary);
+  --mdc-filled-button-label-text-color: #fff;
+  background-color: var(--brand-primary); /* fallback */
+  color: #fff;
+  border: none;
+}
+
+/* Raised / flat warn buttons */
+.mat-mdc-raised-button.mat-warn,
+.mat-mdc-unelevated-button.mat-warn {
+  --mdc-filled-button-container-color: var(--brand-warn) !important;
+  --mdc-filled-button-label-text-color: #fff !important;
+  background-color: var(--brand-warn) !important; /* hard fallback */
+  color: #fff !important;
+  border: none !important;
+}
+
+/* Outlined warn */
+.mat-mdc-outlined-button.mat-warn {
+  --mdc-outlined-button-outline-color: var(--brand-warn) !important;
+  --mdc-outlined-button-label-text-color: var(--brand-warn) !important;
+  border-color: var(--brand-warn) !important; /* fallback */
+  color: var(--brand-warn) !important;
+}
+
+/* Text warn */
+.mat-mdc-button.mat-warn {
+  --mdc-text-button-label-text-color: var(--brand-warn) !important;
+  color: var(--brand-warn) !important;
+}
+
+
+.mat-mdc-outlined-button {
+  --mdc-outlined-button-outline-color: var(--brand-secondary);
+  --mdc-outlined-button-label-text-color: var(--brand-secondary);
+}
+.mat-mdc-button { --mdc-text-button-label-text-color: var(--brand-secondary); }
+.mat-mdc-raised-button:hover, .mat-mdc-unelevated-button:hover { filter: brightness(0.92); }
+.mat-mdc-outlined-button:hover, .mat-mdc-button:hover { color: #007a7a; }
+
+
+/* Form fields */
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing { border-color: var(--brand-primary) !important; }
+.mdc-text-field .mdc-floating-label { color: var(--brand-secondary); }
+.mat-mdc-form-field.mat-focused .mdc-floating-label { color: var(--brand-primary); }
+.mdc-text-field__input { caret-color: var(--brand-primary); }
+
+/* Slide toggle */
+.mat-mdc-slide-toggle.mat-accent {
+  --mdc-switch-selected-track-color:  var(--brand-secondary);
+  --mdc-switch-selected-handle-color: #fff;
+  --mdc-switch-selected-hover-track-color: #007a7a;
+  --mdc-switch-selected-pressed-track-color: #007a7a;
+}
+
+/* Dialog */
+.mat-mdc-dialog-container .mdc-dialog__surface { border-radius: 16px; box-shadow: 0 12px 32px rgba(0,0,0,.18); }
+.mat-mdc-dialog-container .mdc-dialog__title {
+  color: var(--brand-primary) !important;
+}
+.mat-mdc-dialog-container .mdc-dialog__actions .mat-mdc-button { --mdc-text-button-label-text-color: var(--brand-secondary); }
+
+/* Card */
+.mat-mdc-card { border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,.08); border: 1px solid rgba(0,0,0,.06); }
+.mat-mdc-card-title, .mat-mdc-card-subtitle { color: var(--brand-secondary); }
+
+/* Label + icons */
+label { color: var(--brand-secondary); }
+.mat-icon { color: var(--brand-secondary); }
+.mat-icon.primary { color: var(--brand-primary); }
+
+/* Options */
+.mat-mdc-option.mdc-list-item--selected,
+.mat-mdc-option.mdc-list-item--activated { background: var(--brand-secondary) !important; color:#fff !important; }
+.mat-mdc-option.mdc-list-item--selected .mdc-list-item__primary-text { color:#fff !important; }
+.mat-mdc-option:hover { background: rgba(0,145,145,.08); }
+
+/* Datepicker */
+.mat-datepicker-content .mat-calendar-header .mat-calendar-period-button,
+.mat-datepicker-content .mat-calendar-header .mat-calendar-previous-button,
+.mat-datepicker-content .mat-calendar-header .mat-calendar-next-button { color: var(--brand-secondary); }
+.mat-calendar-body-selected { background-color: var(--brand-primary) !important; color:#fff !important; }
+.mat-calendar-body-today:not(.mat-calendar-body-selected) { border-color: var(--brand-secondary) !important; }
+
+/* Timepicker */
+.ngx-mat-timepicker .timepicker-dial__control { color: var(--brand-secondary); }
+.ngx-mat-timepicker .timepicker__header { background: var(--brand-primary); color:#fff; }
+.ngx-mat-timepicker .clock-face__number--selected { background: var(--brand-secondary); color:#fff; }

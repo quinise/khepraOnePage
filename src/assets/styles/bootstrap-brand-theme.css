@@ -1,0 +1,67 @@
+:root {
+  --bs-primary: #00bfbf;
+  --bs-primary-rgb: 0, 191, 191;
+  --bs-secondary: #009191;
+  --bs-secondary-rgb: 0, 0, 0;
+  --bs-info: #00e5e5;
+  --bs-success: #39b76e;
+  --bs-warning: #f0ad4e;
+  --bs-danger: #dc4c46;
+  --bs-light: #f8f9fa;
+  --bs-dark: #000000;
+  --bs-link-color: #00bfbf;
+  --bs-link-hover-color: #009191;
+  --bs-body-bg: #ffffff;
+  --bs-border-radius: 0.75rem;
+  --bs-border-radius-lg: 1rem;
+  --bs-border-radius-sm: 0.5rem;
+}
+
+/* Brand accents */
+.btn-primary, .btn-outline-primary:hover {
+  box-shadow: 0 0.5rem 1rem rgba(var(--bs-primary-rgb), 0.15);
+}
+
+.navbar-brand img {
+  height: 28px;
+  width: auto;
+}
+
+.badge.bg-primary {
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+}
+
+/* Softer cards with rounded corners */
+.card {
+  border-radius: var(--bs-border-radius-lg);
+  box-shadow: 0 .25rem .75rem rgba(0,0,0,.06);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+/* Accent focus ring */
+.form-control:focus, .form-select:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 .25rem rgba(var(--bs-primary-rgb), .25);
+}
+
+/* Pill chips */
+.badge {
+  border-radius: 999px;
+  padding: .5rem .75rem;
+}
+
+/* Gradient header bar using primary shades */
+.bg-brand-gradient {
+  background: linear-gradient(135deg, var(--bs-primary) 0%, #009191 100%);
+  color: #fff;
+}
+:root,
+[data-bs-theme="light"] {
+  --bs-secondary: #009191;
+  --bs-secondary-rgb: 0, 145, 145;
+}
+
+[data-bs-theme="dark"] {
+  --bs-secondary: #009191;
+  --bs-secondary-rgb: 0, 145, 145;
+}
