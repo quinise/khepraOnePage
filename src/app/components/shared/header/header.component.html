@@ -1,9 +1,9 @@
 <nav class="py-2 bg-brand-gradient border-bottom d-flex">
   <div class="container-fluid container d-flex flex-wrap">
     <ul class="nav me-auto">
-      <li class="nav-item"><a href="#" class="nav-link link-body-emphasis text-white px-2 active" aria-current="page">Home</a></li>
-      <li class="nav-item"><a routerLink="/services" class="nav-link link-body-emphasis text-white px-2">Services</a></li>
-      <li class="nav-item"><a routerLink="/events" class="nav-link link-body-emphasis text-white px-2">Events</a></li>
+      <li class="nav-item"><p><a href="#" class="nav-link link-body-emphasis text-white px-2 active" aria-current="page">Home</a></p></li>
+      <li class="nav-item"><p><a routerLink="/services" class="nav-link link-body-emphasis text-white px-2">Services</a></p></li>
+      <li class="nav-item"><p><a routerLink="/events" class="nav-link link-body-emphasis text-white px-2">Events</a></p></li>
       <ng-container *ngIf="user$ | async as user">
         <!-- Admin header items -->
         <ng-container *ngIf="user.role === 'admin'">
@@ -11,10 +11,10 @@
             <div class="vr my-auto mx-5" style="height: 30px;"></div>
           </li>
           <li class="nav-item">
-            <a routerLink="/admin-panel" class="nav-link link-body-emphasis text-white px-2">Admin Panel</a>
+            <p><a routerLink="/admin-panel" class="nav-link link-body-emphasis text-white px-2">Admin Panel</a></p>
           </li>
           <li class="nav-item">
-            <a routerLink="/event-management" class="nav-link link-body-emphasis text-white px-2">Event Management</a>
+            <p><a routerLink="/event-management" class="nav-link link-body-emphasis text-white px-2">Event Management</a></p>
           </li>
         </ng-container>
         <!-- User header items -->
@@ -23,10 +23,10 @@
             <div class="vr my-auto mx-5" style="height: 30px;"></div>
           </li>
           <li class="nav-item">
-            <a routerLink="/user-dashboard" class="nav-link link-body-emphasis text-white px-2">Dashboard</a>
+            <p><a routerLink="/user-dashboard" class="nav-link link-body-emphasis text-white px-2">Dashboard</a></p>
           </li>
           <li class="nav-item">
-            <a routerLink="/account-settings" class="nav-link link-body-emphasis text-white px-2">Account Settings</a>
+            <p><a routerLink="/account-settings" class="nav-link link-body-emphasis text-white px-2">Account Settings</a></p>
           </li>
         </ng-container>
       </ng-container>
