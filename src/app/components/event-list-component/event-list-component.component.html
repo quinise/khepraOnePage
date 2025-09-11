@@ -1,7 +1,7 @@
 <!-- Filter Component -->
 <app-event-filter></app-event-filter>
 <ng-container *ngIf="includePast && unifiedSortedPastDates.length > 0">
-  <h2 class="text-center">Past Appointments and Events</h2>
+  <h2 class="text-center text-secondary">Past Appointments and Events</h2>
 
   <!-- Past Appointments Section -->
   <ng-container *ngIf="hasPastAppointments">
@@ -51,7 +51,7 @@
   </ng-container>
 </ng-container>
 
-<h2 class="text-center mt-5">Future Appointments and Events</h2>
+<h2 class="text-center text-secondary mt-5">Future Appointments and Events</h2>
 <div *ngIf="unifiedSortedFutureDates.length > 0; else noFutureItems">
 
   <!-- Future Appointments Section -->

@@ -1,4 +1,4 @@
-import { NgIf } from '@angular/common';
+import { NgIf, DatePipe} from '@angular/common';
 import { Component, Input, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { FullCalendarModule } from '@fullcalendar/angular';
@@ -22,7 +22,7 @@ import { EventFilterComponent } from '../../shared/event-filter/event-filter.com
 
 @Component({
   selector: 'app-calendar-view',
-  imports: [NgIf, FullCalendarModule, EventFilterComponent],
+  imports: [NgIf, DatePipe, FullCalendarModule, EventFilterComponent],
   templateUrl: './calendar-view.component.html',
   styleUrls: ['./calendar-view.component.css'],
 })
@@ -31,7 +31,6 @@ export class CalendarViewComponent implements OnDestroy {
 
   isAdmin = false;
   userId = this.authWrapperService.getCurrentUser()?.uid || '';
-
 
   showPanel = false;
   selectedEvent: EventApi | null = null;
@@ -176,21 +175,86 @@ export class CalendarViewComponent implements OnDestroy {
   }
 
   loadData(): void {
-    this.eventsService.fetchAppointmentsAndEvents(this.isAdmin, this.userId, null).subscribe({
-      next: ([appointments, events]) => {
-        this.appointments = appointments.filter((a) => !!a.date);
-        this.events = events.filter((e) => !!e.startDate);
+    this.eventsService
+      .fetchAppointmentsAndEvents(this.isAdmin, this.userId, null)
+      .subscribe({
+        next: ([appointments, events]) => {
+          // Keep only items with dates
+          this.appointments = appointments.filter(a => !!a.date);
+          this.events       = events.filter(e => !!e.startDate);
 
-        // Update EventFilterService with new data
-        this.filterService.updateAppointments(this.appointments);
-        this.filterService.updateEvents(this.events);
+          // Update your filters as you already do
+          this.filterService.updateAppointments(this.appointments);
+          this.filterService.updateEvents(this.events);
+          this.filterService.setRange(this.filterService.daysRange);
 
-        // Trigger filtering (e.g., based on initial days range)
-        this.filterService.setRange(this.filterService.daysRange);
-      },
-      error: (error) => console.error('TESTING: Error loading data:', error)
-    });
+          // Map to FullCalendar EventInput with highlight classes
+          const apptInputs = this.appointments.map(a => ({
+            id: a.id?.toString(),
+            title: `${a.name} - ${a.type}`,
+            start: a.date,
+            end: a.endTime ?? undefined,
+            allDay: false,
+            classNames: ['fc-event-highlight', 'fc-event-teal'],
+            extendedProps: {
+              type: 'appointment',
+              appointmentId: a.id,
+              appointment: a,
+              appointmentType: a.type,
+              appointmentName: a.name,
+              appointmentEmail: a.email,
+              appointmentPhone: a.phoneNumber,
+              appointmentDate: a.date,
+              appointmentStartTime: a.startTime,
+              appointmentVirtual: a.isVirtual,
+              appointmentStreet: a.streetAddress,
+              appointmentCity: a.city,
+              appointmentState: a.state,
+              appointmentZip: a.zipCode,
+              appointmentCreatedByAdmin: a.createdByAdmin,
+            }
+          }));
+
+          const eventInputs = this.events.map(e => ({
+            id: e.id?.toString(),
+            title: e.eventName,
+            start: e.startDate,
+            end: e.endDate ?? undefined,
+            allDay: true,
+            classNames: ['fc-event-highlight', 'fc-event-orange'],
+            extendedProps: {
+              type: 'event',
+              eventId: e.id,
+              event: e,
+              eventName: e.eventName,
+              eventType: e.eventType,
+              eventStart: e.startDate,
+              eventStartTime: e.startTime,
+              eventEnd: e.endDate,
+              eventEndTime: e.endTime,
+              eventDescription: e.description,
+              eventVirtual: e.isVirtual,
+              eventStreet: e.streetAddress,
+              eventCity: e.city,
+              eventState: e.state,
+              eventZip: e.zipCode,
+            }
+          }));
+
+          const allInputs = [...eventInputs, ...apptInputs];
+
+          // Replace the whole options object so Angular change detection runs
+          this.calendarOptions = {
+            ...this.calendarOptions,
+            events: allInputs,
+            // Ensures pills render as blocks (no dots)
+            eventDisplay: 'block'
+          };
+        },
+        error: (err) => console.error('TESTING: Error loading data:', err)
+      });
   }
+
 
   updateCalendar(): void {
     const futureAppointments = Object.values(this.filteredAppointmentsGrouped).flat();
