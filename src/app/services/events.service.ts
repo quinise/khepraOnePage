@@ -28,7 +28,7 @@ export class EventsService {
   transformAppointmentsForFullCalendar(appointments: Appointment[]): any[] {
     return appointments.map(appointment => ({
       id: appointment.id?.toString(),
-      title: `${appointment.name} - ${appointment.type}`,
+      title: `${appointment.type}`,
       start: appointment.date,
       allDay: false,
       classNames: ['fc-event-highlight', 'fc-event-teal'],
