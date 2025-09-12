@@ -50,7 +50,7 @@
     </button>
 </mat-dialog-actions>
 </form>
-<div class="m-4">
+<div *ngIf="data.authStep === 'Login'" class="m-4">
   <a (click)="resetPassword()" class="text-primary" style="cursor: pointer;">Forgot your password?</a>
 </div>
 </div>
