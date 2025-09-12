@@ -10,7 +10,7 @@
       <div class="mb-4" *ngIf="pastAppointmentsGrouped[date]?.length">
         <div class="card mb-3 mx-2">
           <div class="card-header bg-primary text-white">
-            {{ date }}
+            {{ date | date:'MMMM dd, yyyy' }}
           </div>
           <ul class="list-group list-group-flush">
             <li class="list-group-item" *ngFor="let appointment of pastAppointmentsGrouped[date]">
@@ -35,7 +35,7 @@
       <div *ngIf="pastEventsGrouped[date]?.length">
         <div class="card mb-3 mx-2">
           <div class="card-header bg-success text-white">
-            {{ date }}
+            {{ date | date:'MMMM dd, yyyy' }}
           </div>
           <ul class="list-group list-group-flush">
             <li class="list-group-item" *ngFor="let event of pastEventsGrouped[date]">
@@ -61,7 +61,7 @@
       <div class="col-md-6" *ngIf="filteredAppointmentsGrouped[date]?.length">
         <div class="card mb-3 mx-2">
           <div class="card-header bg-primary text-white">
-            {{ date }}
+            {{ date | date:'MMMM dd, yyyy' }}
           </div>
           <ul class="list-group list-group-flush">
             <li class="list-group-item" *ngFor="let appointment of filteredAppointmentsGrouped[date]">
@@ -78,7 +78,7 @@
               </button>
               <button
               *ngIf="canEditAppointment(appointment)"
-              class="btn btn-sm btn-primary mt-2 mx-2"
+              class="btn btn-sm btn-primary bg-primary border-0 mt-2 mx-2"
               (click)="editAppointment(appointment)"
               >
               Edit Appointment
@@ -97,7 +97,7 @@
       <div class="col-md-6" *ngIf="filteredEventsGrouped[date]?.length">
         <div class="card mb-3 mx-2">
           <div class="card-header bg-success text-white">
-            {{ date }}
+            {{ date | date:'MMMM dd, yyyy' }}
           </div>
           <ul class="list-group list-group-flush">
             <li class="list-group-item" *ngFor="let event of filteredEventsGrouped[date]">
@@ -106,7 +106,7 @@
               Type: {{ event.eventType }}<br>
               Virtual: {{ event.isVirtual ? 'Yes' : 'No' }}<br>
               <div>
-                <button *ngIf="isAdmin" class="btn btn-sm btn-primary mt-2 mx-3" (click)="openEditEventDialog(event)">
+                <button *ngIf="isAdmin" class="btn btn-sm btn-primary bg-primary border-0 mt-2 mx-3" (click)="openEditEventDialog(event)">
                   Edit Event Details
                 </button>
                 <button class="btn btn-sm btn-danger mt-2" (click)="deleteEvent(+event.id!)">

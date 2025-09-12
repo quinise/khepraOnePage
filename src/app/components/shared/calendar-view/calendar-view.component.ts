@@ -166,6 +166,8 @@ export class CalendarViewComponent implements OnDestroy {
         right: 'dayGridMonth',
       },
       eventClick: this.handleEventClick.bind(this),
+      displayEventTime: false,
+      eventDisplay: 'block'
     };
   }
 
