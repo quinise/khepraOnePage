@@ -3,10 +3,11 @@
   <img src="docs/SHLogo-nav.png" width="360" alt="Project Logo" />
 </p>
 
-[![Build](https://img.shields.io/badge/build-passing-brightgreen)]()
-[![License](https://img.shields.io/badge/license-MIT-blue)]()
-[![Angular](https://img.shields.io/badge/angular-19-red)]()
-[![Spring Boot](https://img.shields.io/badge/spring%20boot-3.x-green)]()
+[![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
+[![Angular](https://img.shields.io/badge/angular-19-red)](https://angular.dev/)
+[![Bootstrap](https://img.shields.io/badge/bootstrap-5.3-7952b3?logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
+[![Spring Boot](https://img.shields.io/badge/spring%20boot-3.x-green)](https://spring.io/projects/spring-boot)
+
 
 A streamlined scheduling and consultation app that makes it easy for users to book appointments and events, while giving admins powerful tools to manage calendars, avoid conflicts, and keep everything up to date. Built with a modern full-stack architecture, it provides real-time validation, role-based features, and a smooth user experience across devices.
 
